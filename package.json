@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "sync-docs": "bash scripts/sync_docs.sh && node scripts/generate_llms.js",
+    "sync-docs": "node scripts/sync_docs.js && node scripts/generate_llms.js",
     "dev": "npm run sync-docs && astro dev",
     "build": "npm run sync-docs && astro build",
     "preview": "astro preview"

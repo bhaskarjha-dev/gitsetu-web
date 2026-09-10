@@ -8,7 +8,7 @@
         <span class="badge-text">Vision 2026</span>
       </div>
       <h2 class="section-title">The Universal <span class="accent-text">Identity Fabric.</span></h2>
-      <p class="section-subtitle">With <strong>v1.0.0 GA</strong> established as the enterprise baseline across 25 regression test suites, GitSetu expands from local workstation security to universal developer, CI/CD, and agentic identity orchestration.</p>
+      <p class="section-subtitle">With <strong>v1.0.0 GA</strong> established as the enterprise baseline across 32 regression test suites, GitSetu expands from local workstation security to universal developer, CI/CD, and agentic identity orchestration.</p>
     </div>
 
     <!-- Foundation Baseline Banner -->
@@ -17,7 +17,7 @@
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
         <span>Shipped in v1.0.0 GA</span>
       </div>
-      <p class="baseline-desc">Zero-Trust Pre-Commit Guard • Native Windows PowerShell Installer & Shims • Homebrew & Scoop Formulas • Workspace Auto-Provisioning • Longest-Match Routing • 25 Automated Suites (198 Assertions) • Windows Sandbox Live Harness</p>
+      <p class="baseline-desc">Zero-Trust Pre-Commit Guard • 9 Distribution Channels (npx, WinGet, Homebrew, Scoop, AUR, Nix, gh) • Zero-Prompt Auto-Discovery • Standalone Monolith • 32 Automated Suites (240+ Assertions) • 24-Phase Sandbox Audit</p>
     </div>
 
     <div class="roadmap-grid">
@@ -27,8 +27,8 @@
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="accent-icon"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
         </div>
         <h3>Universal Distribution</h3>
-        <p>Single-file standalone bundle (no git clone), Homebrew Tap & Scoop bucket activation, Winget, AUR, Nix Flakes, GitHub CLI extension (<code>gh gitsetu</code>), and 1-second auto-discovery (<code>gitsetu init --auto</code>).</p>
-        <span class="status-label">Phase 1</span>
+        <p>Single-file standalone bundle (no git clone), WinGet, Homebrew, Scoop, AUR, Nix Flakes, npx zero-install, GitHub CLI extension (<code>gh gitsetu</code>), and sub-second auto-discovery (<code>gitsetu setup --auto</code>).</p>
+        <span class="status-label status-shipped">Shipped in v1.0.0</span>
       </div>
 
       <!-- Roadmap Item 2 -->
@@ -171,6 +171,13 @@
     background: var(--bg-tertiary);
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-full);
+  }
+
+  .status-shipped {
+    background: rgba(16, 185, 129, 0.12);
+    color: var(--color-success);
+    border-color: rgba(16, 185, 129, 0.3);
+    font-weight: 600;
   }
 
   @media (max-width: 900px) {

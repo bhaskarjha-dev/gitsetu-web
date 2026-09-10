@@ -300,7 +300,19 @@ import '@xterm/xterm/css/xterm.css';
     handleCommand(cmd: string) {
       if (!this.term) return;
       if (this.setupState === 'IDLE') {
-        if (cmd === 'gitsetu setup') {
+        if (cmd === 'gitsetu setup --auto' || cmd === 'gitsetu init --auto' || cmd === 'gitsetu setup -y') {
+          this.term.write('  \x1b[1;36mGitSetu Zero-Prompt Auto-Discovery v1.0.0\x1b[0m\r\n');
+          this.term.write('  🔍 \x1b[36mScanning local workstation...\x1b[0m\r\n');
+          this.term.write('     \x1b[32m✔\x1b[0m Active Git Author: \x1b[33mme@bhaskarjha.dev\x1b[0m\r\n');
+          this.term.write('     \x1b[32m✔\x1b[0m Discovered 2 SSH keys in ~/.ssh/ (\x1b[33mid_ed25519_work\x1b[0m, \x1b[33mid_ed25519_personal\x1b[0m)\r\n');
+          this.term.write('     \x1b[32m✔\x1b[0m Discovered 2 workspace folders (\x1b[33m~/work\x1b[0m, \x1b[33m~/personal\x1b[0m)\r\n');
+          this.term.write('  ⚡ \x1b[36mComposing & applying zero-trust blueprint...\x1b[0m\r\n');
+          this.term.write('     \x1b[32m✔\x1b[0m [work] ➔ ~/work/ (dev@company.com, ed25519_work)\r\n');
+          this.term.write('     \x1b[32m✔\x1b[0m [personal] ➔ [Global Fallback] (me@bhaskarjha.dev, ed25519_personal)\r\n');
+          this.term.write('     \x1b[32m✔\x1b[0m OpenSSH Include isolation injected\r\n');
+          this.term.write('  \x1b[1;32m✨ Provisioned 2 profiles in 0.8s with zero prompts! (v1.0.0 GA)\x1b[0m\r\n\r\n');
+          this.term.write(this.prompt);
+        } else if (cmd === 'gitsetu setup' || cmd === 'gitsetu init') {
           this.term.write('  Profile name: ');
           this.setupState = 'PROFILE_NAME';
         } else if (cmd === 'gitsetu status') {
@@ -314,25 +326,27 @@ import '@xterm/xterm/css/xterm.css';
           this.term.write('  \x1b[32m✔\x1b[0m Zero-Trust Identity Guard: \x1b[1;32mEnforced\x1b[0m\r\n\r\n');
           this.term.write(this.prompt);
         } else if (cmd === 'gitsetu doctor') {
-          this.term.write('  \x1b[1;36mGitSetu Diagnostic Engine v1.0.0\x1b[0m\r\n');
+          this.term.write('  \x1b[1;36mGitSetu Diagnostic Engine v1.0.0 GA\x1b[0m\r\n');
           this.term.write('  \x1b[32m✔\x1b[0m Git 2.45+ (includeIf conditional routing)\r\n');
           this.term.write('  \x1b[32m✔\x1b[0m OpenSSH 7.3+ (Include directive verified)\r\n');
           this.term.write('  \x1b[32m✔\x1b[0m POSIX Shell: Bash 3.2+ compatible\r\n');
           this.term.write('  \x1b[32m✔\x1b[0m Directory routing: Longest-match active\r\n');
-          this.term.write('  \x1b[32m✔\x1b[0m 25 regression test suites: 100% green\r\n\r\n');
+          this.term.write('  \x1b[32m✔\x1b[0m 32 regression test suites: 100% green\r\n');
+          this.term.write('  \x1b[32m✔\x1b[0m 24-phase Windows Sandbox audit: 70/70 checks passed\r\n\r\n');
           this.term.write(this.prompt);
         } else if (cmd === 'gitsetu --version' || cmd === 'gitsetu -v') {
           this.term.write('  gitsetu v1.0.0 (Day 1 General Availability)\r\n\r\n');
           this.term.write(this.prompt);
         } else if (cmd === 'gitsetu --help' || cmd === 'gitsetu help' || cmd === 'gitsetu') {
-          this.term.write('  \x1b[1mGitSetu\x1b[0m — Zero-Dependency Git Identity Manager v1.0.0\r\n');
+          this.term.write('  \x1b[1mGitSetu\x1b[0m — Zero-Dependency Git Identity Manager v1.0.0 GA\r\n');
           this.term.write('  Usage: gitsetu <command> [arguments]\r\n\r\n');
           this.term.write('  Commands:\r\n');
-          this.term.write('    setup        Interactive Blueprint setup dashboard\r\n');
-          this.term.write('    status       Inspect registered profiles and active scope\r\n');
-          this.term.write('    doctor       Audit runtime dependencies and configuration\r\n');
-          this.term.write('    guard        Pre-commit identity verification\r\n');
-          this.term.write('    vault        AES-256 encrypted profile backup/restore\r\n\r\n');
+          this.term.write('    setup [--auto]  Blueprint setup dashboard or zero-prompt auto-discovery\r\n');
+          this.term.write('    init [--auto]   Alias for setup\r\n');
+          this.term.write('    status          Inspect registered profiles and active scope\r\n');
+          this.term.write('    doctor          Audit runtime dependencies and configuration\r\n');
+          this.term.write('    guard           Pre-commit identity verification\r\n');
+          this.term.write('    vault           AES-256 encrypted profile backup/restore\r\n\r\n');
           this.term.write(this.prompt);
         } else if (cmd === 'clear') {
           this.term.reset();
