@@ -23,13 +23,19 @@ import TerminalDemo from './TerminalDemo.astro';
 
       <!-- CTA & Command -->
       <div class="hero-actions reveal delay-300">
-        <copy-button class="install-block group magnetic">
-          <code class="install-command" id="install-cmd" tabindex="0">curl -sL https://gitsetu.bhaskarjha.dev/install | bash</code>
-          <button class="copy-btn" aria-label="Copy install command" type="button">
-            <svg class="copy-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-            <svg class="check-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><polyline points="20 6 9 17 4 12"/></svg>
-          </button>
-        </copy-button>
+        <div class="install-container">
+          <div class="os-toggle" role="tablist" aria-label="Select Operating System">
+            <button class="os-tab active" data-os="posix" type="button">macOS / Linux</button>
+            <button class="os-tab" data-os="windows" type="button">Windows (PowerShell)</button>
+          </div>
+          <copy-button class="install-block group magnetic">
+            <code class="install-command" id="install-cmd" tabindex="0">curl -sL https://gitsetu.bhaskarjha.dev/install | bash</code>
+            <button class="copy-btn" aria-label="Copy install command" type="button">
+              <svg class="copy-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              <svg class="check-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><polyline points="20 6 9 17 4 12"/></svg>
+            </button>
+          </copy-button>
+        </div>
         <a href="/docs/getting-started/quickstart" class="btn btn-primary magnetic">
           Read Docs 
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
@@ -105,6 +111,31 @@ import TerminalDemo from './TerminalDemo.astro';
 
   // Magnetic Buttons & 3D Magnetic Terminal
   document.addEventListener('astro:page-load', () => {
+    // OS Toggle Handler
+    const posixCmd = 'curl -sL https://gitsetu.bhaskarjha.dev/install | bash';
+    const winCmd = 'irm https://gitsetu.bhaskarjha.dev/install.ps1 | iex';
+    const osTabs = document.querySelectorAll('.os-tab');
+    const installCmdEl = document.querySelector('#install-cmd');
+
+    osTabs.forEach((tab) => {
+      tab.addEventListener('click', () => {
+        osTabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        const os = tab.getAttribute('data-os');
+        if (installCmdEl) {
+          installCmdEl.textContent = os === 'windows' ? winCmd : posixCmd;
+        }
+      });
+    });
+
+    // Auto-detect Windows
+    if (typeof navigator !== 'undefined' && (/win/i.test(navigator.userAgent || '') || /win/i.test(navigator.platform || ''))) {
+      const winTab = document.querySelector('.os-tab[data-os="windows"]') as HTMLButtonElement;
+      if (winTab && !winTab.classList.contains('active')) {
+        winTab.click();
+      }
+    }
+
     // Magnetic Buttons
     const magneticEls = document.querySelectorAll('.magnetic');
     magneticEls.forEach((el) => {
@@ -215,6 +246,44 @@ import TerminalDemo from './TerminalDemo.astro';
     gap: var(--space-md);
     margin-bottom: var(--space-2xl);
     width: 100%;
+  }
+
+  .install-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+    min-width: 280px;
+    max-width: 520px;
+  }
+
+  .os-toggle {
+    display: flex;
+    gap: 6px;
+  }
+
+  .os-tab {
+    background: transparent;
+    border: 1px solid transparent;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    padding: 3px 10px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+  }
+
+  .os-tab:hover {
+    color: var(--text-primary);
+    border-color: var(--border-subtle);
+  }
+
+  .os-tab.active {
+    background: rgba(0, 196, 204, 0.12);
+    border-color: rgba(0, 196, 204, 0.3);
+    color: var(--accent-primary);
+    font-weight: 600;
   }
 
   copy-button.install-block {
