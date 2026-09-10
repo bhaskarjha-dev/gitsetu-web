@@ -41,17 +41,19 @@
       <div class="code-panel new-way">
         <div class="panel-header">
           <span class="panel-label success-label">The GitSetu Way</span>
-          <span class="file-name">~/.ssh/config</span>
+          <span class="file-name">~/.gitconfig & ~/.ssh/config</span>
         </div>
         <div class="panel-body">
-          <pre><code><span class="comment"># GitSetu handles everything dynamically.</span>
-<span class="comment"># Just use 'git@github.com'.</span>
+          <pre><code><span class="comment"># ~/.gitconfig — longest-match conditional include</span>
+<span class="keyword">[includeIf</span> <span class="string">"gitdir:~/work/"</span><span class="keyword">]</span>
+  <span class="keyword">path</span> = ~/.config/gitsetu/profiles/work.gitconfig
 
-<span class="keyword">Include</span> ~/.config/gitsetu/ssh/*</code></pre>
+<span class="comment"># ~/.ssh/config — OpenSSH isolation (ADR 0002)</span>
+<span class="keyword">Include</span> ~/.config/gitsetu/profiles/ssh_config</code></pre>
         </div>
         <div class="panel-footer success-footer">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
-          Idempotent, Zero-Trust, Automatic.
+          Zero-Trust, Longest-Match, Automatic.
         </div>
       </div>
 

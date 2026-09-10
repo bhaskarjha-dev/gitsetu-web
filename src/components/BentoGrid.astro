@@ -23,34 +23,34 @@
           </div>
         </div>
         <div class="bento-content">
-          <h3>Cryptographic Sandboxing</h3>
-          <p>GitSetu leverages native Git <code>includeIf</code> directives to physically sandbox your repositories. Corporate keys and personal credentials never cross the boundary.</p>
+          <h3>Zero-Trust Sandboxing</h3>
+          <p>GitSetu leverages native Git <code>includeIf</code> directives and OpenSSH <code>Include</code> isolation. Corporate keys and personal credentials never cross boundaries, with zero background daemons.</p>
         </div>
       </div>
 
-      <!-- Card 2: Performance (1x1) -->
+      <!-- Card 2: Auto-Provisioned Workspaces (1x1) -->
       <div class="bento-card span-1x1 reveal delay-300">
         <div class="bento-visual icon-visual">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="accent-icon"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="accent-icon"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path><line x1="12" y1="11" x2="12" y2="17"></line><line x1="9" y1="14" x2="15" y2="14"></line></svg>
         </div>
         <div class="bento-content">
-          <h3>Zero-Dependency Core</h3>
-          <p>Pure Bash 3.2 execution means routing happens instantly without heavy runtimes.</p>
+          <h3>Workspace Provisioning</h3>
+          <p>Instant <code>mkdir -p</code> provisioning on profile creation, plus clean unmounting and pruning on profile deletion.</p>
         </div>
       </div>
 
-      <!-- Card 3: Keychain (1x1) -->
+      <!-- Card 3: Longest-Prefix Routing (1x1) -->
       <div class="bento-card span-1x1 reveal delay-400">
         <div class="bento-visual icon-visual">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="accent-icon"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"></path></svg>
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="accent-icon"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
         </div>
         <div class="bento-content">
-          <h3>Hardware FIDO2</h3>
-          <p>Native support for YubiKey (<code>ed25519-sk</code>) bootstrapping.</p>
+          <h3>Longest-Match Routing</h3>
+          <p>Deterministic routing with full case-insensitivity on Windows (<code>msys</code>/<code>cygwin</code>) and macOS (<code>darwin</code>).</p>
         </div>
       </div>
 
-      <!-- Card 4: Identity Guard (2x1) -->
+      <!-- Card 4: Pre-Commit Guard (2x1) -->
       <div class="bento-card span-2x1 reveal delay-200">
         <div class="bento-visual icon-visual-large" style="min-height: 140px; background: rgba(255,255,255,0.01);">
           <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--color-error)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.8; filter: drop-shadow(0 0 10px rgba(239, 68, 68, 0.4));">
@@ -61,24 +61,47 @@
         </div>
         <div class="bento-content">
           <h3>Pre-Commit Guard</h3>
-          <p>A fail-closed hook that physically blocks commits if your active email doesn't strictly match the required profile.</p>
+          <p>A fail-closed hook that physically blocks commits if your active Git author email does not match the scoped workspace directory profile.</p>
         </div>
       </div>
 
-      <!-- Card 5: Automated Key Lifecycle (1x1) -->
+      <!-- Card 5: Credential Broker (1x1) -->
       <div class="bento-card span-1x1 reveal delay-300">
-        <div class="bento-visual icon-visual-large" style="min-height: 120px;">
+        <div class="bento-visual icon-visual">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="accent-icon"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 9.9-1"></path></svg>
+        </div>
+        <div class="bento-content">
+          <h3>Credential Broker</h3>
+          <p>Namespaced PATs stored in macOS Keychain, Linux secret-tool, and Windows Credential Manager.</p>
+        </div>
+      </div>
+
+      <!-- Card 6: Hardware FIDO2 & SSH Signing (1x1) -->
+      <div class="bento-card span-1x1 reveal delay-200">
+        <div class="bento-visual icon-visual">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="accent-icon"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"></path></svg>
+        </div>
+        <div class="bento-content">
+          <h3>FIDO2 & SSH Signing</h3>
+          <p>Native YubiKey (<code>ed25519-sk</code>) support and automated SSH-based cryptographic commit signing.</p>
+        </div>
+      </div>
+
+      <!-- Card 7: 25 Test Suites & Windows Sandbox (2x1) -->
+      <div class="bento-card span-2x1 reveal delay-300">
+        <div class="bento-visual icon-visual-large" style="min-height: 140px; background: rgba(255,255,255,0.01);">
           <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--color-success)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.8; filter: drop-shadow(0 0 10px rgba(34, 197, 94, 0.4));">
-            <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"></path>
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+            <polyline points="22 4 12 14.01 9 11.01"></polyline>
           </svg>
         </div>
         <div class="bento-content">
-          <h3>Automated Key Lifecycle</h3>
-          <p>GitSetu automatically generates and distributes ED25519 SSH keys per profile.</p>
+          <h3>25 Test Suites (100% Green)</h3>
+          <p>198 automated assertions covering POSIX locking, signal traps, and multi-profile rehydration, backed by a 12-phase live Windows Sandbox harness.</p>
         </div>
       </div>
 
-      <!-- Card 6: Encrypted Backup (3x1) -->
+      <!-- Card 8: Encrypted Backup (3x1) -->
       <div class="bento-card span-3x1 reveal delay-400">
         <div class="vault-bg">
           <svg viewBox="0 0 100 100" class="vault-mesh" preserveAspectRatio="none">
@@ -108,8 +131,8 @@
         </div>
         <div class="bento-content">
           <div class="text-group" style="max-width: 60%;">
-            <h3>Encrypted Profile Backup</h3>
-            <p>Export your entire identity architecture. GitSetu uses AES-256 OpenSSL encryption to securely backup and restore your profiles across machines.</p>
+            <h3>Encrypted Profile Vaults</h3>
+            <p>Export your entire identity architecture. GitSetu uses AES-256 OpenSSL encryption to securely backup, migrate, and restore profiles across workstations.</p>
           </div>
         </div>
       </div>

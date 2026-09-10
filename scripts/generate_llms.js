@@ -33,7 +33,7 @@ function readDocsRecursively(dir) {
     if (fs.statSync(fullPath).isDirectory()) {
       readDocsRecursively(fullPath);
     } else if (fullPath.endsWith('.md')) {
-      const relativePath = path.relative(docsDir, fullPath);
+      const relativePath = path.relative(docsDir, fullPath).replace(/\\/g, '/');
       const content = fs.readFileSync(fullPath, 'utf-8');
       
       llmContent += `\n--- START OF FILE: ${relativePath} ---\n\n`;

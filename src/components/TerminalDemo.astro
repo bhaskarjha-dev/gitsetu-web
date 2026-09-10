@@ -194,7 +194,7 @@ import '@xterm/xterm/css/xterm.css';
         if (this.term) {
           this.term.reset();
           this.term.clearTextureAtlas();
-          this.term.write('\x1b[3mSandbox active. Try typing \x1b[33mgitsetu setup\x1b[0m\x1b[3m.\x1b[0m\r\n\r\n');
+          this.term.write('\x1b[3mSandbox active. Try typing \x1b[33mgitsetu setup\x1b[0m\x1b[3m, \x1b[33mgitsetu status\x1b[0m\x1b[3m, or \x1b[33mgitsetu doctor\x1b[0m\x1b[3m.\x1b[0m\r\n\r\n');
           this.term.write(this.prompt);
         }
       });
@@ -303,6 +303,37 @@ import '@xterm/xterm/css/xterm.css';
         if (cmd === 'gitsetu setup') {
           this.term.write('  Profile name: ');
           this.setupState = 'PROFILE_NAME';
+        } else if (cmd === 'gitsetu status') {
+          this.term.write('  \x1b[1;36mGitSetu Profile Registry (v1.0.0 GA)\x1b[0m\r\n');
+          this.term.write('  1) [\x1b[32mwork\x1b[0m] dev@company.com\r\n');
+          this.term.write('     Dir: \x1b[33m~/work\x1b[0m (Provisioned)\r\n');
+          this.term.write('     Key: ~/.ssh/id_ed25519_work\r\n');
+          this.term.write('  2) [\x1b[32mpersonal\x1b[0m] me@bhaskarjha.dev\r\n');
+          this.term.write('     Dir: [Global Fallback]\r\n');
+          this.term.write('     Key: ~/.ssh/id_ed25519_personal\r\n');
+          this.term.write('  \x1b[32m✔\x1b[0m Zero-Trust Identity Guard: \x1b[1;32mEnforced\x1b[0m\r\n\r\n');
+          this.term.write(this.prompt);
+        } else if (cmd === 'gitsetu doctor') {
+          this.term.write('  \x1b[1;36mGitSetu Diagnostic Engine v1.0.0\x1b[0m\r\n');
+          this.term.write('  \x1b[32m✔\x1b[0m Git 2.45+ (includeIf conditional routing)\r\n');
+          this.term.write('  \x1b[32m✔\x1b[0m OpenSSH 7.3+ (Include directive verified)\r\n');
+          this.term.write('  \x1b[32m✔\x1b[0m POSIX Shell: Bash 3.2+ compatible\r\n');
+          this.term.write('  \x1b[32m✔\x1b[0m Directory routing: Longest-match active\r\n');
+          this.term.write('  \x1b[32m✔\x1b[0m 25 regression test suites: 100% green\r\n\r\n');
+          this.term.write(this.prompt);
+        } else if (cmd === 'gitsetu --version' || cmd === 'gitsetu -v') {
+          this.term.write('  gitsetu v1.0.0 (Day 1 General Availability)\r\n\r\n');
+          this.term.write(this.prompt);
+        } else if (cmd === 'gitsetu --help' || cmd === 'gitsetu help' || cmd === 'gitsetu') {
+          this.term.write('  \x1b[1mGitSetu\x1b[0m — Zero-Dependency Git Identity Manager v1.0.0\r\n');
+          this.term.write('  Usage: gitsetu <command> [arguments]\r\n\r\n');
+          this.term.write('  Commands:\r\n');
+          this.term.write('    setup        Interactive Blueprint setup dashboard\r\n');
+          this.term.write('    status       Inspect registered profiles and active scope\r\n');
+          this.term.write('    doctor       Audit runtime dependencies and configuration\r\n');
+          this.term.write('    guard        Pre-commit identity verification\r\n');
+          this.term.write('    vault        AES-256 encrypted profile backup/restore\r\n\r\n');
+          this.term.write(this.prompt);
         } else if (cmd === 'clear') {
           this.term.reset();
           this.term.write(this.prompt);
@@ -319,13 +350,15 @@ import '@xterm/xterm/css/xterm.css';
         this.term.write(`  Directory: `);
         this.setupState = 'DIRECTORY';
       } else if (this.setupState === 'DIRECTORY') {
+        const targetDir = cmd || '~/work';
         this.setupState = 'PROCESSING';
         this.simulateProcessing(() => {
           if (!this.term) return;
+          this.term.write(`  \x1b[32m✔\x1b[0m Workspace provisioned: \x1b[33m${targetDir}\x1b[0m (mkdir -p)\r\n`);
           this.term.write(`  \x1b[32m✔\x1b[0m SSH key generated: \x1b[33m~/.ssh/id_ed25519_${this.profileName}\x1b[0m\r\n`);
-          this.term.write(`  \x1b[32m✔\x1b[0m Git config written: \x1b[33m~/.config/gitsetu/${this.profileName}.gitconfig\x1b[0m\r\n`);
-          this.term.write(`  \x1b[32m✔\x1b[0m SSH config updated: \x1b[33m~/.ssh/config\x1b[0m\r\n`);
-          this.term.write(`  \x1b[32m✔\x1b[0m Profile '${this.profileName}' created successfully\r\n\r\n`);
+          this.term.write(`  \x1b[32m✔\x1b[0m Git config written: \x1b[33m~/.config/gitsetu/profiles/${this.profileName}.gitconfig\x1b[0m\r\n`);
+          this.term.write(`  \x1b[32m✔\x1b[0m OpenSSH config updated: \x1b[33m~/.ssh/config\x1b[0m\r\n`);
+          this.term.write(`  \x1b[32m✔\x1b[0m Profile '${this.profileName}' created successfully (v1.0.0 GA)\r\n\r\n`);
           this.term.write(this.prompt);
           this.setupState = 'IDLE';
         });
@@ -376,19 +409,23 @@ import '@xterm/xterm/css/xterm.css';
       if(!this.isAutoDemo || !this.term || this.abortController?.signal.aborted) { this.isDemoRunning = false; return; }
       this.term.write('\x1b[2K\r'); // Erase line
       
+      this.term.write('  \x1b[32m✔\x1b[0m Workspace provisioned: \x1b[33m~/work\x1b[0m (mkdir -p)\r\n');
+      await this.wait(200);
+      if(!this.isAutoDemo || !this.term || this.abortController?.signal.aborted) { this.isDemoRunning = false; return; }
+
       this.term.write('  \x1b[32m✔\x1b[0m SSH key generated: \x1b[33m~/.ssh/id_ed25519_work\x1b[0m\r\n');
       await this.wait(200);
       if(!this.isAutoDemo || !this.term || this.abortController?.signal.aborted) { this.isDemoRunning = false; return; }
       
-      this.term.write('  \x1b[32m✔\x1b[0m Git config written: \x1b[33m~/.config/gitsetu/work.gitconfig\x1b[0m\r\n');
+      this.term.write('  \x1b[32m✔\x1b[0m Git config written: \x1b[33m~/.config/gitsetu/profiles/work.gitconfig\x1b[0m\r\n');
       await this.wait(200);
       if(!this.isAutoDemo || !this.term || this.abortController?.signal.aborted) { this.isDemoRunning = false; return; }
       
-      this.term.write('  \x1b[32m✔\x1b[0m SSH config updated: \x1b[33m~/.ssh/config\x1b[0m\r\n');
+      this.term.write('  \x1b[32m✔\x1b[0m OpenSSH config updated: \x1b[33m~/.ssh/config\x1b[0m\r\n');
       await this.wait(200);
       if(!this.isAutoDemo || !this.term || this.abortController?.signal.aborted) { this.isDemoRunning = false; return; }
       
-      this.term.write('  \x1b[32m✔\x1b[0m Profile \'work\' created successfully\r\n\r\n');
+      this.term.write('  \x1b[32m✔\x1b[0m Profile \'work\' created successfully (v1.0.0 GA)\r\n\r\n');
       await this.wait(500);
       if(!this.isAutoDemo || !this.term || this.abortController?.signal.aborted) { this.isDemoRunning = false; return; }
       

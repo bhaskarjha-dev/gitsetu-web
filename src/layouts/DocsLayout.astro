@@ -10,7 +10,7 @@ const currentPath = Astro.url.pathname.replace(/^\/|\/$/g, '');
 const ogImageUrl = `https://gitsetu.bhaskarjha.dev/og/${currentPath}.png`;
 
 // Compute edit URL based on current path
-const editUrl = `https://github.com/bhaskarjha-com/gitsetu/tree/main/docs`;
+const editUrl = `https://github.com/bhaskarjha-dev/gitsetu/tree/main/docs`;
 ---
 
 <!DOCTYPE html>
@@ -80,6 +80,7 @@ const editUrl = `https://github.com/bhaskarjha-com/gitsetu/tree/main/docs`;
           <div class="nav-group">
             <h3 class="nav-heading">Getting Started</h3>
             <ul>
+              <li><a href="/docs/getting-started/introduction" class={frontmatter.title === 'Getting Started' ? 'active' : ''}>Introduction</a></li>
               <li><a href="/docs/getting-started/installation" class={frontmatter.title === 'Installation' ? 'active' : ''}>Installation</a></li>
               <li><a href="/docs/getting-started/quickstart" class={frontmatter.title === 'Quickstart' ? 'active' : ''}>Quickstart</a></li>
             </ul>
@@ -110,11 +111,19 @@ const editUrl = `https://github.com/bhaskarjha-com/gitsetu/tree/main/docs`;
             </ul>
           </div>
           <div class="nav-group">
+            <h3 class="nav-heading">Architecture Decisions</h3>
+            <ul>
+              <li><a href="/docs/adr/0001-dual-ssh-routing-strategy" class={frontmatter.title === 'ADR 0001: Dual SSH Routing' ? 'active' : ''}>ADR 0001: Dual SSH Routing</a></li>
+              <li><a href="/docs/adr/0002-ssh-config-include-directive" class={frontmatter.title === 'ADR 0002: OpenSSH Include Pivot' ? 'active' : ''}>ADR 0002: OpenSSH Include Pivot</a></li>
+            </ul>
+          </div>
+          <div class="nav-group">
             <h3 class="nav-heading">Reference & Support</h3>
             <ul>
               <li><a href="/docs/reference/cli-commands" class={frontmatter.title === 'CLI Commands' ? 'active' : ''}>CLI Commands</a></li>
               <li><a href="/docs/reference/troubleshooting" class={frontmatter.title === 'Troubleshooting' ? 'active' : ''}>Troubleshooting</a></li>
               <li><a href="/docs/reference/faq" class={frontmatter.title === 'FAQ' ? 'active' : ''}>FAQ</a></li>
+              <li><a href="/docs/reference/manual-qa" class={frontmatter.title === 'Manual QA Playbook' ? 'active' : ''}>Manual QA Playbook</a></li>
               <li><a href="/docs/reference/contributing" class={frontmatter.title === 'Contributing Guide' ? 'active' : ''}>Contributing Guide</a></li>
             </ul>
           </div>

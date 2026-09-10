@@ -8,38 +8,47 @@
         <span class="badge-text">Vision 2026</span>
       </div>
       <h2 class="section-title">The Universal <span class="accent-text">Identity Fabric.</span></h2>
-      <p class="section-subtitle">Today, GitSetu protects developers from leaking credentials. Tomorrow, it governs the identity of AI agents and CI/CD pipelines. We are building the infrastructure for the agentic era.</p>
+      <p class="section-subtitle">With <strong>v1.0.0 GA</strong> established as the enterprise baseline across 25 regression test suites, GitSetu expands from local workstation security to universal developer, CI/CD, and agentic identity orchestration.</p>
+    </div>
+
+    <!-- Foundation Baseline Banner -->
+    <div class="baseline-banner reveal delay-150">
+      <div class="baseline-badge">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+        <span>Shipped in v1.0.0 GA</span>
+      </div>
+      <p class="baseline-desc">Zero-Trust Pre-Commit Guard • Workspace Auto-Provisioning • Longest-Match Routing • OpenSSH Include Pivot • 25 Automated Suites (198 Assertions) • Windows Sandbox Live Harness</p>
     </div>
 
     <div class="roadmap-grid">
       <!-- Roadmap Item 1 -->
       <div class="roadmap-card reveal delay-200">
         <div class="roadmap-icon">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="accent-icon"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="accent-icon"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
         </div>
-        <h3>CI/CD Machine Identity</h3>
-        <p>Ephemeral, zero-trust identities for GitHub Actions and CI/CD runners to prevent supply chain credential theft.</p>
-        <span class="status-label">Phase 2</span>
+        <h3>Distribution & Trust</h3>
+        <p>Official package channels for Homebrew, APT, and AUR, plus an initialization wrapper for native Windows PowerShell environments.</p>
+        <span class="status-label">Phase 1</span>
       </div>
 
       <!-- Roadmap Item 2 -->
       <div class="roadmap-card reveal delay-300">
         <div class="roadmap-icon">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="accent-icon"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.3"></path></svg>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="accent-icon"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
         </div>
-        <h3>Automated Key Rotation</h3>
-        <p>Scheduled 90-day key rotations directly integrated with GitHub/GitLab APIs for true zero-touch lifecycle management.</p>
-        <span class="status-label">Phase 3</span>
+        <h3>Parity & Ecosystem UX</h3>
+        <p>Interactive fuzzy profile switching (<code>fzf</code>), native VS Code status-bar identity display, and per-profile classical PGP auto-wiring.</p>
+        <span class="status-label">Phase 2</span>
       </div>
 
       <!-- Roadmap Item 3 -->
       <div class="roadmap-card reveal delay-400">
         <div class="roadmap-icon">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="accent-icon"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="accent-icon"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.3"></path></svg>
         </div>
-        <h3>Agentic Identity Governance</h3>
-        <p>A native MCP server to issue and revoke scoped credentials for AI coding agents (Cursor, Claude Code, Devin).</p>
-        <span class="status-label">Phase 4</span>
+        <h3>The Enterprise Moat</h3>
+        <p>Scheduled 90-day automated key rotations, headless ephemeral CI/CD identity runners, and pre-push secret diff scanning.</p>
+        <span class="status-label">Phase 3</span>
       </div>
     </div>
   </div>
@@ -65,7 +74,43 @@
   .roadmap-header {
     text-align: center;
     max-width: 800px;
-    margin: 0 auto var(--space-4xl) auto;
+    margin: 0 auto var(--space-2xl) auto;
+  }
+
+  .baseline-banner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: var(--space-sm);
+    background: rgba(0, 196, 204, 0.04);
+    border: 1px solid rgba(0, 196, 204, 0.25);
+    border-radius: var(--radius-lg);
+    padding: var(--space-md) var(--space-xl);
+    max-width: 900px;
+    margin: 0 auto var(--space-3xl) auto;
+    backdrop-filter: blur(10px);
+  }
+
+  .baseline-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(16, 185, 129, 0.15);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    border-radius: var(--radius-full);
+    padding: 3px 10px;
+    font-size: var(--text-xs);
+    font-family: var(--font-mono);
+    font-weight: 600;
+    color: var(--color-success);
+  }
+
+  .baseline-desc {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    margin: 0;
+    line-height: 1.5;
   }
 
   .roadmap-grid {

@@ -4,7 +4,7 @@
 
 set -euo pipefail
 
-REPO_RAW_URL="https://raw.githubusercontent.com/bhaskarjha-com/gitsetu/main"
+REPO_RAW_URL="https://raw.githubusercontent.com/bhaskarjha-dev/gitsetu/main"
 LOCAL_REPO_DIR=".."
 DOCS_DIR="src/pages/docs"
 
@@ -22,7 +22,8 @@ sync_doc() {
 
   echo "Syncing $dest_path..."
   
-  local temp_file=$(mktemp)
+  local temp_file
+  temp_file=$(mktemp)
   
   # Try local first (for monorepo/local dev), fallback to curl
   if [ -f "$LOCAL_REPO_DIR/$source_path" ]; then
@@ -44,13 +45,18 @@ sync_doc() {
     fi
   fi
 
+  # Sanitize CRLF to LF
+  tr -d '\r' < "$temp_file" > "${temp_file}.lf"
+  mv "${temp_file}.lf" "$temp_file"
+
   # Create subdirectories if needed
   mkdir -p "$(dirname "$DOCS_DIR/$dest_path")"
 
   # Calculate relative path to layout based on depth
   # If dest_path is "getting-started/quickstart.md", depth is 1
   # So layout path should be "../../../layouts/DocsLayout.astro"
-  local depth=$(echo "$dest_path" | grep -o "/" | wc -l)
+  local stripped="${dest_path//[^\/]/}"
+  local depth=${#stripped}
   local layout_path="../../layouts/DocsLayout.astro"
   for ((i=0; i<depth; i++)); do
     layout_path="../$layout_path"
@@ -63,9 +69,9 @@ layout: $layout_path
 title: "$title"
 ---
 EOF
-  
-  # Strip .md extensions from internal links for clean URLs, preserving #anchors
-  sed -E 's|\]\(([^)]+)\.md(#.*)?\)|\1\2|g' "$temp_file" >> "$DOCS_DIR/$dest_path"
+
+  # Strip .md extensions and convert relative ../ links to /docs/ for clean, robust routing
+  sed -E 's|\]\(([^)]+)\.md(#.*)?\)|](\1\2)|g' "$temp_file" | sed -E 's|\]\(\.\./|](/docs/|g' >> "$DOCS_DIR/$dest_path"
 
   rm -f "$temp_file"
 }
@@ -77,6 +83,7 @@ sync_doc "docs/overview/comparisons.md" "overview/comparisons.md" "Ecosystem Com
 sync_doc "docs/overview/manifesto.md" "overview/manifesto.md" "Design Manifesto"
 
 # 2. Getting Started
+sync_doc "docs/getting-started/introduction.md" "getting-started/introduction.md" "Getting Started"
 sync_doc "docs/getting-started/installation.md" "getting-started/installation.md" "Installation"
 sync_doc "docs/getting-started/quickstart.md" "getting-started/quickstart.md" "Quickstart"
 
@@ -96,10 +103,15 @@ sync_doc "docs/guides/vault-backups.md" "guides/vault-backups.md" "Vault Backups
 sync_doc "docs/enterprise/security-privacy.md" "enterprise/security-privacy.md" "Security & Privacy"
 sync_doc "docs/enterprise/product-roadmap.md" "enterprise/product-roadmap.md" "Product Roadmap"
 
-# 6. Reference & Support
+# 6. Architecture Decisions (ADR)
+sync_doc "docs/adr/0001-dual-ssh-routing-strategy.md" "adr/0001-dual-ssh-routing-strategy.md" "ADR 0001: Dual SSH Routing"
+sync_doc "docs/adr/0002-ssh-config-include-directive.md" "adr/0002-ssh-config-include-directive.md" "ADR 0002: OpenSSH Include Pivot"
+
+# 7. Reference & Support
 sync_doc "docs/reference/cli-commands.md" "reference/cli-commands.md" "CLI Commands"
 sync_doc "docs/reference/troubleshooting.md" "reference/troubleshooting.md" "Troubleshooting"
 sync_doc "docs/reference/faq.md" "reference/faq.md" "FAQ"
+sync_doc "docs/MANUAL_QA.md" "reference/manual-qa.md" "Manual QA Playbook"
 sync_doc "CONTRIBUTING.md" "reference/contributing.md" "Contributing Guide"
 
 echo "Documentation sync complete!"
