@@ -24,9 +24,12 @@ import TerminalDemo from './TerminalDemo.astro';
       <!-- CTA & Command -->
       <div class="hero-actions reveal delay-300">
         <div class="install-container">
-          <div class="os-toggle" role="tablist" aria-label="Select Operating System">
+          <div class="os-toggle" role="tablist" aria-label="Select Installation Method">
             <button class="os-tab active" data-os="posix" type="button">macOS / Linux</button>
-            <button class="os-tab" data-os="windows" type="button">Windows (PowerShell)</button>
+            <button class="os-tab" data-os="windows" type="button">Windows (PS)</button>
+            <button class="os-tab" data-os="npx" type="button">npx</button>
+            <button class="os-tab" data-os="winget" type="button">WinGet</button>
+            <button class="os-tab" data-os="brew" type="button">Homebrew</button>
           </div>
           <copy-button class="install-block group magnetic">
             <code class="install-command" id="install-cmd" tabindex="0">curl -sL https://gitsetu.bhaskarjha.dev/install | bash</code>
@@ -111,9 +114,14 @@ import TerminalDemo from './TerminalDemo.astro';
 
   // Magnetic Buttons & 3D Magnetic Terminal
   document.addEventListener('astro:page-load', () => {
-    // OS Toggle Handler
-    const posixCmd = 'curl -sL https://gitsetu.bhaskarjha.dev/install | bash';
-    const winCmd = 'irm https://gitsetu.bhaskarjha.dev/install.ps1 | iex';
+    // Installation Command Toggle Handler
+    const commands: Record<string, string> = {
+      posix: 'curl -sL https://gitsetu.bhaskarjha.dev/install | bash',
+      windows: 'irm https://gitsetu.bhaskarjha.dev/install.ps1 | iex',
+      npx: 'npx gitsetu setup --auto',
+      winget: 'winget install BhaskarJha.GitSetu',
+      brew: 'brew tap bhaskarjha-dev/tap && brew install gitsetu'
+    };
     const osTabs = document.querySelectorAll('.os-tab');
     const installCmdEl = document.querySelector('#install-cmd');
 
@@ -121,9 +129,9 @@ import TerminalDemo from './TerminalDemo.astro';
       tab.addEventListener('click', () => {
         osTabs.forEach(t => t.classList.remove('active'));
         tab.classList.add('active');
-        const os = tab.getAttribute('data-os');
-        if (installCmdEl) {
-          installCmdEl.textContent = os === 'windows' ? winCmd : posixCmd;
+        const os = tab.getAttribute('data-os') || 'posix';
+        if (installCmdEl && commands[os]) {
+          installCmdEl.textContent = commands[os];
         }
       });
     });
