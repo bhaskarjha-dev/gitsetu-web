@@ -451,12 +451,14 @@
     justify-content: center;
     padding-top: 10vh;
     opacity: 0;
+    visibility: hidden;
     pointer-events: none;
-    transition: opacity var(--transition-fast);
+    transition: opacity var(--transition-fast), visibility var(--transition-fast);
   }
 
   .cmd-backdrop.active {
     opacity: 1;
+    visibility: visible;
     pointer-events: auto;
   }
 

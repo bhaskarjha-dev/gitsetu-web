@@ -125,6 +125,8 @@ html {
 
 body {
   background-color: transparent;
+  overflow-x: hidden;
+  max-width: 100vw;
   /* Premium Dark Mode Mesh / Grid */
   background-image: 
     radial-gradient(circle 800px at var(--mouse-x, 50%) var(--mouse-y, 0%), rgba(255, 255, 255, 0.04) 0%, transparent 100%),
