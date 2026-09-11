@@ -1,2 +1,7 @@
 /install https://raw.githubusercontent.com/bhaskarjha-dev/gitsetu/main/install.sh 302
+/install.sh https://raw.githubusercontent.com/bhaskarjha-dev/gitsetu/main/install.sh 302
+/install.ps1 https://raw.githubusercontent.com/bhaskarjha-dev/gitsetu/main/install.ps1 302
 /uninstall https://raw.githubusercontent.com/bhaskarjha-dev/gitsetu/main/uninstall.sh 302
+/uninstall.sh https://raw.githubusercontent.com/bhaskarjha-dev/gitsetu/main/uninstall.sh 302
+/uninstall.ps1 https://raw.githubusercontent.com/bhaskarjha-dev/gitsetu/main/uninstall.ps1 302
+
