@@ -1,35 +1,40 @@
 ---
+const pathname = Astro.url.pathname.replace(/\/$/, '') || '/';
+const isActive = (path: string) => {
+  if (path === '/') return pathname === '/' ? 'active' : '';
+  return pathname === path || pathname.startsWith(path + '/') ? 'active' : '';
+};
 ---
 
 <header class="navbar" id="navbar">
   <div class="nav-container">
     <div class="nav-brand">
-      <a href="/">
+      <a href="/" aria-label="GitSetu Home">
         <img src="/logo.png" alt="GitSetu" class="brand-logo" width="24" height="24" />
         GitSetu
       </a>
     </div>
 
     <ul class="nav-links">
-      <li><a href="/docs/getting-started/installation">Installation</a></li>
-      <li><a href="/docs/getting-started/quickstart">Quickstart</a></li>
-      <li><a href="/docs/overview/architecture">Architecture</a></li>
-      <li><a href="/docs/enterprise/security-privacy">Security</a></li>
+      <li><a href="/docs/getting-started/installation" class={isActive('/docs/getting-started/installation')}>Installation</a></li>
+      <li><a href="/docs/getting-started/quickstart" class={isActive('/docs/getting-started/quickstart')}>Quickstart</a></li>
+      <li><a href="/docs/overview/architecture" class={isActive('/docs/overview/architecture')}>Architecture</a></li>
+      <li><a href="/docs/enterprise/security-privacy" class={isActive('/docs/enterprise/security-privacy')}>Security</a></li>
     </ul>
 
     <div class="nav-actions">
-      <!-- Command Palette Mockup Trigger -->
-      <button class="cmd-palette-btn" id="search-btn" aria-label="Search">
+      <!-- Command Palette Trigger -->
+      <button class="cmd-palette-btn" id="search-btn" aria-label="Search documentation and commands">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
         <span class="cmd-text">Search...</span>
         <kbd id="cmd-key">⌘K</kbd>
       </button>
 
-      <a href="https://github.com/bhaskarjha-dev/gitsetu" target="_blank" rel="noopener" class="github-link" aria-label="GitHub">
+      <a href="https://github.com/bhaskarjha-dev/gitsetu" target="_blank" rel="noopener" class="github-link" aria-label="GitHub Repository">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
       </a>
-      <a href="/docs" class="btn btn-outline">Docs</a>
-      <button class="mobile-nav-toggle" aria-expanded="false" aria-controls="mobile-menu" aria-label="Toggle menu">
+      <a href="/docs" class={`btn btn-outline ${isActive('/docs')}`}>Docs</a>
+      <button class="mobile-nav-toggle" aria-expanded="false" aria-controls="mobile-menu" aria-label="Toggle mobile menu">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
       </button>
     </div>
@@ -37,21 +42,27 @@
 
   <!-- Mobile Menu Dropdown -->
   <div class="mobile-menu" id="mobile-menu">
-    <a href="/docs/getting-started/installation">Installation</a>
-    <a href="/docs/getting-started/quickstart">Quickstart</a>
-    <a href="/docs/overview/architecture">Architecture</a>
-    <a href="/docs/enterprise/security-privacy">Security</a>
+    <a href="/docs/getting-started/installation" class={isActive('/docs/getting-started/installation')}>Installation</a>
+    <a href="/docs/getting-started/quickstart" class={isActive('/docs/getting-started/quickstart')}>Quickstart</a>
+    <a href="/docs/overview/architecture" class={isActive('/docs/overview/architecture')}>Architecture</a>
+    <a href="/docs/enterprise/security-privacy" class={isActive('/docs/enterprise/security-privacy')}>Security</a>
+    <a href="/docs" class={isActive('/docs')}>All Docs</a>
     <a href="https://github.com/bhaskarjha-dev/gitsetu" target="_blank" rel="noopener">GitHub</a>
   </div>
 </header>
 
 <script>
   class NavbarManager extends HTMLElement {
-    private scrollHandler: () => void;
-    private navbar: HTMLElement | null;
+    private scrollHandler: (() => void) | null = null;
+    private navbar: HTMLElement | null = null;
+    private searchBtn: HTMLElement | null = null;
+    private mobileToggle: HTMLElement | null = null;
+    private mobileMenu: HTMLElement | null = null;
+    private handleSearchClick: (() => void) | null = null;
+    private handleToggleClick: (() => void) | null = null;
+    private handleMenuLinkClick: (() => void) | null = null;
 
-    constructor() {
-      super();
+    connectedCallback() {
       this.navbar = document.getElementById('navbar');
       this.scrollHandler = () => {
         if (window.scrollY > 20) {
@@ -60,36 +71,65 @@
           this.navbar?.classList.remove('scrolled');
         }
       };
-    }
 
-    connectedCallback() {
       window.addEventListener('scroll', this.scrollHandler, { passive: true });
-      // Trigger initially in case page loaded scrolled down
       this.scrollHandler();
 
-      const searchBtn = document.getElementById('search-btn');
+      this.searchBtn = document.getElementById('search-btn');
       const cmdKey = document.getElementById('cmd-key');
       
-      if (navigator.platform.toUpperCase().indexOf('MAC') < 0) {
-        if(cmdKey) cmdKey.textContent = 'Ctrl+K';
+      if (navigator.platform.toUpperCase().indexOf('MAC') < 0 && cmdKey) {
+        cmdKey.textContent = 'Ctrl+K';
       }
 
-      searchBtn?.addEventListener('click', () => {
+      this.handleSearchClick = () => {
         document.dispatchEvent(new CustomEvent('open-command-palette'));
-      });
+      };
+      this.searchBtn?.addEventListener('click', this.handleSearchClick);
 
-      const mobileToggle = document.querySelector('.mobile-nav-toggle');
-      const mobileMenu = document.getElementById('mobile-menu');
+      this.mobileToggle = document.querySelector('.mobile-nav-toggle');
+      this.mobileMenu = document.getElementById('mobile-menu');
 
-      mobileToggle?.addEventListener('click', () => {
-        const isExpanded = mobileToggle.getAttribute('aria-expanded') === 'true';
-        mobileToggle.setAttribute('aria-expanded', String(!isExpanded));
-        mobileMenu?.classList.toggle('active');
+      this.handleToggleClick = () => {
+        const isExpanded = this.mobileToggle?.getAttribute('aria-expanded') === 'true';
+        this.mobileToggle?.setAttribute('aria-expanded', String(!isExpanded));
+        this.mobileMenu?.classList.toggle('active');
+      };
+      this.mobileToggle?.addEventListener('click', this.handleToggleClick);
+
+      // Auto-close mobile menu when any navigation link is clicked
+      this.handleMenuLinkClick = () => {
+        this.mobileMenu?.classList.remove('active');
+        this.mobileToggle?.setAttribute('aria-expanded', 'false');
+      };
+      this.mobileMenu?.querySelectorAll('a').forEach(a => {
+        a.addEventListener('click', this.handleMenuLinkClick!);
       });
     }
 
     disconnectedCallback() {
-      window.removeEventListener('scroll', this.scrollHandler);
+      if (this.scrollHandler) {
+        window.removeEventListener('scroll', this.scrollHandler);
+        this.scrollHandler = null;
+      }
+      if (this.searchBtn && this.handleSearchClick) {
+        this.searchBtn.removeEventListener('click', this.handleSearchClick);
+        this.handleSearchClick = null;
+      }
+      if (this.mobileToggle && this.handleToggleClick) {
+        this.mobileToggle.removeEventListener('click', this.handleToggleClick);
+        this.handleToggleClick = null;
+      }
+      if (this.mobileMenu && this.handleMenuLinkClick) {
+        this.mobileMenu.querySelectorAll('a').forEach(a => {
+          a.removeEventListener('click', this.handleMenuLinkClick!);
+        });
+        this.handleMenuLinkClick = null;
+      }
+      this.navbar = null;
+      this.searchBtn = null;
+      this.mobileToggle = null;
+      this.mobileMenu = null;
     }
   }
 
@@ -183,14 +223,22 @@
     font-size: var(--text-sm);
     font-weight: 500;
     text-decoration: none !important;
-    padding: var(--space-xs) var(--space-sm);
-    border-radius: var(--radius-sm);
+    padding: 6px 14px;
+    border-radius: var(--radius-full);
     transition: all var(--transition-fast);
+    border: 1px solid transparent;
   }
 
   .nav-links a:hover {
     color: var(--text-heading);
     background: rgba(255, 255, 255, 0.05);
+  }
+
+  .nav-links a.active {
+    color: var(--accent-primary);
+    background: rgba(0, 196, 204, 0.1);
+    border-color: rgba(0, 196, 204, 0.3);
+    box-shadow: 0 0 12px rgba(0, 196, 204, 0.15);
   }
 
   .nav-actions {
@@ -272,6 +320,13 @@
     box-shadow: 0 0 15px var(--accent-glow);
   }
 
+  .btn-outline.active {
+    border-color: var(--accent-primary);
+    color: var(--accent-primary);
+    background: rgba(0, 196, 204, 0.12);
+    box-shadow: 0 0 15px var(--accent-glow);
+  }
+
   /* Mobile Nav Button */
   .mobile-nav-toggle {
     display: none;
@@ -285,6 +340,18 @@
   @media (max-width: 900px) {
     .nav-links {
       display: none;
+    }
+
+    .mobile-nav-toggle {
+      display: flex !important;
+      align-items: center;
+      justify-content: center;
+    }
+  }
+
+  @media (min-width: 901px) {
+    .mobile-menu {
+      display: none !important;
     }
   }
 
@@ -320,9 +387,6 @@
     }
 
     .mobile-nav-toggle {
-      display: flex !important;
-      align-items: center;
-      justify-content: center;
       margin-left: 4px;
     }
   }

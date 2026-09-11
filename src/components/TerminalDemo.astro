@@ -93,10 +93,6 @@ import '@xterm/xterm/css/xterm.css';
 
       if (this.demoTimeout) clearTimeout(this.demoTimeout);
       if (this.processingInterval) clearInterval(this.processingInterval);
-      if (this.visibilityObserver) {
-        this.visibilityObserver.disconnect();
-        this.visibilityObserver = null;
-      }
       if (this.term) {
         this.term.dispose();
         this.term = null;
@@ -104,8 +100,6 @@ import '@xterm/xterm/css/xterm.css';
       const container = this.querySelector('#terminal-container');
       if (container) container.innerHTML = '';
     }
-
-    // IntersectionObserver removed for guaranteed synchronous initialization
 
     async initTerminal(container: HTMLElement) {
       const demoBtn = this.querySelector('#mode-demo') as HTMLElement;
@@ -115,10 +109,21 @@ import '@xterm/xterm/css/xterm.css';
       this.cleanup();
       container.innerHTML = '';
 
-      // Dynamic import to prevent bundle bloat (CSS is statically imported in frontmatter)
-      const { Terminal } = await import('@xterm/xterm');
+      // Resilient dynamic import to prevent bundle bloat and handle fast route transitions
+      let TerminalClass: any;
+      try {
+        const mod = await import('@xterm/xterm');
+        TerminalClass = mod.Terminal;
+      } catch (err) {
+        console.warn('Failed to load xterm module:', err);
+        return;
+      }
 
-      this.term = new Terminal({
+      if (!this.isConnected || !this.abortController || this.abortController.signal.aborted) {
+        return;
+      }
+
+      this.term = new TerminalClass({
         cols: 70, // Fixed safe column count that fits the 600px container perfectly
         rows: 15,
         cursorBlink: true,

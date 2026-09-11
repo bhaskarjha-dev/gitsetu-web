@@ -1,4 +1,9 @@
 ---
+const currentPath = '/' + Astro.url.pathname.replace(/^\/|\/$/g, '');
+const isActive = (path: string) => {
+  const normPath = '/' + path.replace(/^\/|\/$/g, '');
+  return currentPath === normPath ? 'active' : '';
+};
 ---
 
 <footer class="status-bar">
@@ -18,10 +23,10 @@
   </div>
 
   <div class="status-right">
-    <a href="/docs/getting-started/installation" class="status-item link">Install</a>
-    <a href="/docs/getting-started/quickstart" class="status-item link">Docs</a>
-    <a href="/docs/overview/architecture" class="status-item link">Architecture</a>
-    <a href="/docs/enterprise/product-roadmap" class="status-item link">Roadmap</a>
+    <a href="/docs/getting-started/installation" class={`status-item link ${isActive('/docs/getting-started/installation')}`}>Install</a>
+    <a href="/docs/getting-started/quickstart" class={`status-item link ${isActive('/docs/getting-started/quickstart')}`}>Docs</a>
+    <a href="/docs/overview/architecture" class={`status-item link ${isActive('/docs/overview/architecture')}`}>Architecture</a>
+    <a href="/docs/enterprise/product-roadmap" class={`status-item link ${isActive('/docs/enterprise/product-roadmap')}`}>Roadmap</a>
     <a href="https://github.com/bhaskarjha-dev/gitsetu" target="_blank" rel="noopener" class="status-item link">
       GitHub
     </a>
@@ -79,6 +84,11 @@
     text-decoration: none;
     cursor: pointer;
     transition: color var(--transition-fast);
+  }
+
+  .status-item.link.active {
+    color: var(--accent-primary);
+    background: rgba(0, 196, 204, 0.15);
   }
 
   .status-item:hover.link {

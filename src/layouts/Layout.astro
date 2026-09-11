@@ -95,13 +95,12 @@ const {
             entries.forEach(entry => {
               if (entry.isIntersecting) {
                 entry.target.classList.add('active');
-                // Optional: unobserve after revealing if you want it to trigger only once
               }
             });
           }, {
             root: null,
-            threshold: 0.1,
-            rootMargin: "0px 0px -50px 0px"
+            threshold: 0.05,
+            rootMargin: "0px 0px 50px 0px"
           });
 
           revealElements.forEach(el => this.revealObserver?.observe(el));
