@@ -13,8 +13,8 @@ import '@xterm/xterm/css/xterm.css';
       <span class="terminal-title">gitsetu — bash</span>
       
       <div class="terminal-modes">
-        <button class="mode-btn active" id="mode-demo">Auto-Demo</button>
-        <button class="mode-btn" id="mode-interactive">Interactive</button>
+        <button class="mode-btn active" id="mode-demo" type="button">Auto-Demo</button>
+        <button class="mode-btn" id="mode-interactive" type="button">Interactive</button>
       </div>
     </div>
     
@@ -36,6 +36,7 @@ import '@xterm/xterm/css/xterm.css';
     demoTimeout: any = null;
     processingInterval: any = null;
     abortController: AbortController | null = null;
+    resizeObserver: ResizeObserver | null = null;
     
     isAutoDemo = true;
     isDemoRunning = false;
@@ -47,27 +48,33 @@ import '@xterm/xterm/css/xterm.css';
 
     connectedCallback() {
       // First Principle: Xterm.js strictly requires painted physical dimensions to boot.
-      // We use a native ResizeObserver to deterministically wait until the browser 
-      // has fully parsed the DOM and applied all CSS to the container.
-      // This completely bypasses any Astro routing race conditions or Cloudflare deferred execution bugs.
+      // We check if dimensions are already available (instant paint) or observe until ready.
       const container = this.querySelector('#terminal-container') as HTMLElement;
       if (!container) return;
 
-      const observer = new ResizeObserver((entries) => {
-        for (let entry of entries) {
-          if (entry.contentRect.width > 0 && entry.contentRect.height > 0) {
-            observer.disconnect(); // Stop observing once painted
-            if (!this.abortController) { // Prevent double initialization
-              this.setup(container);
-            }
+      const initIfReady = () => {
+        if (container.offsetWidth > 0 && container.offsetHeight > 0) {
+          if (this.resizeObserver) {
+            this.resizeObserver.disconnect();
+            this.resizeObserver = null;
+          }
+          if (!this.term && !this.abortController) {
+            this.setup(container);
           }
         }
-      });
-      observer.observe(container);
+      };
+
+      if (container.offsetWidth > 0 && container.offsetHeight > 0) {
+        initIfReady();
+      } else {
+        this.resizeObserver = new ResizeObserver(() => {
+          initIfReady();
+        });
+        this.resizeObserver.observe(container);
+      }
     }
 
     setup(container: HTMLElement) {
-      this.abortController = new AbortController();
       this.initTerminal(container).then(() => {
         if (this.isAutoDemo && !this.isDemoRunning) {
           this.runAutoDemo();
@@ -80,23 +87,30 @@ import '@xterm/xterm/css/xterm.css';
     }
 
     cleanup() {
-      this.isAutoDemo = true;
-      this.isDemoRunning = false;
-      this.setupState = 'IDLE';
-      this.currentLine = '';
-      this.profileName = '';
-      
+      if (this.resizeObserver) {
+        this.resizeObserver.disconnect();
+        this.resizeObserver = null;
+      }
       if (this.abortController) {
         this.abortController.abort();
         this.abortController = null;
       }
-
-      if (this.demoTimeout) clearTimeout(this.demoTimeout);
-      if (this.processingInterval) clearInterval(this.processingInterval);
+      if (this.demoTimeout) {
+        clearTimeout(this.demoTimeout);
+        this.demoTimeout = null;
+      }
+      if (this.processingInterval) {
+        clearInterval(this.processingInterval);
+        this.processingInterval = null;
+      }
       if (this.term) {
         this.term.dispose();
         this.term = null;
       }
+      this.isDemoRunning = false;
+      this.setupState = 'IDLE';
+      this.currentLine = '';
+      this.profileName = '';
       const container = this.querySelector('#terminal-container');
       if (container) container.innerHTML = '';
     }
@@ -109,17 +123,22 @@ import '@xterm/xterm/css/xterm.css';
       this.cleanup();
       container.innerHTML = '';
 
-      // Resilient dynamic import to prevent bundle bloat and handle fast route transitions
+      // Create new session controller AFTER cleanup
+      const abortController = new AbortController();
+      this.abortController = abortController;
+      const currentSignal = abortController.signal;
+
+      // Resilient dynamic import handling ESM & CJS default interop
       let TerminalClass: any;
       try {
-        const mod = await import('@xterm/xterm');
-        TerminalClass = mod.Terminal;
+        const mod: any = await import('@xterm/xterm');
+        TerminalClass = mod.Terminal || (mod.default && (mod.default.Terminal || mod.default));
       } catch (err) {
         console.warn('Failed to load xterm module:', err);
         return;
       }
 
-      if (!this.isConnected || !this.abortController || this.abortController.signal.aborted) {
+      if (!this.isConnected || currentSignal.aborted) {
         return;
       }
 
@@ -127,7 +146,7 @@ import '@xterm/xterm/css/xterm.css';
         cols: 70, // Fixed safe column count that fits the 600px container perfectly
         rows: 15,
         cursorBlink: true,
-        fontFamily: 'monospace', // Start with fallback to prevent early texture corruption
+        fontFamily: 'monospace', // Fallback font until custom font loads
         fontSize: 13,
         theme: {
           background: 'transparent',
@@ -147,27 +166,29 @@ import '@xterm/xterm/css/xterm.css';
       });
 
       this.term.open(container);
-      this.term.reset(); // Hard flush WebGL state
+      this.term.reset();
       this.term.clearTextureAtlas();
 
       // Dynamically upgrade font once loaded
-      document.fonts.load('13px "JetBrains Mono"').then(() => {
-        if (this.term) {
-          this.term.options.fontFamily = '"JetBrains Mono", monospace';
-          this.term.clearTextureAtlas();
-        }
-      }).catch(() => {});
+      if (typeof document !== 'undefined' && document.fonts) {
+        document.fonts.load('13px "JetBrains Mono"').then(() => {
+          if (this.term && !currentSignal.aborted) {
+            this.term.options.fontFamily = '"JetBrains Mono", monospace';
+            this.term.clearTextureAtlas();
+          }
+        }).catch(() => {});
+      }
 
-      // --- HYBRID LOGIC ---
+      // --- HYBRID LOGIC & MODE SWITCHING ---
 
       demoBtn?.addEventListener('click', () => {
         if (this.isAutoDemo) return;
         this.isAutoDemo = true;
-        this.isDemoRunning = false; // Reset lock
+        this.isDemoRunning = false;
         
         demoBtn.classList.add('active');
-        interactiveBtn.classList.remove('active');
-        hint.style.opacity = '1';
+        interactiveBtn?.classList.remove('active');
+        if (hint) hint.style.opacity = '1';
         
         if (this.term) {
           this.term.reset();
@@ -182,40 +203,50 @@ import '@xterm/xterm/css/xterm.css';
         if (this.processingInterval) clearInterval(this.processingInterval);
         
         this.runAutoDemo();
-      });
+      }, { signal: currentSignal });
 
       interactiveBtn?.addEventListener('click', () => {
-        if (!this.isAutoDemo) return;
-        this.isAutoDemo = false; // The loops will check this and naturally exit!
+        if (!this.isAutoDemo) {
+          if (this.term) this.term.focus();
+          return;
+        }
+        this.isAutoDemo = false;
+        this.isDemoRunning = false;
         
-        demoBtn.classList.remove('active');
+        demoBtn?.classList.remove('active');
         interactiveBtn.classList.add('active');
-        hint.style.opacity = '0';
+        if (hint) hint.style.opacity = '0';
         
-        // DO NOT clear demoTimeout! Let the async loop naturally detect isAutoDemo=false and terminate itself!
-        // This prevents the dead-promise hang bug when returning to Auto-Demo.
+        if (this.demoTimeout) clearTimeout(this.demoTimeout);
         if (this.processingInterval) clearInterval(this.processingInterval);
         
         if (this.term) {
           this.term.reset();
           this.term.clearTextureAtlas();
-          this.term.write('\x1b[3mSandbox active. Try typing \x1b[33mgitsetu setup\x1b[0m\x1b[3m, \x1b[33mgitsetu status\x1b[0m\x1b[3m, or \x1b[33mgitsetu doctor\x1b[0m\x1b[3m.\x1b[0m\r\n\r\n');
+          this.term.write('\x1b[3mSandbox active. Type \x1b[33mgitsetu status\x1b[0m\x1b[3m, \x1b[33msetup\x1b[0m\x1b[3m, or \x1b[33mdoctor\x1b[0m\x1b[3m.\x1b[0m\r\n\r\n');
           this.term.write(this.prompt);
+          this.term.focus();
         }
-      });
+      }, { signal: currentSignal });
 
       container.addEventListener('click', () => {
         if (this.isAutoDemo) {
           interactiveBtn?.click();
+        } else if (this.term) {
+          this.term.focus();
         }
-        if (this.term) this.term.focus();
-      });
+      }, { signal: currentSignal });
 
       // --- INTERACTIVE ENGINE ---
 
-      this.term.onData(e => {
-        if (this.isAutoDemo || !this.term) return; 
+      this.term.onData((e: string) => {
+        if (this.isAutoDemo) {
+          interactiveBtn?.click();
+          return;
+        }
+        if (!this.term) return;
 
+        // Ignore arrow keys / escape sequences for now
         if (e === '\x1b[A' || e === '\x1b[B' || e === '\x1b[C' || e === '\x1b[D') return;
 
         switch (e) {
@@ -224,7 +255,8 @@ import '@xterm/xterm/css/xterm.css';
             this.handleCommand(this.currentLine.trim());
             this.currentLine = '';
             break;
-          case '\x7F': // Backspace
+          case '\x7F': // Backspace (DEL)
+          case '\x08': // Backspace (BS)
             if (this.currentLine.length > 0) {
               this.currentLine = this.currentLine.substring(0, this.currentLine.length - 1);
               this.term.write('\b \b');
@@ -234,7 +266,7 @@ import '@xterm/xterm/css/xterm.css';
             this.term.write('^C\r\n');
             this.currentLine = '';
             this.setupState = 'IDLE';
-            clearInterval(this.processingInterval);
+            if (this.processingInterval) clearInterval(this.processingInterval);
             this.term.write(this.prompt);
             break;
           default:
@@ -246,31 +278,35 @@ import '@xterm/xterm/css/xterm.css';
       });
     }
 
-    async wait(ms: number) {
-      return new Promise((resolve, reject) => { 
-        if (this.abortController?.signal.aborted) {
-          return reject(new Error('Aborted'));
+    async wait(ms: number): Promise<boolean> {
+      return new Promise<boolean>((resolve) => { 
+        if (this.abortController?.signal.aborted || !this.isAutoDemo) {
+          return resolve(false);
         }
         
+        let timer: any = null;
+
         const onAbort = () => {
-          clearTimeout(this.demoTimeout);
-          reject(new Error('Aborted'));
+          if (timer) clearTimeout(timer);
+          resolve(false);
         };
         
         this.abortController?.signal.addEventListener('abort', onAbort, { once: true });
         
-        this.demoTimeout = setTimeout(() => {
+        timer = setTimeout(() => {
           this.abortController?.signal.removeEventListener('abort', onAbort);
-          if (!this.isAutoDemo) {
-            reject(new Error('Demo stopped'));
+          if (!this.isAutoDemo || this.abortController?.signal.aborted) {
+            resolve(false);
           } else {
             resolve(true);
           }
         }, ms);
-      }).catch(() => false);
+
+        this.demoTimeout = timer;
+      });
     }
 
-    async typeText(text: string, speed = 45) {
+    async typeText(text: string, speed = 45): Promise<boolean> {
       for (let i = 0; i < text.length; i++) {
         if (!this.isAutoDemo || !this.term || this.abortController?.signal.aborted) {
           this.isDemoRunning = false;
@@ -278,7 +314,10 @@ import '@xterm/xterm/css/xterm.css';
         }
         this.term.write(text.charAt(i));
         const continued = await this.wait(speed);
-        if (!continued) return false;
+        if (!continued) {
+          this.isDemoRunning = false;
+          return false;
+        }
       }
       return true;
     }
@@ -289,13 +328,15 @@ import '@xterm/xterm/css/xterm.css';
       this.term.write('  \x1b[36mGenerating cryptographic keys\x1b[0m');
       this.processingInterval = setInterval(() => {
         if (!this.term || this.abortController?.signal.aborted) {
-          clearInterval(this.processingInterval);
+          if (this.processingInterval) clearInterval(this.processingInterval);
+          this.processingInterval = null;
           return;
         }
         this.term.write('.');
         dots++;
         if (dots >= 3) {
-          clearInterval(this.processingInterval);
+          if (this.processingInterval) clearInterval(this.processingInterval);
+          this.processingInterval = null;
           this.term.write('\x1b[2K\r'); 
           callback();
         }
@@ -304,8 +345,10 @@ import '@xterm/xterm/css/xterm.css';
 
     handleCommand(cmd: string) {
       if (!this.term) return;
+      const lower = cmd.toLowerCase();
+
       if (this.setupState === 'IDLE') {
-        if (cmd === 'gitsetu setup --auto' || cmd === 'gitsetu init --auto' || cmd === 'gitsetu setup -y') {
+        if (lower === 'gitsetu setup --auto' || lower === 'gitsetu init --auto' || lower === 'gitsetu setup -y' || lower === 'setup --auto' || lower === 'init --auto') {
           this.term.write('  \x1b[1;36mGitSetu Zero-Prompt Auto-Discovery v1.0.0\x1b[0m\r\n');
           this.term.write('  🔍 \x1b[36mScanning local workstation...\x1b[0m\r\n');
           this.term.write('     \x1b[32m✔\x1b[0m Active Git Author: \x1b[33mme@bhaskarjha.dev\x1b[0m\r\n');
@@ -317,10 +360,10 @@ import '@xterm/xterm/css/xterm.css';
           this.term.write('     \x1b[32m✔\x1b[0m OpenSSH Include isolation injected\r\n');
           this.term.write('  \x1b[1;32m✨ Provisioned 2 profiles in 0.8s with zero prompts! (v1.0.0 GA)\x1b[0m\r\n\r\n');
           this.term.write(this.prompt);
-        } else if (cmd === 'gitsetu setup' || cmd === 'gitsetu init') {
+        } else if (lower === 'gitsetu setup' || lower === 'gitsetu init' || lower === 'setup' || lower === 'init') {
           this.term.write('  Profile name: ');
           this.setupState = 'PROFILE_NAME';
-        } else if (cmd === 'gitsetu status') {
+        } else if (lower === 'gitsetu status' || lower === 'status') {
           this.term.write('  \x1b[1;36mGitSetu Profile Registry (v1.0.0 GA)\x1b[0m\r\n');
           this.term.write('  1) [\x1b[32mwork\x1b[0m] dev@company.com\r\n');
           this.term.write('     Dir: \x1b[33m~/work\x1b[0m (Provisioned)\r\n');
@@ -330,7 +373,7 @@ import '@xterm/xterm/css/xterm.css';
           this.term.write('     Key: ~/.ssh/id_ed25519_personal\r\n');
           this.term.write('  \x1b[32m✔\x1b[0m Zero-Trust Identity Guard: \x1b[1;32mEnforced\x1b[0m\r\n\r\n');
           this.term.write(this.prompt);
-        } else if (cmd === 'gitsetu doctor') {
+        } else if (lower === 'gitsetu doctor' || lower === 'doctor') {
           this.term.write('  \x1b[1;36mGitSetu Diagnostic Engine v1.0.0 GA\x1b[0m\r\n');
           this.term.write('  \x1b[32m✔\x1b[0m Git 2.45+ (includeIf conditional routing)\r\n');
           this.term.write('  \x1b[32m✔\x1b[0m OpenSSH 7.3+ (Include directive verified)\r\n');
@@ -339,25 +382,34 @@ import '@xterm/xterm/css/xterm.css';
           this.term.write('  \x1b[32m✔\x1b[0m 32 regression test suites: 100% green\r\n');
           this.term.write('  \x1b[32m✔\x1b[0m 24-phase Windows Sandbox audit: 70/70 checks passed\r\n\r\n');
           this.term.write(this.prompt);
-        } else if (cmd === 'gitsetu --version' || cmd === 'gitsetu -v') {
+        } else if (lower === 'gitsetu --version' || lower === 'gitsetu -v' || lower === 'gitsetu version' || lower === 'version') {
           this.term.write('  gitsetu v1.0.0 (Day 1 General Availability)\r\n\r\n');
           this.term.write(this.prompt);
-        } else if (cmd === 'gitsetu --help' || cmd === 'gitsetu help' || cmd === 'gitsetu') {
+        } else if (lower === 'gitsetu --help' || lower === 'gitsetu help' || lower === 'gitsetu' || lower === 'help') {
           this.term.write('  \x1b[1mGitSetu\x1b[0m — Zero-Dependency Git Identity Manager v1.0.0 GA\r\n');
           this.term.write('  Usage: gitsetu <command> [arguments]\r\n\r\n');
           this.term.write('  Commands:\r\n');
-          this.term.write('    setup [--auto]  Blueprint setup dashboard or zero-prompt auto-discovery\r\n');
+          this.term.write('    setup [--auto]  Interactive dashboard or zero-prompt auto-discovery\r\n');
           this.term.write('    init [--auto]   Alias for setup\r\n');
           this.term.write('    status          Inspect registered profiles and active scope\r\n');
           this.term.write('    doctor          Audit runtime dependencies and configuration\r\n');
           this.term.write('    guard           Pre-commit identity verification\r\n');
           this.term.write('    vault           AES-256 encrypted profile backup/restore\r\n\r\n');
           this.term.write(this.prompt);
-        } else if (cmd === 'clear') {
+        } else if (lower === 'clear' || lower === 'cls') {
           this.term.reset();
           this.term.write(this.prompt);
+        } else if (lower === 'ls' || lower === 'dir') {
+          this.term.write('  personal/  work/\r\n\r\n');
+          this.term.write(this.prompt);
+        } else if (lower === 'pwd') {
+          this.term.write('  /home/developer\r\n\r\n');
+          this.term.write(this.prompt);
+        } else if (lower === 'whoami') {
+          this.term.write('  dev\r\n\r\n');
+          this.term.write(this.prompt);
         } else if (cmd !== '') {
-          this.term.write(`\x1b[31mbash: command not found:\x1b[0m ${cmd}\r\n${this.prompt}`);
+          this.term.write(`  \x1b[31mbash: command not found:\x1b[0m ${cmd}\r\n\r\n${this.prompt}`);
         } else {
           this.term.write(this.prompt);
         }
@@ -389,67 +441,69 @@ import '@xterm/xterm/css/xterm.css';
       this.isDemoRunning = true;
       this.term.write(this.prompt);
       
-      await this.wait(1000);
+      const checkAndContinue = async (ms: number) => {
+        if (!this.isAutoDemo || !this.term || this.abortController?.signal.aborted) return false;
+        return await this.wait(ms);
+      };
+
+      if (!await checkAndContinue(1000)) { this.isDemoRunning = false; return; }
+      if (!(await this.typeText('gitsetu setup', 60))) { this.isDemoRunning = false; return; }
       
-      if (!(await this.typeText('gitsetu setup', 60))) return;
-      
-      await this.wait(400);
-      if(!this.isAutoDemo || !this.term || this.abortController?.signal.aborted) { this.isDemoRunning = false; return; }
+      if (!await checkAndContinue(400)) { this.isDemoRunning = false; return; }
       this.term.write('\r\n  Profile name: ');
       
-      await this.wait(600);
-      if (!(await this.typeText('work', 80))) return;
+      if (!await checkAndContinue(600)) { this.isDemoRunning = false; return; }
+      if (!(await this.typeText('work', 80))) { this.isDemoRunning = false; return; }
       
-      await this.wait(400);
-      if(!this.isAutoDemo || !this.term || this.abortController?.signal.aborted) { this.isDemoRunning = false; return; }
+      if (!await checkAndContinue(400)) { this.isDemoRunning = false; return; }
       this.term.write('\r\n  Git email: ');
       
-      await this.wait(500);
-      if (!(await this.typeText('dev@company.com', 50))) return;
+      if (!await checkAndContinue(500)) { this.isDemoRunning = false; return; }
+      if (!(await this.typeText('dev@company.com', 50))) { this.isDemoRunning = false; return; }
       
-      await this.wait(400);
-      if(!this.isAutoDemo || !this.term || this.abortController?.signal.aborted) { this.isDemoRunning = false; return; }
+      if (!await checkAndContinue(400)) { this.isDemoRunning = false; return; }
       this.term.write('\r\n  Directory: ');
       
-      await this.wait(500);
-      if (!(await this.typeText('~/work', 70))) return;
+      if (!await checkAndContinue(500)) { this.isDemoRunning = false; return; }
+      if (!(await this.typeText('~/work', 70))) { this.isDemoRunning = false; return; }
       
-      await this.wait(500);
-      if(!this.isAutoDemo || !this.term || this.abortController?.signal.aborted) { this.isDemoRunning = false; return; }
+      if (!await checkAndContinue(500)) { this.isDemoRunning = false; return; }
       this.term.write('\r\n  \x1b[36mGenerating cryptographic keys\x1b[0m');
       
-      for(let i = 0; i < 3; i++) {
-        await this.wait(400);
-        if(!this.isAutoDemo || !this.term || this.abortController?.signal.aborted) { this.isDemoRunning = false; return; }
+      for (let i = 0; i < 3; i++) {
+        if (!await checkAndContinue(400)) { this.isDemoRunning = false; return; }
         this.term.write('.');
       }
       
-      await this.wait(200);
-      if(!this.isAutoDemo || !this.term || this.abortController?.signal.aborted) { this.isDemoRunning = false; return; }
+      if (!await checkAndContinue(200)) { this.isDemoRunning = false; return; }
       this.term.write('\x1b[2K\r'); // Erase line
       
       this.term.write('  \x1b[32m✔\x1b[0m Workspace provisioned: \x1b[33m~/work\x1b[0m (mkdir -p)\r\n');
-      await this.wait(200);
-      if(!this.isAutoDemo || !this.term || this.abortController?.signal.aborted) { this.isDemoRunning = false; return; }
+      if (!await checkAndContinue(200)) { this.isDemoRunning = false; return; }
 
       this.term.write('  \x1b[32m✔\x1b[0m SSH key generated: \x1b[33m~/.ssh/id_ed25519_work\x1b[0m\r\n');
-      await this.wait(200);
-      if(!this.isAutoDemo || !this.term || this.abortController?.signal.aborted) { this.isDemoRunning = false; return; }
+      if (!await checkAndContinue(200)) { this.isDemoRunning = false; return; }
       
       this.term.write('  \x1b[32m✔\x1b[0m Git config written: \x1b[33m~/.config/gitsetu/profiles/work.gitconfig\x1b[0m\r\n');
-      await this.wait(200);
-      if(!this.isAutoDemo || !this.term || this.abortController?.signal.aborted) { this.isDemoRunning = false; return; }
+      if (!await checkAndContinue(200)) { this.isDemoRunning = false; return; }
       
       this.term.write('  \x1b[32m✔\x1b[0m OpenSSH config updated: \x1b[33m~/.ssh/config\x1b[0m\r\n');
-      await this.wait(200);
-      if(!this.isAutoDemo || !this.term || this.abortController?.signal.aborted) { this.isDemoRunning = false; return; }
+      if (!await checkAndContinue(200)) { this.isDemoRunning = false; return; }
       
       this.term.write('  \x1b[32m✔\x1b[0m Profile \'work\' created successfully (v1.0.0 GA)\r\n\r\n');
-      await this.wait(500);
-      if(!this.isAutoDemo || !this.term || this.abortController?.signal.aborted) { this.isDemoRunning = false; return; }
+      if (!await checkAndContinue(500)) { this.isDemoRunning = false; return; }
       
       this.term.write(this.prompt);
       this.isDemoRunning = false;
+
+      // Clean loop after 7 seconds if still in Auto-Demo mode
+      if (await checkAndContinue(7000)) {
+        if (this.isAutoDemo && !this.isDemoRunning && this.term && !this.abortController?.signal.aborted) {
+          this.term.reset();
+          this.term.clearTextureAtlas();
+          this.runAutoDemo();
+        }
+      }
     }
   }
 
