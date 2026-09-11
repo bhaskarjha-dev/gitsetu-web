@@ -21,90 +21,131 @@ import TerminalDemo from './TerminalDemo.astro';
         Stop leaking credentials and committing to the wrong profiles. GitSetu cryptographically sandboxes your work, personal, and client identities with zero background processes.
       </p>
 
-      <!-- CTA & Command -->
-      <div class="hero-actions">
-        <div class="install-container">
-          <!-- Category Pills -->
-          <div class="install-categories" role="tablist" aria-label="Installation Category">
-            <button class="cat-pill active" data-category="direct" type="button" role="tab" aria-selected="true" aria-controls="channels-direct">
-              <span class="cat-icon">⚡</span> Direct / Shell
+      <!-- Dedicated Hero CTA Row -->
+      <div class="hero-cta-group">
+        <a href="/docs/getting-started/quickstart" class="btn btn-primary cta-primary magnetic">
+          <span>Read Docs</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+        </a>
+        <a href="https://github.com/bhaskarjha-dev/gitsetu" target="_blank" rel="noopener noreferrer" class="btn btn-secondary cta-secondary magnetic">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+          <span>GitHub</span>
+          <span class="cta-badge">v1.0.0</span>
+          <svg class="external-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+        </a>
+        <a href="/docs/core-engines/identity-routing" class="cta-tertiary">
+          <span>Architecture & Security</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+        </a>
+      </div>
+
+      <!-- Elevated Full-Width Installation Station -->
+      <div class="install-station">
+        <!-- Station Header / Category Tabs -->
+        <div class="station-header">
+          <div class="category-tabs" role="tablist" aria-label="Installation Category">
+            <button class="cat-tab active" data-category="direct" type="button" role="tab" aria-selected="true" aria-controls="channels-direct">
+              <span class="cat-icon">⚡</span>
+              <span class="cat-label">Direct / Shell</span>
             </button>
-            <button class="cat-pill" data-category="pkg" type="button" role="tab" aria-selected="false" aria-controls="channels-pkg">
-              <span class="cat-icon">📦</span> Package Managers
+            <button class="cat-tab" data-category="pkg" type="button" role="tab" aria-selected="false" aria-controls="channels-pkg">
+              <span class="cat-icon">📦</span>
+              <span class="cat-label">Package Managers</span>
             </button>
-            <button class="cat-pill" data-category="extensions" type="button" role="tab" aria-selected="false" aria-controls="channels-extensions">
-              <span class="cat-icon">🧩</span> Nix & Extensions
+            <button class="cat-tab" data-category="extensions" type="button" role="tab" aria-selected="false" aria-controls="channels-extensions">
+              <span class="cat-icon">🧩</span>
+              <span class="cat-label">Nix & Extensions</span>
             </button>
-          </div>
-
-          <!-- Channel Tabs per Category -->
-          <div class="channel-groups">
-            <!-- Group 1: Direct & Shell -->
-            <div class="channel-group active" id="channels-direct" role="tablist" aria-label="Direct Installation Channels">
-              <button class="channel-tab active" data-channel="posix" type="button" role="tab" aria-selected="true">
-                <span class="tab-badge">macOS/Linux</span>curl
-              </button>
-              <button class="channel-tab" data-channel="windows" type="button" role="tab" aria-selected="false">
-                <span class="tab-badge">Windows</span>PowerShell
-              </button>
-              <button class="channel-tab" data-channel="npx" type="button" role="tab" aria-selected="false">
-                <span class="tab-badge">Zero-Install</span>npx
-              </button>
-            </div>
-
-            <!-- Group 2: Package Managers -->
-            <div class="channel-group" id="channels-pkg" role="tablist" aria-label="Package Manager Channels" style="display: none;">
-              <button class="channel-tab" data-channel="winget" type="button" role="tab" aria-selected="false">
-                <span class="tab-badge">Windows</span>WinGet
-              </button>
-              <button class="channel-tab" data-channel="brew" type="button" role="tab" aria-selected="false">
-                <span class="tab-badge">macOS</span>Homebrew
-              </button>
-              <button class="channel-tab" data-channel="scoop" type="button" role="tab" aria-selected="false">
-                <span class="tab-badge">Windows</span>Scoop
-              </button>
-              <button class="channel-tab" data-channel="aur" type="button" role="tab" aria-selected="false">
-                <span class="tab-badge">Arch</span>AUR
-              </button>
-            </div>
-
-            <!-- Group 3: Nix & Extensions -->
-            <div class="channel-group" id="channels-extensions" role="tablist" aria-label="Hermetic and Extension Channels" style="display: none;">
-              <button class="channel-tab" data-channel="nix" type="button" role="tab" aria-selected="false">
-                <span class="tab-badge">Hermetic</span>Nix Flake
-              </button>
-              <button class="channel-tab" data-channel="gh" type="button" role="tab" aria-selected="false">
-                <span class="tab-badge">CLI</span>GitHub CLI
-              </button>
-            </div>
-          </div>
-
-          <!-- Command Box with Terminal Indicator -->
-          <copy-button class="install-block group magnetic">
-            <span class="terminal-prompt" aria-hidden="true">❯</span>
-            <code class="install-command" id="install-cmd" tabindex="0">curl -sL https://gitsetu.bhaskarjha.dev/install | bash</code>
-            <button class="copy-btn" aria-label="Copy install command" type="button">
-              <svg class="copy-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-              <svg class="check-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><polyline points="20 6 9 17 4 12"/></svg>
-            </button>
-          </copy-button>
-
-          <!-- Contextual Explainer & Deep Link -->
-          <div class="install-meta">
-            <div class="install-note" id="install-note">
-              <span class="note-dot"></span>
-              <span id="install-note-text">POSIX one-liner. Automatically updates shell rc and installs into ~/.local/bin</span>
-            </div>
-            <a href="/docs/getting-started/installation" class="install-docs-link">
-              All 9 channels <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-            </a>
           </div>
         </div>
 
-        <a href="/docs/getting-started/quickstart" class="btn btn-primary magnetic">
-          Read Docs 
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-        </a>
+        <!-- Platform Sub-Chips per Category -->
+        <div class="platform-nav" aria-label="Target Platform Channels">
+          <!-- Group 1: Direct / Shell -->
+          <div class="channel-group active" id="channels-direct" role="tablist">
+            <button class="platform-chip active" data-channel="posix" type="button" role="tab" aria-selected="true">
+              <svg class="chip-svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.37c.62-.75 1.04-1.8 0.92-2.85-.9.04-2 .6-2.65 1.35-.58.66-.99 1.72-.88 2.74 1.01.08 2-.49 2.61-1.24z"/></svg>
+              <span>macOS / Linux</span>
+              <span class="chip-badge">curl</span>
+            </button>
+            <button class="platform-chip" data-channel="windows" type="button" role="tab" aria-selected="false">
+              <svg class="chip-svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.901-1.752"/></svg>
+              <span>Windows</span>
+              <span class="chip-badge">PS</span>
+            </button>
+            <button class="platform-chip" data-channel="npx" type="button" role="tab" aria-selected="false">
+              <svg class="chip-svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M0 7.334v8h6.666v1.332H12v-1.332h12v-8H0zm6.666 6.666H2.666V8.666h4v5.334zm5.334 0H9.334V8.666h2.666v5.334zm9.334 0h-4v-1.334H20V8.666h-5.334v5.334h-1.332V8.666h9.332v5.334z"/></svg>
+              <span>Zero-Install</span>
+              <span class="chip-badge">npx</span>
+            </button>
+          </div>
+
+          <!-- Group 2: Package Managers -->
+          <div class="channel-group" id="channels-pkg" role="tablist" style="display: none;">
+            <button class="platform-chip" data-channel="winget" type="button" role="tab" aria-selected="false">
+              <svg class="chip-svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.901-1.752"/></svg>
+              <span>WinGet</span>
+            </button>
+            <button class="platform-chip" data-channel="brew" type="button" role="tab" aria-selected="false">
+              <svg class="chip-svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8h1a4 4 0 0 1 0 8h-1M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8zM6 1v3M10 1v3M14 1v3"/></svg>
+              <span>Homebrew</span>
+            </button>
+            <button class="platform-chip" data-channel="scoop" type="button" role="tab" aria-selected="false">
+              <svg class="chip-svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+              <span>Scoop</span>
+            </button>
+            <button class="platform-chip" data-channel="aur" type="button" role="tab" aria-selected="false">
+              <svg class="chip-svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5L1.5 21.5h21L12 2.5zm0 5.2l6.8 12.3H5.2L12 7.7z"/></svg>
+              <span>Arch AUR</span>
+            </button>
+          </div>
+
+          <!-- Group 3: Nix & Extensions -->
+          <div class="channel-group" id="channels-extensions" role="tablist" style="display: none;">
+            <button class="platform-chip" data-channel="nix" type="button" role="tab" aria-selected="false">
+              <svg class="chip-svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0L1.5 6v12L12 24l10.5-6V6L12 0zm0 3.2l7.5 4.3v8.6L12 20.4l-7.5-4.3V7.5L12 3.2z"/></svg>
+              <span>Nix Flake</span>
+            </button>
+            <button class="platform-chip" data-channel="gh" type="button" role="tab" aria-selected="false">
+              <svg class="chip-svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+              <span>GitHub CLI</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Terminal Command Box with Syntax Highlighting -->
+        <div class="terminal-command-box" id="command-box-frame">
+          <div class="prompt-col" aria-hidden="true">
+            <span class="terminal-prompt">❯</span>
+          </div>
+          <div class="code-col">
+            <code class="install-code" id="install-cmd" tabindex="0" aria-label="Installation command"><span class="tok-cmd">curl</span> <span class="tok-flag">-sL</span> <span class="tok-url">https://gitsetu.bhaskarjha.dev/install</span> <span class="tok-pipe">|</span> <span class="tok-sh">bash</span></code>
+          </div>
+          <div class="action-col">
+            <button class="station-copy-btn" id="station-copy-btn" aria-label="Copy install command" type="button">
+              <span class="copy-idle">
+                <svg class="copy-svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                <span class="copy-text">Copy</span>
+              </span>
+              <span class="copy-success" style="display: none;">
+                <svg class="check-svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                <span class="copied-text">Copied!</span>
+              </span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Meta Bar & Contextual Explainer -->
+        <div class="station-footer">
+          <div class="footer-note" id="install-note">
+            <span class="status-pulse-dot" aria-hidden="true"></span>
+            <span class="note-text" id="install-note-text">POSIX one-liner. Automatically updates shell rc and installs into ~/.local/bin</span>
+          </div>
+          <a href="/docs/getting-started/installation" class="station-docs-link">
+            <span>All 9 distribution channels</span>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+          </a>
+        </div>
       </div>
 
       <!-- Trust Badges -->
@@ -136,110 +177,89 @@ import TerminalDemo from './TerminalDemo.astro';
 </section>
 
 <script>
-  class CopyButton extends HTMLElement {
-    private timeoutId: number | null = null;
-
-    connectedCallback() {
-      const copyBtn = this.querySelector('.copy-btn') as HTMLButtonElement;
-      const installCmd = this.querySelector('.install-command') as HTMLElement;
-      const copyIcon = this.querySelector('.copy-icon') as HTMLElement;
-      const checkIcon = this.querySelector('.check-icon') as HTMLElement;
-
-      copyBtn?.addEventListener('click', async () => {
-        if (this.timeoutId) {
-          clearTimeout(this.timeoutId);
-        }
-        
-        try {
-          await navigator.clipboard.writeText(installCmd?.textContent?.trim() || '');
-          if (copyIcon) copyIcon.style.display = 'none';
-          if (checkIcon) checkIcon.style.display = 'block';
-          
-          this.timeoutId = window.setTimeout(() => {
-            if (copyIcon) copyIcon.style.display = 'block';
-            if (checkIcon) checkIcon.style.display = 'none';
-            this.timeoutId = null;
-          }, 2000);
-        } catch {
-          const range = document.createRange();
-          if (installCmd) range.selectNodeContents(installCmd);
-          window.getSelection()?.removeAllRanges();
-          window.getSelection()?.addRange(range);
-        }
-      });
-    }
-  }
-
-  if (!customElements.get('copy-button')) {
-    customElements.define('copy-button', CopyButton);
-  }
-
-  // Magnetic Buttons & 3D Magnetic Terminal
+  // Magnetic Buttons, Interactive Installation Station & 3D Terminal
   document.addEventListener('astro:page-load', () => {
-    // 9 Distribution Channels & Commands
-    const channelData: Record<string, { cmd: string; note: string; category: string }> = {
+    // 9 Distribution Channels & Commands with Syntax Highlighting HTML
+    const channelData: Record<string, { cmd: string; html: string; note: string; category: string }> = {
       posix: {
         cmd: 'curl -sL https://gitsetu.bhaskarjha.dev/install | bash',
+        html: '<span class="tok-cmd">curl</span> <span class="tok-flag">-sL</span> <span class="tok-url">https://gitsetu.bhaskarjha.dev/install</span> <span class="tok-pipe">|</span> <span class="tok-sh">bash</span>',
         note: 'POSIX one-liner. Automatically updates shell rc and installs into ~/.local/bin',
         category: 'direct'
       },
       windows: {
         cmd: 'irm https://gitsetu.bhaskarjha.dev/install.ps1 | iex',
+        html: '<span class="tok-cmd">irm</span> <span class="tok-url">https://gitsetu.bhaskarjha.dev/install.ps1</span> <span class="tok-pipe">|</span> <span class="tok-sh">iex</span>',
         note: 'Native PowerShell one-liner. Auto-generates cmd/ps1 shims and adds to PATH.',
         category: 'direct'
       },
       npx: {
         cmd: 'npx gitsetu setup --auto',
+        html: '<span class="tok-cmd">npx</span> <span class="tok-pkg">gitsetu</span> <span class="tok-arg">setup</span> <span class="tok-flag">--auto</span>',
         note: 'Zero installation needed. Runs anywhere Node 16+ is installed without global pollution.',
         category: 'direct'
       },
       winget: {
         cmd: 'winget install BhaskarJha.GitSetu',
+        html: '<span class="tok-cmd">winget</span> <span class="tok-arg">install</span> <span class="tok-pkg">BhaskarJha.GitSetu</span>',
         note: 'Microsoft Windows Package Manager (v1.6.0 portable alias). Native execution in any shell.',
         category: 'pkg'
       },
       brew: {
         cmd: 'brew tap bhaskarjha-dev/tap && brew install gitsetu',
+        html: '<span class="tok-cmd">brew</span> <span class="tok-arg">tap</span> <span class="tok-pkg">bhaskarjha-dev/tap</span> <span class="tok-pipe">&amp;&amp;</span> <span class="tok-cmd">brew</span> <span class="tok-arg">install</span> <span class="tok-pkg">gitsetu</span>',
         note: 'Homebrew tap formula for macOS & Linux with automated bash completion.',
         category: 'pkg'
       },
       scoop: {
         cmd: 'scoop bucket add gitsetu https://github.com/bhaskarjha-dev/scoop-bucket && scoop install gitsetu',
+        html: '<span class="tok-cmd">scoop</span> <span class="tok-arg">bucket add</span> <span class="tok-pkg">gitsetu</span> <span class="tok-url">https://github.com/bhaskarjha-dev/scoop-bucket</span> <span class="tok-pipe">&amp;&amp;</span> <span class="tok-cmd">scoop</span> <span class="tok-arg">install</span> <span class="tok-pkg">gitsetu</span>',
         note: 'Windows Scoop bucket installation with isolated portable shim management.',
         category: 'pkg'
       },
       aur: {
         cmd: 'yay -S gitsetu',
+        html: '<span class="tok-cmd">yay</span> <span class="tok-flag">-S</span> <span class="tok-pkg">gitsetu</span>',
         note: 'Arch Linux AUR package with system bash-completion integration and PKGBUILD parity.',
         category: 'pkg'
       },
       nix: {
         cmd: 'nix run github:bhaskarjha-dev/gitsetu',
+        html: '<span class="tok-cmd">nix</span> <span class="tok-arg">run</span> <span class="tok-pkg">github:bhaskarjha-dev/gitsetu</span>',
         note: 'Hermetic execution via Nix Flake with sandboxed dependencies and zero system pollution.',
         category: 'extensions'
       },
       gh: {
         cmd: 'gh extension install bhaskarjha-dev/gh-gitsetu',
+        html: '<span class="tok-cmd">gh</span> <span class="tok-arg">extension install</span> <span class="tok-pkg">bhaskarjha-dev/gh-gitsetu</span>',
         note: 'Official GitHub CLI extension. Run gitsetu directly via "gh gitsetu setup".',
         category: 'extensions'
       }
     };
 
-    const catPills = document.querySelectorAll<HTMLButtonElement>('.cat-pill');
+    let currentChannelKey = 'posix';
+
+    const catTabs = document.querySelectorAll<HTMLButtonElement>('.cat-tab');
     const channelGroups = document.querySelectorAll<HTMLElement>('.channel-group');
-    const channelTabs = document.querySelectorAll<HTMLButtonElement>('.channel-tab');
+    const platformChips = document.querySelectorAll<HTMLButtonElement>('.platform-chip');
     const installCmdEl = document.querySelector<HTMLElement>('#install-cmd');
     const installNoteText = document.querySelector<HTMLElement>('#install-note-text');
+    const copyBtn = document.querySelector<HTMLButtonElement>('#station-copy-btn');
+    const commandBoxFrame = document.querySelector<HTMLElement>('#command-box-frame');
+    const copyIdle = copyBtn?.querySelector('.copy-idle') as HTMLElement;
+    const copySuccess = copyBtn?.querySelector('.copy-success') as HTMLElement;
+    let copyTimeout: number | null = null;
 
     function selectChannel(channelKey: string) {
       const data = channelData[channelKey];
       if (!data) return;
+      currentChannelKey = channelKey;
 
       // 1. Ensure the parent category is active
-      catPills.forEach(pill => {
-        const isCatActive = pill.getAttribute('data-category') === data.category;
-        pill.classList.toggle('active', isCatActive);
-        pill.setAttribute('aria-selected', isCatActive ? 'true' : 'false');
+      catTabs.forEach(tab => {
+        const isCatActive = tab.getAttribute('data-category') === data.category;
+        tab.classList.toggle('active', isCatActive);
+        tab.setAttribute('aria-selected', isCatActive ? 'true' : 'false');
       });
 
       // 2. Show corresponding channel group
@@ -249,16 +269,16 @@ import TerminalDemo from './TerminalDemo.astro';
         group.style.display = isGroupActive ? 'flex' : 'none';
       });
 
-      // 3. Highlight active channel tab
-      channelTabs.forEach(tab => {
-        const isTabActive = tab.getAttribute('data-channel') === channelKey;
-        tab.classList.toggle('active', isTabActive);
-        tab.setAttribute('aria-selected', isTabActive ? 'true' : 'false');
+      // 3. Highlight active platform chip
+      platformChips.forEach(chip => {
+        const isChipActive = chip.getAttribute('data-channel') === channelKey;
+        chip.classList.toggle('active', isChipActive);
+        chip.setAttribute('aria-selected', isChipActive ? 'true' : 'false');
       });
 
-      // 4. Update command text & contextual note
+      // 4. Update command HTML & contextual note
       if (installCmdEl) {
-        installCmdEl.textContent = data.cmd;
+        installCmdEl.innerHTML = data.html;
       }
       if (installNoteText) {
         installNoteText.textContent = data.note;
@@ -266,29 +286,76 @@ import TerminalDemo from './TerminalDemo.astro';
     }
 
     // Category click handler
-    catPills.forEach(pill => {
-      pill.addEventListener('click', () => {
-        const cat = pill.getAttribute('data-category');
+    catTabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        const cat = tab.getAttribute('data-category');
         if (!cat) return;
 
-        // Find the first channel in this category
-        const firstChannelTab = document.querySelector<HTMLButtonElement>(`#channels-${cat} .channel-tab`);
-        if (firstChannelTab) {
-          const ch = firstChannelTab.getAttribute('data-channel');
+        // Find the first platform chip in this category
+        const firstChip = document.querySelector<HTMLButtonElement>(`#channels-${cat} .platform-chip`);
+        if (firstChip) {
+          const ch = firstChip.getAttribute('data-channel');
           if (ch) selectChannel(ch);
         }
       });
     });
 
-    // Channel tab click handler
-    channelTabs.forEach(tab => {
-      tab.addEventListener('click', () => {
-        const ch = tab.getAttribute('data-channel');
+    // Platform chip click handler
+    platformChips.forEach(chip => {
+      chip.addEventListener('click', () => {
+        const ch = chip.getAttribute('data-channel');
         if (ch) selectChannel(ch);
       });
     });
 
-    // Keyboard arrow navigation for tabs
+    // Copy Button interaction with checkmark feedback & pulse
+    copyBtn?.addEventListener('click', async () => {
+      const data = channelData[currentChannelKey];
+      const textToCopy = data ? data.cmd : (installCmdEl?.textContent?.trim() || '');
+
+      if (copyTimeout) clearTimeout(copyTimeout);
+
+      const markCopied = () => {
+        if (copyIdle) copyIdle.style.display = 'none';
+        if (copySuccess) copySuccess.style.display = 'inline-flex';
+        commandBoxFrame?.classList.add('copied-pulse');
+
+        copyTimeout = window.setTimeout(() => {
+          if (copyIdle) copyIdle.style.display = 'inline-flex';
+          if (copySuccess) copySuccess.style.display = 'none';
+          commandBoxFrame?.classList.remove('copied-pulse');
+          copyTimeout = null;
+        }, 2000);
+      };
+
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(textToCopy);
+          markCopied();
+        } else {
+          throw new Error('Clipboard API unavailable');
+        }
+      } catch {
+        const textArea = document.createElement('textarea');
+        textArea.value = textToCopy;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-999999px';
+        textArea.style.top = '-999999px';
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        try {
+          document.execCommand('copy');
+          markCopied();
+        } catch (e) {
+          console.error('Failed to copy', e);
+        } finally {
+          document.body.removeChild(textArea);
+        }
+      }
+    });
+
+    // Keyboard arrow navigation for tabs & chips
     const handleTabKeyNav = (e: KeyboardEvent, tabs: NodeListOf<HTMLButtonElement>) => {
       if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
         e.preventDefault();
@@ -302,14 +369,14 @@ import TerminalDemo from './TerminalDemo.astro';
       }
     };
 
-    catPills.forEach(pill => {
-      pill.addEventListener('keydown', (e) => handleTabKeyNav(e, catPills));
+    catTabs.forEach(tab => {
+      tab.addEventListener('keydown', (e) => handleTabKeyNav(e, catTabs));
     });
 
     channelGroups.forEach(group => {
-      const tabsInGroup = group.querySelectorAll<HTMLButtonElement>('.channel-tab');
-      tabsInGroup.forEach(tab => {
-        tab.addEventListener('keydown', (e) => handleTabKeyNav(e, tabsInGroup));
+      const chipsInGroup = group.querySelectorAll<HTMLButtonElement>('.platform-chip');
+      chipsInGroup.forEach(chip => {
+        chip.addEventListener('keydown', (e) => handleTabKeyNav(e, chipsInGroup));
       });
     });
 
@@ -341,6 +408,7 @@ import TerminalDemo from './TerminalDemo.astro';
       });
     });
 
+    // 3D Tilt for Terminal Demo
     const heroVisual = document.querySelector('.hero-visual') as HTMLElement;
     const terminalNode = document.querySelector('gitsetu-terminal') as HTMLElement;
     
@@ -379,17 +447,17 @@ import TerminalDemo from './TerminalDemo.astro';
   }
 
   .hero {
-    padding-top: calc(var(--nav-height) + var(--space-2xl));
-    padding-bottom: calc(var(--space-4xl) + 40px);
+    padding-top: calc(var(--nav-height) + clamp(1rem, 2.5vw, 2.2rem));
+    padding-bottom: clamp(2.5rem, 5vw, 4rem);
     position: relative;
   }
 
-  /* Fluid Container Architecture */
+  /* Fluid Two-Column Grid */
   .hero-container {
     display: grid;
-    grid-template-columns: 1.05fr 0.95fr;
-    gap: var(--space-3xl);
-    align-items: start;
+    grid-template-columns: 1.12fr 0.88fr;
+    gap: clamp(1.5rem, 3.5vw, 3rem);
+    align-items: center;
     position: relative;
     z-index: 10;
   }
@@ -400,8 +468,11 @@ import TerminalDemo from './TerminalDemo.astro';
     align-items: flex-start;
     text-align: left;
     animation: heroEntrance 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    width: 100%;
+    min-width: 0;
   }
 
+  /* Release Badge */
   .hero-badge {
     display: inline-flex;
     align-items: center;
@@ -412,7 +483,7 @@ import TerminalDemo from './TerminalDemo.astro';
     padding: var(--space-xs) var(--space-md);
     font-size: var(--text-sm);
     color: var(--text-primary);
-    margin-bottom: var(--space-xl);
+    margin-bottom: clamp(0.75rem, 1.5vw, 1.25rem);
     backdrop-filter: blur(10px);
   }
 
@@ -426,76 +497,191 @@ import TerminalDemo from './TerminalDemo.astro';
   }
 
   .hero-title {
-    /* Using clamp for true fluid typography */
-    font-size: clamp(2rem, 8vw, 4.5rem);
-    margin-bottom: var(--space-lg);
-    line-height: 1.05;
+    font-size: clamp(2.1rem, 4.2vw, 3.8rem);
+    margin-bottom: clamp(0.75rem, 1.5vw, 1.1rem);
+    line-height: 1.08;
+    letter-spacing: -0.02em;
+    font-weight: 800;
   }
 
   .hero-subtitle {
-    margin-bottom: var(--space-2xl);
-    font-size: var(--text-lg);
+    margin-bottom: clamp(1rem, 2vw, 1.4rem);
+    font-size: clamp(0.95rem, 1.2vw, 1.08rem);
     color: #d4d4d8;
-    max-width: 95%;
-    line-height: 1.7;
+    max-width: 96%;
+    line-height: 1.6;
   }
 
-  .hero-actions {
+  /* -------------------------------------------------------------
+     DEDICATED HERO CTA GROUP
+  ------------------------------------------------------------- */
+  .hero-cta-group {
     display: flex;
     align-items: center;
-    justify-content: flex-start;
     flex-wrap: wrap;
-    gap: var(--space-md);
-    margin-bottom: var(--space-2xl);
+    gap: 14px;
+    margin-bottom: clamp(1rem, 2vw, 1.4rem);
     width: 100%;
   }
 
-  .install-container {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    flex: 1;
-    min-width: 280px;
-    max-width: 540px;
-  }
-
-  /* Category pills */
-  .install-categories {
+  .cta-primary {
     display: inline-flex;
     align-items: center;
-    gap: 4px;
-    padding: 3px;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-full);
-    width: fit-content;
+    gap: 8px;
+    background: var(--gradient-accent);
+    color: #000000;
+    padding: 11px 22px;
+    border-radius: var(--radius-md);
+    font-weight: 700;
+    font-size: 0.94rem;
+    box-shadow: 0 0 24px var(--accent-glow-strong);
+    transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.2s ease;
+    text-decoration: none;
   }
 
-  .cat-pill {
+  .cta-primary:hover {
+    box-shadow: 0 0 32px var(--accent-primary);
+    transform: translateY(-1px);
+  }
+
+  .cta-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    backdrop-filter: blur(12px);
+    color: #f4f4f5;
+    padding: 10px 18px;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    font-size: 0.92rem;
+    text-decoration: none;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .cta-secondary:hover {
+    background: rgba(255, 255, 255, 0.09);
+    border-color: rgba(0, 196, 204, 0.4);
+    box-shadow: 0 0 20px rgba(0, 196, 204, 0.15);
+    transform: translateY(-1px);
+    color: #ffffff;
+  }
+
+  .cta-badge {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    padding: 1px 6px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #a1a1aa;
+  }
+
+  .external-icon {
+    opacity: 0.5;
+    margin-left: -2px;
+  }
+
+  .cta-tertiary {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: #a1a1aa;
+    font-size: 0.88rem;
+    font-weight: 500;
+    text-decoration: none;
+    padding: 8px 12px;
+    border-radius: var(--radius-sm);
+    transition: all 0.18s ease;
+  }
+
+  .cta-tertiary:hover {
+    color: var(--accent-primary);
+    background: rgba(0, 196, 204, 0.06);
+  }
+
+  .cta-tertiary:hover svg {
+    transform: translateX(3px);
+  }
+
+  .cta-tertiary svg {
+    transition: transform 0.18s ease;
+  }
+
+  /* -------------------------------------------------------------
+     ELEVATED INSTALLATION STATION (GLASS TERMINAL)
+  ------------------------------------------------------------- */
+  .install-station {
+    width: 100%;
+    max-width: 620px;
+    margin-bottom: clamp(1.25rem, 2.5vw, 1.75rem);
+    background: rgba(8, 12, 20, 0.75);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.03);
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.25s ease, box-shadow 0.25s ease;
+  }
+
+  .install-station::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(0, 196, 204, 0.4), rgba(14, 165, 233, 0.4), transparent);
+  }
+
+  /* Station Header / Category Switcher */
+  .station-header {
+    width: 100%;
+  }
+
+  .category-tabs {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: var(--radius-full);
+    padding: 3px;
+    width: 100%;
+  }
+
+  .cat-tab {
+    flex: 1;
     background: transparent;
     border: none;
     font-family: var(--font-sans);
-    font-size: 0.75rem;
+    font-size: 0.78rem;
     font-weight: 500;
     color: var(--text-muted);
-    padding: 4px 12px;
+    padding: 6px 12px;
     border-radius: var(--radius-full);
     cursor: pointer;
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 6px;
-    transition: all var(--transition-fast);
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    white-space: nowrap;
   }
 
-  .cat-pill:hover {
+  .cat-tab:hover {
     color: var(--text-primary);
   }
 
-  .cat-pill.active {
-    background: rgba(255, 255, 255, 0.08);
-    color: var(--text-heading);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  .cat-tab.active {
+    background: rgba(255, 255, 255, 0.12);
+    color: #ffffff;
     font-weight: 600;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
   }
 
   .cat-icon {
@@ -503,165 +689,227 @@ import TerminalDemo from './TerminalDemo.astro';
     line-height: 1;
   }
 
-  /* Channel Groups */
-  .channel-groups {
-    display: flex;
-    align-items: center;
+  /* Platform Sub-Chips */
+  .platform-nav {
+    width: 100%;
   }
 
   .channel-group {
     display: flex;
+    align-items: center;
     flex-wrap: wrap;
-    gap: 6px;
+    gap: 8px;
+    width: 100%;
   }
 
-  .channel-tab {
-    background: transparent;
-    border: 1px solid transparent;
+  .platform-chip {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.07);
     font-family: var(--font-mono);
-    font-size: 0.75rem;
-    color: var(--text-muted);
-    padding: 4px 10px;
-    border-radius: var(--radius-sm);
+    font-size: 0.76rem;
+    color: var(--text-secondary);
+    padding: 5px 11px;
+    border-radius: var(--radius-md);
     cursor: pointer;
     display: inline-flex;
     align-items: center;
-    gap: 4px;
-    transition: all var(--transition-fast);
+    gap: 6px;
+    transition: all 0.18s ease;
   }
 
-  .channel-tab:hover {
+  .platform-chip:hover {
     color: var(--text-primary);
-    border-color: var(--border-subtle);
+    border-color: rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.06);
   }
 
-  .channel-tab.active {
-    background: rgba(0, 196, 204, 0.12);
-    border-color: rgba(0, 196, 204, 0.3);
-    color: var(--accent-primary);
+  .platform-chip.active {
+    background: rgba(0, 196, 204, 0.14);
+    border-color: rgba(0, 196, 204, 0.45);
+    color: #ffffff;
     font-weight: 600;
+    box-shadow: 0 0 14px rgba(0, 196, 204, 0.15);
   }
 
-  .tab-badge {
+  .chip-svg {
+    opacity: 0.85;
+    flex-shrink: 0;
+  }
+
+  .chip-badge {
     font-size: 0.65rem;
-    opacity: 0.6;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    font-family: var(--font-sans);
+    padding: 1px 5px;
+    border-radius: 4px;
+    background: rgba(0, 0, 0, 0.35);
+    color: var(--accent-primary);
+    border: 1px solid rgba(0, 196, 204, 0.25);
+    font-weight: 600;
+    letter-spacing: 0.02em;
   }
 
-  /* Terminal prompt symbol */
+  /* Terminal Command Box */
+  .terminal-command-box {
+    display: flex;
+    align-items: center;
+    background: #020408;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: var(--radius-md);
+    padding: 10px 14px;
+    gap: 10px;
+    width: 100%;
+    position: relative;
+    box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.8);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .terminal-command-box:hover {
+    border-color: rgba(0, 196, 204, 0.35);
+  }
+
+  .terminal-command-box.copied-pulse {
+    border-color: rgba(16, 185, 129, 0.85) !important;
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.3), inset 0 2px 8px rgba(0, 0, 0, 0.8) !important;
+  }
+
+  .prompt-col {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+  }
+
   .terminal-prompt {
     color: var(--accent-primary);
     font-family: var(--font-mono);
-    font-size: 0.9rem;
-    user-select: none;
+    font-size: 0.95rem;
     font-weight: 700;
+    user-select: none;
   }
 
-  /* Install Meta & Contextual Note */
-  .install-meta {
+  .code-col {
+    flex: 1;
+    min-width: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+    display: flex;
+    align-items: center;
+  }
+
+  .code-col::-webkit-scrollbar {
+    display: none;
+  }
+
+  .install-code {
+    font-family: var(--font-mono);
+    font-size: 0.83rem;
+    line-height: 1.4;
+    white-space: nowrap;
+    text-align: left;
+    outline: none;
+    color: #e2e8f0;
+  }
+
+  /* Syntax Highlighting Tokens */
+  .tok-cmd { color: #38bdf8; font-weight: 700; }
+  .tok-flag { color: #fbbf24; font-weight: 600; }
+  .tok-url { color: #f8fafc; font-weight: 500; text-decoration: underline dotted rgba(255, 255, 255, 0.3); text-underline-offset: 3px; }
+  .tok-pipe { color: #c084fc; font-weight: 700; padding: 0 4px; }
+  .tok-sh { color: #34d399; font-weight: 700; }
+  .tok-pkg { color: #a5f3fc; font-weight: 600; }
+  .tok-arg { color: #94a3b8; font-weight: 500; }
+
+  /* Copy Button */
+  .action-col {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+  }
+
+  .station-copy-btn {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: var(--radius-sm);
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 6px 11px;
+    font-family: var(--font-sans);
+    font-size: 0.74rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.18s ease;
+  }
+
+  .station-copy-btn:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: #ffffff;
+    border-color: rgba(255, 255, 255, 0.25);
+  }
+
+  .copy-idle, .copy-success {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .copy-success {
+    color: #34d399;
+    font-weight: 600;
+  }
+
+  /* Station Footer / Contextual Note */
+  .station-footer {
     display: flex;
     align-items: center;
     justify-content: space-between;
     flex-wrap: wrap;
-    gap: 8px;
+    gap: 10px;
     font-size: 0.75rem;
-    padding: 2px 4px;
+    padding-top: 2px;
   }
 
-  .install-note {
+  .footer-note {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
     color: var(--text-secondary);
     font-size: 0.75rem;
     line-height: 1.4;
-    max-width: 70%;
+    flex: 1;
+    min-width: 220px;
   }
 
-  .note-dot {
+  .status-pulse-dot {
     width: 6px;
     height: 6px;
     border-radius: 50%;
     background: var(--accent-primary);
-    box-shadow: 0 0 6px var(--accent-primary);
+    box-shadow: 0 0 8px var(--accent-primary);
     flex-shrink: 0;
+    animation: pulse 2.5s ease-in-out infinite;
   }
 
-  .install-docs-link {
+  .station-docs-link {
     display: inline-flex;
     align-items: center;
-    gap: 4px;
+    gap: 5px;
     color: var(--accent-primary);
     font-weight: 500;
     font-size: 0.75rem;
     white-space: nowrap;
     text-decoration: none;
-    transition: color var(--transition-fast), transform var(--transition-fast);
+    transition: color 0.15s ease, transform 0.15s ease;
+    flex-shrink: 0;
   }
 
-  .install-docs-link:hover {
+  .station-docs-link:hover {
     color: var(--accent-secondary);
     transform: translateX(2px);
   }
 
-  copy-button.install-block {
-    background: var(--bg-code);
-    border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-md);
-    padding: var(--space-sm) var(--space-md);
-    display: flex;
-    align-items: center;
-    min-width: 0;
-    width: 100%;
-    gap: var(--space-md);
-    transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94), border-color var(--transition-fast), box-shadow var(--transition-fast);
-  }
-
-  copy-button.install-block:hover {
-    border-color: var(--border-accent);
-    box-shadow: var(--shadow-glow);
-  }
-
-  .install-command {
-    display: block;
-    flex: 1;
-    min-width: 0;
-    color: var(--text-primary);
-    overflow-x: auto;
-    white-space: nowrap;
-    scrollbar-width: none;
-    text-align: left;
-  }
-  .install-command::-webkit-scrollbar { display: none; }
-
-  .copy-btn {
-    background: none;
-    border: none;
-    color: var(--text-muted);
-    cursor: pointer;
-    padding: 4px;
-    transition: color var(--transition-fast);
-  }
-  .copy-btn:hover { color: var(--text-primary); }
-
-  .btn-primary {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-sm);
-    background: var(--gradient-accent);
-    color: #000000;
-    padding: 12px 24px;
-    border-radius: var(--radius-md);
-    font-weight: 700;
-    box-shadow: 0 0 20px var(--accent-glow-strong);
-    transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow var(--transition-fast);
-  }
-  .btn-primary:hover {
-    box-shadow: 0 0 30px var(--accent-primary);
-  }
-
+  /* -------------------------------------------------------------
+     TRUST BADGES & HERO VISUAL
+  ------------------------------------------------------------- */
   .hero-trust {
     display: flex;
     flex-wrap: wrap;
@@ -751,11 +999,11 @@ import TerminalDemo from './TerminalDemo.astro';
   }
 
   .hero-content, .hero-visual {
-    min-width: 0; /* CRITICAL: Prevents CSS Grid blowout on mobile */
+    min-width: 0; /* Prevents CSS Grid blowout */
   }
 
   /* Responsive Adjustments */
-  @media (max-width: 900px) {
+  @media (max-width: 960px) {
     .hero-container {
       grid-template-columns: minmax(0, 1fr);
       text-align: center;
@@ -768,20 +1016,44 @@ import TerminalDemo from './TerminalDemo.astro';
     .hero-subtitle {
       max-width: 100%;
     }
-    .hero-actions {
+    .hero-cta-group {
       justify-content: center;
+    }
+    .install-station {
+      margin-left: auto;
+      margin-right: auto;
     }
     .hero-trust {
       justify-content: center;
     }
   }
+
   @media (max-width: 600px) {
-    .hero-actions {
+    .hero-cta-group {
       flex-direction: column;
       align-items: stretch;
     }
-    .btn-primary {
+    .cta-primary, .cta-secondary {
       justify-content: center;
+      width: 100%;
+    }
+    .cta-tertiary {
+      justify-content: center;
+    }
+    .category-tabs {
+      overflow-x: auto;
+    }
+    .cat-tab {
+      font-size: 0.72rem;
+      padding: 5px 8px;
+    }
+    .station-footer {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+    }
+    .footer-note {
+      max-width: 100%;
     }
   }
 </style>
