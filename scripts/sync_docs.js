@@ -7,13 +7,11 @@ const __dirname = path.dirname(__filename);
 
 const LOCAL_REPO_DIR = path.resolve(__dirname, '../..');
 const DOCS_DIR = path.resolve(__dirname, '../src/pages/docs');
+const GITHUB_RAW_BASE = 'https://raw.githubusercontent.com/bhaskarjha-dev/gitsetu/main';
 
 console.log('Syncing documentation (cross-platform Node.js engine)...');
 
-// Clear existing docs
-if (fs.existsSync(DOCS_DIR)) {
-  fs.rmSync(DOCS_DIR, { recursive: true, force: true });
-}
+// Ensure docs directory exists
 fs.mkdirSync(DOCS_DIR, { recursive: true });
 
 const docsMapping = [
@@ -56,17 +54,46 @@ const docsMapping = [
   { src: 'CONTRIBUTING.md', dest: 'reference/contributing.md', title: 'Contributing Guide' }
 ];
 
+let syncedCount = 0;
+
 for (const { src, dest, title } of docsMapping) {
   const srcPath = path.join(LOCAL_REPO_DIR, src);
   const destPath = path.join(DOCS_DIR, dest);
 
-  if (!fs.existsSync(srcPath)) {
-    console.warn(`Warning: Missing source file ${srcPath}`);
-    continue;
+  let rawContent = null;
+
+  // 1. Try local filesystem first (local dev)
+  if (fs.existsSync(srcPath)) {
+    rawContent = fs.readFileSync(srcPath, 'utf-8');
+  } else {
+    // 2. Fallback to GitHub raw fetch (CI/CD / Cloudflare Pages)
+    const remoteUrl = `${GITHUB_RAW_BASE}/${src}`;
+    try {
+      console.log(`Fetching from remote: ${remoteUrl}`);
+      const res = await fetch(remoteUrl);
+      if (res.ok) {
+        rawContent = await res.text();
+      } else {
+        console.warn(`Remote fetch returned ${res.status} for ${remoteUrl}`);
+      }
+    } catch (err) {
+      console.warn(`Failed remote fetch for ${remoteUrl}:`, err.message);
+    }
   }
 
-  let content = fs.readFileSync(srcPath, 'utf-8');
-  content = content.replace(/\r\n/g, '\n');
+  // 3. If neither local nor remote is available, preserve existing file if present
+  if (!rawContent) {
+    if (fs.existsSync(destPath)) {
+      console.log(`Preserving existing ${dest}`);
+      syncedCount++;
+      continue;
+    } else {
+      console.error(`Error: Could not retrieve source for ${dest} (${src})`);
+      continue;
+    }
+  }
+
+  let content = rawContent.replace(/\r\n/g, '\n');
 
   // Calculate relative depth for DocsLayout.astro
   const depth = (dest.match(/\//g) || []).length;
@@ -86,6 +113,10 @@ for (const { src, dest, title } of docsMapping) {
   fs.mkdirSync(path.dirname(destPath), { recursive: true });
   fs.writeFileSync(destPath, frontmatter + transformed, 'utf-8');
   console.log(`Synced ${dest}`);
+  syncedCount++;
 }
 
-console.log('Documentation sync complete! 25 documentation pages successfully processed.');
+console.log(`Documentation sync complete! ${syncedCount} of ${docsMapping.length} documentation pages successfully processed.`);
+if (syncedCount < docsMapping.length) {
+  process.exitCode = 1;
+}

@@ -23,8 +23,6 @@ Thumbs.db
 *.swo
 *~
 
-# Dynamically fetched documentation
-src/pages/docs/
 
 # Generated Artifacts
 public/llms.txt
