@@ -1,6 +1,9 @@
 ---
 layout: ../../../layouts/DocsLayout.astro
 title: "Pre-Commit Guard"
+description: "Deterministic pre-commit hook preventing cross-identity commit pollution and secret leakage."
+category: "core-engines"
+slug: "core-engines/precommit-guard"
 ---
 # Pre-Commit Identity Guard Engine
 

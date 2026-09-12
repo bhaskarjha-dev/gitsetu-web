@@ -1,6 +1,9 @@
 ---
 layout: ../../../layouts/DocsLayout.astro
 title: "Design Manifesto"
+description: "Core engineering principles prioritizing zero dependencies, POSIX compliance, and atomic safety."
+category: "overview"
+slug: "overview/manifesto"
 ---
 # The Design Manifesto
 

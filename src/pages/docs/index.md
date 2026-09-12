@@ -1,6 +1,9 @@
 ---
 layout: ../../layouts/DocsLayout.astro
 title: "Introduction"
+description: "Zero-dependency Git multi-identity orchestration and automated SSH profile switching for modern developer workflows."
+category: "overview"
+slug: "index"
 ---
 # Introduction to GitSetu
 

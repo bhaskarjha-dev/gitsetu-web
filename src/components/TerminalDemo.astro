@@ -2,95 +2,145 @@
 import '@xterm/xterm/css/xterm.css';
 ---
 
-<gitsetu-terminal>
-  <div class="terminal-window" aria-label="Interactive Terminal showing GitSetu setup">
+<gitsetu-terminal tabindex="0" role="region" aria-label="Interactive Terminal showing GitSetu setup">
+  <div class="terminal-window">
     <div class="terminal-header">
-      <div class="traffic-lights">
+      <div class="traffic-lights" aria-hidden="true">
         <span class="terminal-dot red"></span>
         <span class="terminal-dot yellow"></span>
         <span class="terminal-dot green"></span>
       </div>
       <span class="terminal-title">gitsetu — bash</span>
       
-      <div class="terminal-modes">
-        <button class="mode-btn active" id="mode-demo" type="button">Auto-Demo</button>
-        <button class="mode-btn" id="mode-interactive" type="button">Interactive</button>
+      <div class="terminal-modes" role="toolbar" aria-label="Terminal Mode Controls">
+        <button class="mode-btn active" id="mode-demo" type="button" aria-pressed="true">Auto-Demo</button>
+        <button class="mode-btn" id="mode-interactive" type="button" aria-pressed="false">Interactive</button>
       </div>
     </div>
     
     <div class="terminal-body">
       <div id="terminal-container" style="height: 340px; width: 100%; position: relative;">
-        <!-- Xterm.js will mount here -->
+        <!-- Static SSR Placeholder for Instant First Paint (LCP) & Zero Initial JS -->
+        <div class="terminal-placeholder" id="terminal-placeholder" aria-hidden="true">
+          <div class="terminal-placeholder-line">
+            <span class="ph-tilde">~</span> <span class="ph-arrow">❯</span> <span class="ph-cursor"></span>
+          </div>
+        </div>
       </div>
     </div>
     
-    <div class="terminal-hint" id="terminal-hint">
-      Click terminal to take control
+    <div class="terminal-hint" id="terminal-hint" aria-live="polite">
+      Click terminal or press Tab to take control
     </div>
   </div>
 </gitsetu-terminal>
 
 <script>
+  /**
+   * GitSetu Interactive Terminal Web Component
+   * Features:
+   * 1. Box-Muller Gaussian human keystroke timing (mean ~65ms, stdDev >= 30.0ms + hesitation)
+   * 2. ANSI color sequences (yellow prompts, green success, red Pre-Commit Guard mismatch)
+   * 3. Non-destructive click & focus response (tabindex="0", active cursor, preserves buffer)
+   * 4. Critical path lazy-loading (zero initial xterm JS until user interaction/scroll)
+   * 5. Reduced motion accessibility (prefers-reduced-motion immediate rendering)
+   */
   class GitsetuTerminal extends HTMLElement {
     term: any = null;
     demoTimeout: any = null;
     processingInterval: any = null;
     abortController: AbortController | null = null;
-    resizeObserver: ResizeObserver | null = null;
     
     isAutoDemo = true;
     isDemoRunning = false;
+    isBooted = false;
+    isBooting = false;
+    pendingInteractive = false;
+    
     setupState = 'IDLE';
     currentLine = '';
     profileName = '';
     
     prompt = '\x1b[1;32m~\x1b[0m \x1b[1;36m❯\x1b[0m ';
+    
+    // Keystroke timing history for empirical Box-Muller variance guarantee
+    timingHistory: number[] = [];
+    cleanupListeners: Array<() => void> = [];
 
     connectedCallback() {
-      // First Principle: Xterm.js strictly requires painted physical dimensions to boot.
-      // We check if dimensions are already available (instant paint) or observe until ready.
+      if (!this.hasAttribute('tabindex')) {
+        this.setAttribute('tabindex', '0');
+      }
+
       const container = this.querySelector('#terminal-container') as HTMLElement;
       if (!container) return;
 
-      const initIfReady = () => {
-        if (container.offsetWidth > 0 && container.offsetHeight > 0) {
-          if (this.resizeObserver) {
-            this.resizeObserver.disconnect();
-            this.resizeObserver = null;
-          }
-          if (!this.term && !this.abortController) {
-            this.setup(container);
-          }
+      // Lazy-loading trigger: Zero Xterm JS on initial critical render path
+      const triggerBoot = (interactive = false) => {
+        this.removeTriggerListeners();
+        if (!this.isBooted && !this.isBooting) {
+          this.boot(container, interactive);
         }
       };
 
-      if (container.offsetWidth > 0 && container.offsetHeight > 0) {
-        initIfReady();
-      } else {
-        this.resizeObserver = new ResizeObserver(() => {
-          initIfReady();
-        });
-        this.resizeObserver.observe(container);
-      }
-    }
+      const onInteraction = () => triggerBoot(false);
+      const onDirectClick = () => triggerBoot(true);
+      const onScroll = () => triggerBoot(false);
 
-    setup(container: HTMLElement) {
-      this.initTerminal(container).then(() => {
-        if (this.isAutoDemo && !this.isDemoRunning) {
-          this.runAutoDemo();
+      // Listen for first user intent (hover, touch, keyboard focus) or page scroll
+      const interactionEvents = ['pointerover', 'mouseenter', 'touchstart', 'focusin'];
+      interactionEvents.forEach((evt) => {
+        this.addEventListener(evt, onInteraction, { once: true, passive: true });
+        this.cleanupListeners.push(() => this.removeEventListener(evt, onInteraction));
+      });
+
+      this.addEventListener('click', onDirectClick, { once: true });
+      this.cleanupListeners.push(() => this.removeEventListener('click', onDirectClick));
+
+      window.addEventListener('scroll', onScroll, { once: true, passive: true });
+      window.addEventListener('wheel', onScroll, { once: true, passive: true });
+      this.cleanupListeners.push(() => {
+        window.removeEventListener('scroll', onScroll);
+        window.removeEventListener('wheel', onScroll);
+      });
+
+      // Keyboard navigation (Tab focus + Enter/Space to take control)
+      this.addEventListener('keydown', (e: KeyboardEvent) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          if (this.isBooting) {
+            this.pendingInteractive = true;
+          } else if (!this.isBooted) {
+            triggerBoot(true);
+          } else if (this.isAutoDemo) {
+            this.pauseAutoDemoForInteraction();
+          }
+        }
+      });
+
+      // Capture interaction intent during boot window
+      container.addEventListener('click', () => {
+        if (this.isBooting) {
+          this.pendingInteractive = true;
+        }
+      });
+      this.addEventListener('click', () => {
+        if (this.isBooting) {
+          this.pendingInteractive = true;
         }
       });
     }
 
+    removeTriggerListeners() {
+      this.cleanupListeners.forEach((fn) => fn());
+      this.cleanupListeners = [];
+    }
+
     disconnectedCallback() {
+      this.removeTriggerListeners();
       this.cleanup();
     }
 
     cleanup() {
-      if (this.resizeObserver) {
-        this.resizeObserver.disconnect();
-        this.resizeObserver = null;
-      }
       if (this.abortController) {
         this.abortController.abort();
         this.abortController = null;
@@ -107,46 +157,151 @@ import '@xterm/xterm/css/xterm.css';
         this.term.dispose();
         this.term = null;
       }
+      this.isBooted = false;
+      this.isBooting = false;
+      this.pendingInteractive = false;
       this.isDemoRunning = false;
       this.setupState = 'IDLE';
       this.currentLine = '';
       this.profileName = '';
       const container = this.querySelector('#terminal-container');
-      if (container) container.innerHTML = '';
+      if (container) {
+        container.innerHTML = `
+          <div class="terminal-placeholder" id="terminal-placeholder" aria-hidden="true">
+            <div class="terminal-placeholder-line">
+              <span class="ph-tilde">~</span> <span class="ph-arrow">❯</span> <span class="ph-cursor"></span>
+            </div>
+          </div>
+        `;
+      }
     }
 
-    async initTerminal(container: HTMLElement) {
-      const demoBtn = this.querySelector('#mode-demo') as HTMLElement;
-      const interactiveBtn = this.querySelector('#mode-interactive') as HTMLElement;
-      const hint = this.querySelector('#terminal-hint') as HTMLElement;
-      
-      this.cleanup();
-      container.innerHTML = '';
+    /**
+     * Box-Muller Gaussian human typing delay generator
+     * Mean ~65ms, standard deviation >= 30.0ms + natural hesitation heuristics
+     */
+    getNextDelay(char = '', prevChar = ''): number {
+      if (typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        return 0;
+      }
 
-      // Create new session controller AFTER cleanup
+      // Box-Muller transformation: z0 = sqrt(-2*ln(u1)) * cos(2*pi*u2)
+      const u1 = Math.max(0.0001, Math.random());
+      const u2 = Math.random();
+      const z0 = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
+      let delay = 65 + z0 * 36;
+
+      // Human hesitation heuristics
+      if (char === ' ' || char === '/') {
+        delay += 85; // Word boundary & directory path pause
+      } else if (char === '.' || char === '@' || char === '-' || char === '_') {
+        delay += 60; // Punctuation & email domain pause
+      } else if (char === '\n' || char === '\r') {
+        delay += 180; // Enter / command execution pause
+      } else if (char && this.timingHistory.length > 0 && this.timingHistory.length % 4 === 0) {
+        delay += 55; // Natural rhythm hesitation
+      }
+
+      delay = Math.max(25, Math.min(480, Math.round(delay)));
+
+      // Statistical variance monitoring: ensure rolling standard deviation >= 30.0ms
+      this.timingHistory.push(delay);
+      if (this.timingHistory.length > 30) this.timingHistory.shift();
+
+      if (this.timingHistory.length >= 8) {
+        const mean = this.timingHistory.reduce((a, b) => a + b, 0) / this.timingHistory.length;
+        const variance = this.timingHistory.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / this.timingHistory.length;
+        const stdDev = Math.sqrt(variance);
+        if (stdDev < 31.0) {
+          delay = delay < mean ? Math.max(25, delay - 25) : Math.min(480, delay + 75);
+          this.timingHistory[this.timingHistory.length - 1] = delay;
+        }
+      }
+
+      return delay;
+    }
+
+    async wait(ms: number): Promise<boolean> {
+      return new Promise<boolean>((resolve) => {
+        if (this.abortController?.signal.aborted || !this.isAutoDemo) {
+          return resolve(false);
+        }
+        let timer: any = null;
+        const onAbort = () => {
+          if (timer) clearTimeout(timer);
+          resolve(false);
+        };
+        this.abortController?.signal.addEventListener('abort', onAbort, { once: true });
+        timer = setTimeout(() => {
+          this.abortController?.signal.removeEventListener('abort', onAbort);
+          if (!this.isAutoDemo || this.abortController?.signal.aborted) {
+            resolve(false);
+          } else {
+            resolve(true);
+          }
+        }, ms);
+        this.demoTimeout = timer;
+      });
+    }
+
+    async typeText(text: string): Promise<boolean> {
+      const isReducedMotion = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (isReducedMotion) {
+        if (this.term) this.term.write(text);
+        return true;
+      }
+      let prev = '';
+      for (let i = 0; i < text.length; i++) {
+        if (!this.isAutoDemo || !this.term || this.abortController?.signal.aborted) {
+          this.isDemoRunning = false;
+          return false;
+        }
+        const char = text.charAt(i);
+        this.term.write(char);
+        const delay = this.getNextDelay(char, prev);
+        prev = char;
+        const continued = await this.wait(delay);
+        if (!continued) {
+          this.isDemoRunning = false;
+          return false;
+        }
+      }
+      return true;
+    }
+
+    async boot(container: HTMLElement, startInteractive = false) {
+      if (this.isBooted || this.isBooting) return;
+      this.isBooting = true;
+
       const abortController = new AbortController();
       this.abortController = abortController;
       const currentSignal = abortController.signal;
 
-      // Resilient dynamic import handling ESM & CJS default interop
       let TerminalClass: any;
       try {
         const mod: any = await import('@xterm/xterm');
         TerminalClass = mod.Terminal || (mod.default && (mod.default.Terminal || mod.default));
       } catch (err) {
-        console.warn('Failed to load xterm module:', err);
+        console.warn('Failed to dynamically load @xterm/xterm:', err);
+        this.isBooting = false;
         return;
       }
 
       if (!this.isConnected || currentSignal.aborted) {
+        this.isBooting = false;
         return;
       }
 
+      // Remove static SSR placeholder
+      const placeholder = container.querySelector('#terminal-placeholder');
+      if (placeholder) placeholder.remove();
+
       this.term = new TerminalClass({
-        cols: 70, // Fixed safe column count that fits the 600px container perfectly
+        cols: 70,
         rows: 15,
         cursorBlink: true,
-        fontFamily: 'monospace', // Fallback font until custom font loads
+        cursorStyle: startInteractive ? 'block' : 'bar',
+        fontFamily: '"JetBrains Mono", monospace',
         fontSize: 13,
         theme: {
           background: 'transparent',
@@ -166,10 +321,12 @@ import '@xterm/xterm/css/xterm.css';
       });
 
       this.term.open(container);
-      this.term.reset();
       this.term.clearTextureAtlas();
 
-      // Dynamically upgrade font once loaded
+      this.isBooted = true;
+      this.isBooting = false;
+
+      // Font upgrade
       if (typeof document !== 'undefined' && document.fonts) {
         document.fonts.load('13px "JetBrains Mono"').then(() => {
           if (this.term && !currentSignal.aborted) {
@@ -179,29 +336,87 @@ import '@xterm/xterm/css/xterm.css';
         }).catch(() => {});
       }
 
-      // --- HYBRID LOGIC & MODE SWITCHING ---
+      this.attachTerminalEventListeners(currentSignal);
+
+      if (startInteractive) {
+        this.pauseAutoDemoForInteraction();
+      } else if (this.isAutoDemo && !this.isDemoRunning) {
+        this.runAutoDemo();
+      }
+    }
+
+    pauseAutoDemoForInteraction() {
+      const demoBtn = this.querySelector('#mode-demo') as HTMLButtonElement;
+      const interactiveBtn = this.querySelector('#mode-interactive') as HTMLButtonElement;
+      const hint = this.querySelector('#terminal-hint') as HTMLElement;
+
+      this.isAutoDemo = false;
+      this.isDemoRunning = false;
+
+      if (this.demoTimeout) {
+        clearTimeout(this.demoTimeout);
+        this.demoTimeout = null;
+      }
+      if (this.processingInterval) {
+        clearInterval(this.processingInterval);
+        this.processingInterval = null;
+      }
+
+      demoBtn?.classList.remove('active');
+      demoBtn?.setAttribute('aria-pressed', 'false');
+      interactiveBtn?.classList.add('active');
+      interactiveBtn?.setAttribute('aria-pressed', 'true');
+
+      if (hint) {
+        hint.textContent = "Sandbox active — type 'help', 'status', or 'setup'";
+        hint.style.opacity = '0.9';
+      }
+
+      if (this.term) {
+        this.term.options.cursorBlink = true;
+        this.term.options.cursorStyle = 'block';
+
+        // CRITICAL INTEGRITY REQUIREMENT: DO NOT call this.term.reset()!
+        // Preserve visible demonstration output buffer so user context is not wiped
+        this.term.write('\r\n\x1b[3mSandbox active. Type \x1b[33mgitsetu status\x1b[0m\x1b[3m, \x1b[33msetup\x1b[0m\x1b[3m, or \x1b[33mdoctor\x1b[0m\x1b[3m.\x1b[0m\r\n');
+        this.term.write(this.prompt);
+        this.term.focus();
+      }
+    }
+
+    attachTerminalEventListeners(currentSignal: AbortSignal) {
+      const demoBtn = this.querySelector('#mode-demo') as HTMLButtonElement;
+      const interactiveBtn = this.querySelector('#mode-interactive') as HTMLButtonElement;
+      const container = this.querySelector('#terminal-container') as HTMLElement;
+      const hint = this.querySelector('#terminal-hint') as HTMLElement;
 
       demoBtn?.addEventListener('click', () => {
         if (this.isAutoDemo) return;
         this.isAutoDemo = true;
         this.isDemoRunning = false;
-        
+
         demoBtn.classList.add('active');
+        demoBtn.setAttribute('aria-pressed', 'true');
         interactiveBtn?.classList.remove('active');
-        if (hint) hint.style.opacity = '1';
-        
+        interactiveBtn?.setAttribute('aria-pressed', 'false');
+        if (hint) {
+          hint.textContent = 'Click terminal or press Tab to take control';
+          hint.style.opacity = '0.7';
+        }
+
         if (this.term) {
           this.term.reset();
           this.term.clearTextureAtlas();
+          this.term.options.cursorStyle = 'bar';
         }
-        
+
         this.setupState = 'IDLE';
         this.currentLine = '';
         this.profileName = '';
-        
+
         if (this.demoTimeout) clearTimeout(this.demoTimeout);
         if (this.processingInterval) clearInterval(this.processingInterval);
-        
+
         this.runAutoDemo();
       }, { signal: currentSignal });
 
@@ -210,59 +425,41 @@ import '@xterm/xterm/css/xterm.css';
           if (this.term) this.term.focus();
           return;
         }
-        this.isAutoDemo = false;
-        this.isDemoRunning = false;
-        
-        demoBtn?.classList.remove('active');
-        interactiveBtn.classList.add('active');
-        if (hint) hint.style.opacity = '0';
-        
-        if (this.demoTimeout) clearTimeout(this.demoTimeout);
-        if (this.processingInterval) clearInterval(this.processingInterval);
-        
-        if (this.term) {
-          this.term.reset();
-          this.term.clearTextureAtlas();
-          this.term.write('\x1b[3mSandbox active. Type \x1b[33mgitsetu status\x1b[0m\x1b[3m, \x1b[33msetup\x1b[0m\x1b[3m, or \x1b[33mdoctor\x1b[0m\x1b[3m.\x1b[0m\r\n\r\n');
-          this.term.write(this.prompt);
-          this.term.focus();
-        }
+        this.pauseAutoDemoForInteraction();
       }, { signal: currentSignal });
 
-      container.addEventListener('click', () => {
+      container?.addEventListener('click', () => {
         if (this.isAutoDemo) {
-          interactiveBtn?.click();
+          this.pauseAutoDemoForInteraction();
         } else if (this.term) {
           this.term.focus();
         }
       }, { signal: currentSignal });
 
-      // --- INTERACTIVE ENGINE ---
-
+      // Interactive CLI keyboard input
       this.term.onData((e: string) => {
         if (this.isAutoDemo) {
-          interactiveBtn?.click();
+          this.pauseAutoDemoForInteraction();
           return;
         }
         if (!this.term) return;
 
-        // Ignore arrow keys / escape sequences for now
         if (e === '\x1b[A' || e === '\x1b[B' || e === '\x1b[C' || e === '\x1b[D') return;
 
         switch (e) {
-          case '\r': // Enter
+          case '\r':
             this.term.write('\r\n');
             this.handleCommand(this.currentLine.trim());
             this.currentLine = '';
             break;
-          case '\x7F': // Backspace (DEL)
-          case '\x08': // Backspace (BS)
+          case '\x7F':
+          case '\x08':
             if (this.currentLine.length > 0) {
               this.currentLine = this.currentLine.substring(0, this.currentLine.length - 1);
               this.term.write('\b \b');
             }
             break;
-          case '\x03': // Ctrl+C
+          case '\x03':
             this.term.write('^C\r\n');
             this.currentLine = '';
             this.setupState = 'IDLE';
@@ -276,50 +473,6 @@ import '@xterm/xterm/css/xterm.css';
             }
         }
       });
-    }
-
-    async wait(ms: number): Promise<boolean> {
-      return new Promise<boolean>((resolve) => { 
-        if (this.abortController?.signal.aborted || !this.isAutoDemo) {
-          return resolve(false);
-        }
-        
-        let timer: any = null;
-
-        const onAbort = () => {
-          if (timer) clearTimeout(timer);
-          resolve(false);
-        };
-        
-        this.abortController?.signal.addEventListener('abort', onAbort, { once: true });
-        
-        timer = setTimeout(() => {
-          this.abortController?.signal.removeEventListener('abort', onAbort);
-          if (!this.isAutoDemo || this.abortController?.signal.aborted) {
-            resolve(false);
-          } else {
-            resolve(true);
-          }
-        }, ms);
-
-        this.demoTimeout = timer;
-      });
-    }
-
-    async typeText(text: string, speed = 45): Promise<boolean> {
-      for (let i = 0; i < text.length; i++) {
-        if (!this.isAutoDemo || !this.term || this.abortController?.signal.aborted) {
-          this.isDemoRunning = false;
-          return false;
-        }
-        this.term.write(text.charAt(i));
-        const continued = await this.wait(speed);
-        if (!continued) {
-          this.isDemoRunning = false;
-          return false;
-        }
-      }
-      return true;
     }
 
     simulateProcessing(callback: () => void) {
@@ -337,7 +490,7 @@ import '@xterm/xterm/css/xterm.css';
         if (dots >= 3) {
           if (this.processingInterval) clearInterval(this.processingInterval);
           this.processingInterval = null;
-          this.term.write('\x1b[2K\r'); 
+          this.term.write('\x1b[2K\r');
           callback();
         }
       }, 350);
@@ -361,7 +514,7 @@ import '@xterm/xterm/css/xterm.css';
           this.term.write('  \x1b[1;32m✨ Provisioned 2 profiles in 0.8s with zero prompts! (v1.0.0 GA)\x1b[0m\r\n\r\n');
           this.term.write(this.prompt);
         } else if (lower === 'gitsetu setup' || lower === 'gitsetu init' || lower === 'setup' || lower === 'init') {
-          this.term.write('  Profile name: ');
+          this.term.write('  \x1b[33m?\x1b[0m \x1b[1;33mProfile name:\x1b[0m ');
           this.setupState = 'PROFILE_NAME';
         } else if (lower === 'gitsetu status' || lower === 'status') {
           this.term.write('  \x1b[1;36mGitSetu Profile Registry (v1.0.0 GA)\x1b[0m\r\n');
@@ -372,6 +525,10 @@ import '@xterm/xterm/css/xterm.css';
           this.term.write('     Dir: [Global Fallback]\r\n');
           this.term.write('     Key: ~/.ssh/id_ed25519_personal\r\n');
           this.term.write('  \x1b[32m✔\x1b[0m Zero-Trust Identity Guard: \x1b[1;32mEnforced\x1b[0m\r\n\r\n');
+          this.term.write(this.prompt);
+        } else if (lower === 'gitsetu guard' || lower === 'guard') {
+          this.term.write('  \x1b[1;36mGitSetu Pre-Commit Identity Guard v1.0.0\x1b[0m\r\n');
+          this.term.write('  \x1b[32m✔ [Pre-Commit Guard]\x1b[0m Active profile \x1b[33mwork\x1b[0m (dev@company.com). Match verified.\r\n\r\n');
           this.term.write(this.prompt);
         } else if (lower === 'gitsetu doctor' || lower === 'doctor') {
           this.term.write('  \x1b[1;36mGitSetu Diagnostic Engine v1.0.0 GA\x1b[0m\r\n');
@@ -415,10 +572,10 @@ import '@xterm/xterm/css/xterm.css';
         }
       } else if (this.setupState === 'PROFILE_NAME') {
         this.profileName = cmd || 'work';
-        this.term.write(`  Git email: `);
+        this.term.write(`  \x1b[33m?\x1b[0m \x1b[1;33mGit email:\x1b[0m `);
         this.setupState = 'GIT_EMAIL';
       } else if (this.setupState === 'GIT_EMAIL') {
-        this.term.write(`  Directory: `);
+        this.term.write(`  \x1b[33m?\x1b[0m \x1b[1;33mDirectory:\x1b[0m `);
         this.setupState = 'DIRECTORY';
       } else if (this.setupState === 'DIRECTORY') {
         const targetDir = cmd || '~/work';
@@ -440,59 +597,87 @@ import '@xterm/xterm/css/xterm.css';
       if (this.isDemoRunning || !this.isAutoDemo || !this.term || this.abortController?.signal.aborted) return;
       this.isDemoRunning = true;
       this.term.write(this.prompt);
-      
+
       const checkAndContinue = async (ms: number) => {
         if (!this.isAutoDemo || !this.term || this.abortController?.signal.aborted) return false;
         return await this.wait(ms);
       };
 
-      if (!await checkAndContinue(1000)) { this.isDemoRunning = false; return; }
-      if (!(await this.typeText('gitsetu setup', 60))) { this.isDemoRunning = false; return; }
-      
-      if (!await checkAndContinue(400)) { this.isDemoRunning = false; return; }
-      this.term.write('\r\n  Profile name: ');
-      
-      if (!await checkAndContinue(600)) { this.isDemoRunning = false; return; }
-      if (!(await this.typeText('work', 80))) { this.isDemoRunning = false; return; }
-      
-      if (!await checkAndContinue(400)) { this.isDemoRunning = false; return; }
-      this.term.write('\r\n  Git email: ');
-      
+      const isReducedMotion = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (isReducedMotion) {
+        this.term.write('gitsetu setup\r\n');
+        this.term.write('  \x1b[33m?\x1b[0m \x1b[1;33mProfile name:\x1b[0m work\r\n');
+        this.term.write('  \x1b[33m?\x1b[0m \x1b[1;33mGit email:\x1b[0m dev@company.com\r\n');
+        this.term.write('  \x1b[33m?\x1b[0m \x1b[1;33mDirectory:\x1b[0m ~/work\r\n');
+        this.term.write('  \x1b[32m✔\x1b[0m Workspace provisioned: \x1b[33m~/work\x1b[0m (mkdir -p)\r\n');
+        this.term.write('  \x1b[32m✔\x1b[0m SSH key generated: \x1b[33m~/.ssh/id_ed25519_work\x1b[0m\r\n');
+        this.term.write('  \x1b[32m✔\x1b[0m Git config written: \x1b[33m~/.config/gitsetu/profiles/work.gitconfig\x1b[0m\r\n');
+        this.term.write('  \x1b[32m✔\x1b[0m OpenSSH config updated: \x1b[33m~/.ssh/config\x1b[0m\r\n');
+        this.term.write('  \x1b[31m✘ [Pre-Commit Guard]\x1b[0m \x1b[31mIdentity mismatch: dev@company.com != me@bhaskarjha.dev\x1b[0m\r\n');
+        this.term.write('  \x1b[33m⚡ Zero-Trust Guard auto-resolving identity for ~/work...\x1b[0m\r\n');
+        this.term.write('  \x1b[32m✔ [Pre-Commit Guard]\x1b[0m \x1b[1;32mIdentity aligned: dev@company.com (id_ed25519_work)\x1b[0m\r\n');
+        this.term.write('  \x1b[1;32m✨ Zero-Trust sandbox active — commit authorized! (v1.0.0 GA)\x1b[0m\r\n\r\n');
+        this.term.write(this.prompt);
+        this.isDemoRunning = false;
+        return;
+      }
+
+      if (!await checkAndContinue(800)) { this.isDemoRunning = false; return; }
+      if (!(await this.typeText('gitsetu setup'))) { this.isDemoRunning = false; return; }
+
+      if (!await checkAndContinue(350)) { this.isDemoRunning = false; return; }
+      this.term.write('\r\n  \x1b[33m?\x1b[0m \x1b[1;33mProfile name:\x1b[0m ');
+
       if (!await checkAndContinue(500)) { this.isDemoRunning = false; return; }
-      if (!(await this.typeText('dev@company.com', 50))) { this.isDemoRunning = false; return; }
-      
+      if (!(await this.typeText('work'))) { this.isDemoRunning = false; return; }
+
+      if (!await checkAndContinue(350)) { this.isDemoRunning = false; return; }
+      this.term.write('\r\n  \x1b[33m?\x1b[0m \x1b[1;33mGit email:\x1b[0m ');
+
+      if (!await checkAndContinue(450)) { this.isDemoRunning = false; return; }
+      if (!(await this.typeText('dev@company.com'))) { this.isDemoRunning = false; return; }
+
+      if (!await checkAndContinue(350)) { this.isDemoRunning = false; return; }
+      this.term.write('\r\n  \x1b[33m?\x1b[0m \x1b[1;33mDirectory:\x1b[0m ');
+
+      if (!await checkAndContinue(450)) { this.isDemoRunning = false; return; }
+      if (!(await this.typeText('~/work'))) { this.isDemoRunning = false; return; }
+
       if (!await checkAndContinue(400)) { this.isDemoRunning = false; return; }
-      this.term.write('\r\n  Directory: ');
-      
-      if (!await checkAndContinue(500)) { this.isDemoRunning = false; return; }
-      if (!(await this.typeText('~/work', 70))) { this.isDemoRunning = false; return; }
-      
-      if (!await checkAndContinue(500)) { this.isDemoRunning = false; return; }
       this.term.write('\r\n  \x1b[36mGenerating cryptographic keys\x1b[0m');
-      
+
       for (let i = 0; i < 3; i++) {
-        if (!await checkAndContinue(400)) { this.isDemoRunning = false; return; }
+        if (!await checkAndContinue(350)) { this.isDemoRunning = false; return; }
         this.term.write('.');
       }
-      
+
       if (!await checkAndContinue(200)) { this.isDemoRunning = false; return; }
       this.term.write('\x1b[2K\r'); // Erase line
-      
+
       this.term.write('  \x1b[32m✔\x1b[0m Workspace provisioned: \x1b[33m~/work\x1b[0m (mkdir -p)\r\n');
-      if (!await checkAndContinue(200)) { this.isDemoRunning = false; return; }
+      if (!await checkAndContinue(180)) { this.isDemoRunning = false; return; }
 
       this.term.write('  \x1b[32m✔\x1b[0m SSH key generated: \x1b[33m~/.ssh/id_ed25519_work\x1b[0m\r\n');
-      if (!await checkAndContinue(200)) { this.isDemoRunning = false; return; }
-      
+      if (!await checkAndContinue(180)) { this.isDemoRunning = false; return; }
+
       this.term.write('  \x1b[32m✔\x1b[0m Git config written: \x1b[33m~/.config/gitsetu/profiles/work.gitconfig\x1b[0m\r\n');
-      if (!await checkAndContinue(200)) { this.isDemoRunning = false; return; }
-      
+      if (!await checkAndContinue(180)) { this.isDemoRunning = false; return; }
+
       this.term.write('  \x1b[32m✔\x1b[0m OpenSSH config updated: \x1b[33m~/.ssh/config\x1b[0m\r\n');
-      if (!await checkAndContinue(200)) { this.isDemoRunning = false; return; }
-      
-      this.term.write('  \x1b[32m✔\x1b[0m Profile \'work\' created successfully (v1.0.0 GA)\r\n\r\n');
+      if (!await checkAndContinue(400)) { this.isDemoRunning = false; return; }
+
+      // Pre-Commit Guard Demonstration: Red error resolving to Green success
+      this.term.write('  \x1b[31m✘ [Pre-Commit Guard]\x1b[0m \x1b[31mIdentity mismatch: dev@company.com != me@bhaskarjha.dev\x1b[0m\r\n');
       if (!await checkAndContinue(500)) { this.isDemoRunning = false; return; }
-      
+
+      this.term.write('  \x1b[33m⚡ Zero-Trust Guard auto-resolving identity for ~/work...\x1b[0m\r\n');
+      if (!await checkAndContinue(600)) { this.isDemoRunning = false; return; }
+
+      this.term.write('  \x1b[32m✔ [Pre-Commit Guard]\x1b[0m \x1b[1;32mIdentity aligned: dev@company.com (id_ed25519_work)\x1b[0m\r\n');
+      this.term.write('  \x1b[1;32m✨ Zero-Trust sandbox active — commit authorized! (v1.0.0 GA)\x1b[0m\r\n\r\n');
+
+      if (!await checkAndContinue(600)) { this.isDemoRunning = false; return; }
+
       this.term.write(this.prompt);
       this.isDemoRunning = false;
 
@@ -507,13 +692,24 @@ import '@xterm/xterm/css/xterm.css';
     }
   }
 
-  // Register the custom element once
   if (typeof window !== 'undefined' && !customElements.get('gitsetu-terminal')) {
     customElements.define('gitsetu-terminal', GitsetuTerminal);
   }
 </script>
 
 <style>
+  gitsetu-terminal {
+    display: block;
+    outline: none;
+  }
+
+  gitsetu-terminal:focus-visible,
+  gitsetu-terminal:focus {
+    outline: 2px solid var(--accent-primary);
+    outline-offset: 4px;
+    border-radius: var(--radius-xl);
+  }
+
   .terminal-window {
     width: 100%;
     margin: 0 auto;
@@ -526,6 +722,12 @@ import '@xterm/xterm/css/xterm.css';
     box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 1), 0 0 0 1px rgba(255, 255, 255, 0.03), inset 0 1px 0 rgba(255, 255, 255, 0.1);
     position: relative;
     text-align: left; /* Fix inherited text-align: center from Hero.astro on mobile */
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .terminal-window:focus-within {
+    border-color: rgba(0, 196, 204, 0.45);
+    box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 1), 0 0 20px rgba(0, 196, 204, 0.15);
   }
 
   .terminal-header {
@@ -606,6 +808,38 @@ import '@xterm/xterm/css/xterm.css';
     display: none;
   }
 
+  /* Static SSR Placeholder */
+  .terminal-placeholder {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    padding: 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    line-height: 1.4;
+    color: #ededed;
+    pointer-events: none;
+  }
+
+  .ph-tilde { color: #10b981; font-weight: bold; }
+  .ph-arrow { color: #00c4cc; font-weight: bold; }
+  .ph-cursor {
+    display: inline-block;
+    width: 8px;
+    height: 15px;
+    background-color: #00c4cc;
+    vertical-align: text-bottom;
+    margin-left: 4px;
+    animation: phCursorBlink 1s infinite steps(1);
+  }
+
+  @keyframes phCursorBlink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
+  }
+
   .terminal-hint {
     position: absolute;
     bottom: 16px;
@@ -633,6 +867,13 @@ import '@xterm/xterm/css/xterm.css';
   
   :global(.xterm-screen) {
     padding-left: 8px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ph-cursor {
+      animation: none;
+      opacity: 1;
+    }
   }
 
   /* Mobile Flaw Fixes */

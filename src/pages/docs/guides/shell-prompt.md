@@ -1,6 +1,9 @@
 ---
 layout: ../../../layouts/DocsLayout.astro
 title: "Shell Prompt Integration"
+description: "Dynamic prompt modules for Bash, Zsh, Starship, and Fish displaying the active Git identity."
+category: "guides"
+slug: "guides/shell-prompt"
 ---
 # Shell Prompt Integration
 

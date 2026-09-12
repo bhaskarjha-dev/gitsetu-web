@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://gitsetu.bhaskarjha.dev/sitemap.xml

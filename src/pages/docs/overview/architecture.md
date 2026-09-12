@@ -1,6 +1,9 @@
 ---
 layout: ../../../layouts/DocsLayout.astro
 title: "Architecture"
+description: "Internal mechanics, modular compilation patterns, and zero-trust execution flows of GitSetu."
+category: "overview"
+slug: "overview/architecture"
 ---
 # System Architecture
 

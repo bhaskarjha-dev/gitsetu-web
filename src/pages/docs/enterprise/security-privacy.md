@@ -1,6 +1,9 @@
 ---
 layout: ../../../layouts/DocsLayout.astro
 title: "Security & Privacy"
+description: "Threat model, air-gapped deployment guarantees, zero-telemetry policy, and audit trail specifications."
+category: "enterprise"
+slug: "enterprise/security-privacy"
 ---
 # Enterprise Security & Privacy
 

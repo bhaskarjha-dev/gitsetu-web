@@ -91,7 +91,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), inset 0 0 100px rgba(0, 229, 255, 0.02);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), inset 0 0 100px var(--accent-glow);
   }
 
   /* Grid Background */
@@ -165,7 +165,7 @@
   }
 
   .work-path {
-    stroke: rgba(0, 229, 255, 0.2);
+    stroke: var(--accent-glow-strong);
   }
 
   /* Data Orbs */
@@ -176,6 +176,12 @@
     border-radius: 50%;
     offset-distance: 0%;
     z-index: 4; /* Travels UNDER the env-nodes for 3D depth */
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--transition-base);
+  }
+  .data-orb.active {
+    opacity: 1;
   }
   .work-orb {
     background: var(--accent-primary);
@@ -214,15 +220,15 @@
 
   /* Node Heartbeat */
   @keyframes nodeHeartbeat {
-    0%, 90% { box-shadow: 0 0 20px rgba(0, 229, 255, 0.05); }
-    95% { box-shadow: 0 0 40px rgba(0, 229, 255, 0.4), inset 0 0 20px rgba(0, 229, 255, 0.2); border-color: rgba(0, 229, 255, 0.8); }
-    100% { box-shadow: 0 0 20px rgba(0, 229, 255, 0.05); }
+    0%, 90% { box-shadow: 0 0 20px var(--accent-glow); }
+    95% { box-shadow: 0 0 40px var(--accent-glow-strong), inset 0 0 20px var(--accent-glow); border-color: var(--accent-primary); }
+    100% { box-shadow: 0 0 20px var(--accent-glow); }
   }
 
   .work-node {
     top: 20%;
     left: 10%;
-    border-color: rgba(0, 229, 255, 0.4);
+    border-color: var(--border-accent);
     animation: nodeHeartbeat 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
   }
 
@@ -271,7 +277,7 @@
   }
 
   .config-item.active {
-    border-color: rgba(0, 229, 255, 0.3);
+    border-color: var(--border-accent);
     color: var(--accent-primary);
   }
 
@@ -289,8 +295,8 @@
   }
 
   .work-node .boundary-shield {
-    border-color: rgba(0, 229, 255, 0.2);
-    background: rgba(0, 229, 255, 0.02);
+    border-color: var(--border-accent);
+    background: var(--accent-glow);
   }
 
   @keyframes ping {
@@ -383,28 +389,34 @@
       const isMobile = window.innerWidth <= 800;
 
       if (isMobile) {
-        // 2-lane data bus vertical flow for mobile
-        const laneOffset = 15;
-        
-        const wPathStr = `M ${cx - laneOffset} ${cy} L ${wx - laneOffset} ${wy}`;
-        const pPathStr = `M ${cx + laneOffset} ${cy} L ${px + laneOffset} ${py}`;
-        
+        // Mobile flow: work connects directly from core bottom to work top;
+        // personal cleanly routes around the right edge of the work card to avoid intersecting it
+        const cBottom = cRect.bottom - svgRect.top;
+        const wTop = wRect.top - svgRect.top;
+        const pTop = pRect.top - svgRect.top;
+
+        const wPathStr = `M ${cx} ${cBottom} L ${wx} ${wTop}`;
+        const bypassX = Math.min(svgRect.width - 12, (wRect.right - svgRect.left) + 20);
+        const pPathStr = `M ${cx + 15} ${cy} C ${bypassX} ${cy + 25}, ${bypassX} ${wy - 40}, ${bypassX} ${wy} C ${bypassX} ${wy + 40}, ${px + 20} ${pTop - 25}, ${px} ${pTop}`;
+
         workPath.setAttribute('d', wPathStr);
         personalPath.setAttribute('d', pPathStr);
-        
+
         document.documentElement.style.setProperty('--work-path', `path('${wPathStr}')`);
         document.documentElement.style.setProperty('--personal-path', `path('${pPathStr}')`);
       } else {
         // Curved desktop paths
         const wPathStr = `M ${cx} ${cy} C ${cx} ${wy}, ${wx} ${cy}, ${wx} ${wy}`;
         const pPathStr = `M ${cx} ${cy} C ${cx} ${py}, ${px} ${cy}, ${px} ${py}`;
-        
+
         workPath.setAttribute('d', wPathStr);
         personalPath.setAttribute('d', pPathStr);
-        
+
         document.documentElement.style.setProperty('--work-path', `path('${wPathStr}')`);
         document.documentElement.style.setProperty('--personal-path', `path('${pPathStr}')`);
       }
+
+      this.querySelectorAll('.data-orb').forEach((orb) => orb.classList.add('active'));
     }
   }
 

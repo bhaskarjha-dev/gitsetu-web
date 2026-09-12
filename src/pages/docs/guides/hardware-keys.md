@@ -1,6 +1,9 @@
 ---
 layout: ../../../layouts/DocsLayout.astro
 title: "Hardware Keys (FIDO2)"
+description: "Configuration guide for FIDO2/WebAuthn hardware security keys and resident SSH credentials."
+category: "guides"
+slug: "guides/hardware-keys"
 ---
 # Hardware Keys (FIDO2 / YubiKey)
 

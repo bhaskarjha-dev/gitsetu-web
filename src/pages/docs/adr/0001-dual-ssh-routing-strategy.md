@@ -1,6 +1,9 @@
 ---
 layout: ../../../layouts/DocsLayout.astro
 title: "ADR 0001: Dual SSH Routing"
+description: "Architectural Decision Record: Dual SSH key routing via Match blocks versus include directives."
+category: "adr"
+slug: "adr/0001-dual-ssh-routing-strategy"
 ---
 # ADR 0001: The Dual-Strategy SSH Routing Architecture
 

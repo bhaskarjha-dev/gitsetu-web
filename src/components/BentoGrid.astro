@@ -143,16 +143,23 @@
 
 <script>
   document.addEventListener('astro:page-load', () => {
-    // Spotlights
+    // Spotlights with rAF throttling and reduced motion check
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     const cards = document.querySelectorAll('.bento-card');
     cards.forEach(card => {
+      let isThrottled = false;
       card.addEventListener('mousemove', (e: any) => {
-        const rect = card.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        (card as HTMLElement).style.setProperty('--spotlight-x', `${x}px`);
-        (card as HTMLElement).style.setProperty('--spotlight-y', `${y}px`);
-      });
+        if (isThrottled) return;
+        isThrottled = true;
+        requestAnimationFrame(() => {
+          const rect = card.getBoundingClientRect();
+          const x = e.clientX - rect.left;
+          const y = e.clientY - rect.top;
+          (card as HTMLElement).style.setProperty('--spotlight-x', `${x}px`);
+          (card as HTMLElement).style.setProperty('--spotlight-y', `${y}px`);
+          isThrottled = false;
+        });
+      }, { passive: true });
     });
   });
 </script>
@@ -412,14 +419,19 @@
     .text-group {
       max-width: 100% !important;
     }
+    .card-1 {
+      display: flex;
+      flex-direction: column;
+    }
     .card-1 .bento-content {
       width: 100%;
-      padding-bottom: 180px;
+      padding: var(--space-lg) var(--space-md);
     }
     .card-1-visual {
-      inset: auto 0 0 0;
+      position: relative;
+      inset: auto;
       width: 100%;
-      height: 160px;
+      height: 140px;
       border-left: none;
       border-top: 1px solid var(--border-subtle);
     }

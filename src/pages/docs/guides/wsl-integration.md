@@ -1,6 +1,9 @@
 ---
 layout: ../../../layouts/DocsLayout.astro
 title: "WSL Integration"
+description: "Seamless Windows Subsystem for Linux (WSL) interoperability with Windows credential managers."
+category: "guides"
+slug: "guides/wsl-integration"
 ---
 # WSL Integration
 

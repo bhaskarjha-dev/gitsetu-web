@@ -7,12 +7,17 @@ export const GET = async () => {
     
     const results = Object.keys(allDocs).map((path) => {
       const doc = allDocs[path] as any;
-      const rawContent = rawDocs[path] as string || '';
+      const rawContent = (rawDocs[path] as string) || '';
       
+      const normPath = path.replace(/\\/g, '/');
+
       // Convert relative file path to an absolute URL path.
       // e.g. './docs/getting-started/quickstart.md' -> '/docs/getting-started/quickstart'
-      let url = path.replace('./docs/', '/docs/').replace('.md', '');
+      let url = normPath.replace('./docs/', '/docs/').replace('.md', '');
       if (url === '/docs/index') url = '/docs';
+
+      const relPath = normPath.replace('./docs/', '').replace('.md', '');
+      const slug = relPath === 'index' ? 'index' : relPath;
       
       // Enhanced markdown and HTML stripping for clean search index payload
       const cleanContent = rawContent
@@ -24,10 +29,16 @@ export const GET = async () => {
         .replace(/\s+/g, ' ')          // Collapse whitespace
         .trim();
 
+      const category = doc.frontmatter?.category || (slug.includes('/') ? slug.split('/')[0] : 'overview');
+      const description = (doc.frontmatter?.description || cleanContent.slice(0, 160)).trim();
+
       return {
+        id: slug,
         title: doc.frontmatter?.title || url,
-        description: doc.frontmatter?.description || '',
+        category: category,
+        slug: slug,
         url: url,
+        description: description,
         content: cleanContent
       };
     });
@@ -46,4 +57,4 @@ export const GET = async () => {
       headers: { 'Content-Type': 'application/json' }
     });
   }
-}
+};

@@ -1,6 +1,9 @@
 ---
 layout: ../../../layouts/DocsLayout.astro
 title: "Identity Routing"
+description: "Hierarchical includeIf routing engine mapping repository working directories to isolated Git identities."
+category: "core-engines"
+slug: "core-engines/identity-routing"
 ---
 # Identity Routing Engine
 

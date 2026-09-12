@@ -7,9 +7,13 @@
     "sync-docs": "node scripts/sync_docs.js && node scripts/generate_llms.js",
     "dev": "npm run sync-docs && astro dev",
     "build": "npm run sync-docs && astro build",
-    "preview": "astro preview"
+    "preview": "astro preview",
+    "test": "playwright test",
+    "test:e2e": "playwright test",
+    "test:runner": "node tests/e2e/runner.mjs"
   },
   "devDependencies": {
+    "@playwright/test": "^1.50.0",
     "astro": "^6.3.1"
   },
   "dependencies": {

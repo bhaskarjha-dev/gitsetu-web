@@ -1,6 +1,9 @@
 ---
 layout: ../../../layouts/DocsLayout.astro
 title: "Ecosystem Comparisons"
+description: "Comparative evaluation of GitSetu versus manual SSH configs, direnv, and alternative Git identity managers."
+category: "overview"
+slug: "overview/comparisons"
 ---
 # Git Identity Tools: Comprehensive Comparison
 

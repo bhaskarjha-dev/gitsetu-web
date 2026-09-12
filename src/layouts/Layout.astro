@@ -6,47 +6,92 @@ import CommandPalette from '../components/CommandPalette.astro';
 interface Props {
   title?: string;
   description?: string;
+  canonical?: string;
 }
 
 const {
   title = 'GitSetu — Zero-Dependency Git Identity Manager',
-  description = 'Manage multiple Git identities automatically. SSH keys, credentials, and commit signing — all in pure Bash 3.2. Zero dependencies.'
+  description = 'Manage multiple Git identities automatically. SSH keys, credentials, and commit signing — all in pure Bash 3.2. Zero dependencies.',
+  canonical = 'https://gitsetu.bhaskarjha.dev'
 } = Astro.props;
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="en" style="color-scheme: dark;">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="theme-color" content="#000000" />
     <title>{title}</title>
     <meta name="description" content={description} />
 
-    <!-- OpenGraph -->
-    <meta property="og:title" content="GitSetu — Stop committing as the wrong person" />
-    <meta property="og:description" content="Auto-switch Git identity, SSH keys, and credentials by directory. Pure Bash. Zero deps." />
+    <!-- OpenGraph & Twitter -->
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
     <meta property="og:image" content="https://gitsetu.bhaskarjha.dev/og-image.png" />
-    <meta property="og:url" content="https://gitsetu.bhaskarjha.dev" />
+    <meta property="og:url" content={canonical} />
     <meta property="og:type" content="website" />
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content="https://gitsetu.bhaskarjha.dev/og-image.png" />
 
     <!-- Canonical -->
-    <link rel="canonical" href="https://gitsetu.bhaskarjha.dev" />
+    <link rel="canonical" href={canonical} />
 
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 
-    <!-- Fonts -->
+    <!-- Critical CSS for FOWT Elimination & Progressive Reveal Fallback -->
+    <style is:inline>
+      html, body {
+        background-color: var(--bg-primary, #000000);
+        color: var(--text-primary, #ededed);
+      }
+      @media (max-width: 768px) {
+        html { -webkit-text-size-adjust: 100%; }
+      }
+      @media (max-width: 375px) {
+        html { -webkit-text-size-adjust: 100%; }
+      }
+    </style>
+    <noscript>
+      <style>
+        .reveal {
+          opacity: 1 !important;
+          transform: none !important;
+        }
+      </style>
+    </noscript>
+
+    <!-- Fonts: Preconnect & Non-Blocking Async Loading with display=swap -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet" />
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'" />
+    <noscript>
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" />
+    </noscript>
     <ClientRouter />
     
     <!-- JSON-LD Semantic Web -->
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
+        "@type": "WebSite",
+        "@id": "https://gitsetu.bhaskarjha.dev/#website",
+        "url": "https://gitsetu.bhaskarjha.dev",
+        "name": "GitSetu",
+        "description": "Zero-dependency Git multi-identity orchestration engine",
+        "inLanguage": "en"
+      }
+    </script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
         "@type": "SoftwareApplication",
+        "@id": "https://gitsetu.bhaskarjha.dev/#software",
         "name": "GitSetu",
         "operatingSystem": "POSIX (Linux, macOS, WSL)",
         "applicationCategory": "DeveloperApplication",
@@ -66,31 +111,38 @@ const {
     <script defer data-domain="gitsetu.bhaskarjha.dev" src="https://plausible.io/js/script.js"></script>
   </head>
   <body>
+    <a href="#main-content" class="skip-link">Skip to content</a>
     <global-manager>
       <!-- Persistent Noise Overlay -->
       <div class="noise-overlay"></div>
-      <CommandPalette />
       <slot />
+      <CommandPalette />
     </global-manager>
     
     <script>
       class GlobalManager extends HTMLElement {
         private revealObserver: IntersectionObserver | null = null;
+        private mouseMovePending = false;
         
         private handleMousemove = (e: MouseEvent) => {
-          const x = (e.clientX / window.innerWidth) * 100;
-          const y = (e.clientY / window.innerHeight) * 100;
-          document.body.style.setProperty('--mouse-x', `${x}%`);
-          document.body.style.setProperty('--mouse-y', `${y}%`);
+          if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+          if (this.mouseMovePending) return;
+          this.mouseMovePending = true;
+          requestAnimationFrame(() => {
+            const x = (e.clientX / window.innerWidth) * 100;
+            const y = (e.clientY / window.innerHeight) * 100;
+            document.body.style.setProperty('--mouse-x', `${x}%`);
+            document.body.style.setProperty('--mouse-y', `${y}%`);
+            this.mouseMovePending = false;
+          });
         };
 
-        connectedCallback() {
-          // Spotlight Logic
-          document.addEventListener('mousemove', this.handleMousemove, { passive: true });
+        private initRevealObserver = () => {
+          if (this.revealObserver) {
+            this.revealObserver.disconnect();
+          }
 
-          // Global Reveal on Scroll
           const revealElements = this.querySelectorAll('.reveal');
-          
           this.revealObserver = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
               if (entry.isIntersecting) {
@@ -104,10 +156,22 @@ const {
           });
 
           revealElements.forEach(el => this.revealObserver?.observe(el));
+        };
+
+        connectedCallback() {
+          // Spotlight Logic with rAF throttling
+          document.addEventListener('mousemove', this.handleMousemove, { passive: true });
+
+          // Global Reveal on Scroll
+          this.initRevealObserver();
+
+          // Re-bind when navigating with ClientRouter
+          document.addEventListener('astro:page-load', this.initRevealObserver);
         }
 
         disconnectedCallback() {
           document.removeEventListener('mousemove', this.handleMousemove);
+          document.removeEventListener('astro:page-load', this.initRevealObserver);
           if (this.revealObserver) {
             this.revealObserver.disconnect();
             this.revealObserver = null;

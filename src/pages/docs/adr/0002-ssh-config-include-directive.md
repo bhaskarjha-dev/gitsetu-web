@@ -1,6 +1,9 @@
 ---
 layout: ../../../layouts/DocsLayout.astro
 title: "ADR 0002: OpenSSH Include Pivot"
+description: "Architectural Decision Record: Standardizing on modular Include ~/.config/gitsetu/profiles/ssh_config."
+category: "adr"
+slug: "adr/0002-ssh-config-include-directive"
 ---
 # ADR 0002: The OpenSSH `Include` Directive Pivot
 

@@ -393,43 +393,57 @@ import TerminalDemo from './TerminalDemo.astro';
       }
     }
 
-    // Magnetic Buttons
-    const magneticEls = document.querySelectorAll('.magnetic');
-    magneticEls.forEach((el) => {
-      const htmlEl = el as HTMLElement;
-      htmlEl.addEventListener('mousemove', (e) => {
-        const rect = htmlEl.getBoundingClientRect();
-        const x = e.clientX - rect.left - rect.width / 2;
-        const y = e.clientY - rect.top - rect.height / 2;
-        htmlEl.style.transform = `translate(${x * 0.1}px, ${y * 0.1}px)`;
+    // Magnetic Buttons (with rAF throttling and reduced motion check)
+    const isReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!isReducedMotion) {
+      const magneticEls = document.querySelectorAll('.magnetic');
+      magneticEls.forEach((el) => {
+        const htmlEl = el as HTMLElement;
+        let isThrottled = false;
+        htmlEl.addEventListener('mousemove', (e) => {
+          if (isThrottled) return;
+          isThrottled = true;
+          requestAnimationFrame(() => {
+            const rect = htmlEl.getBoundingClientRect();
+            const x = e.clientX - rect.left - rect.width / 2;
+            const y = e.clientY - rect.top - rect.height / 2;
+            htmlEl.style.transform = `translate(${x * 0.1}px, ${y * 0.1}px)`;
+            isThrottled = false;
+          });
+        }, { passive: true });
+        htmlEl.addEventListener('mouseleave', () => {
+          htmlEl.style.transform = 'translate(0px, 0px)';
+        });
       });
-      htmlEl.addEventListener('mouseleave', () => {
-        htmlEl.style.transform = 'translate(0px, 0px)';
-      });
-    });
 
-    // 3D Tilt for Terminal Demo
-    const heroVisual = document.querySelector('.hero-visual') as HTMLElement;
-    const terminalNode = document.querySelector('gitsetu-terminal') as HTMLElement;
-    
-    if (heroVisual && terminalNode) {
-      heroVisual.addEventListener('mousemove', (e) => {
-        const rect = heroVisual.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        
-        const centerX = rect.width / 2;
-        const centerY = rect.height / 2;
-        
-        const rotateX = ((y - centerY) / centerY) * -10;
-        const rotateY = ((x - centerX) / centerX) * 10;
-        
-        terminalNode.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
-      });
+      // 3D Tilt for Terminal Demo
+      const heroVisual = document.querySelector('.hero-visual') as HTMLElement;
+      const terminalNode = document.querySelector('gitsetu-terminal') as HTMLElement;
       
-      heroVisual.addEventListener('mouseleave', () => {
-        terminalNode.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)`;
-      });
+      if (heroVisual && terminalNode) {
+        let isTiltThrottled = false;
+        heroVisual.addEventListener('mousemove', (e) => {
+          if (isTiltThrottled) return;
+          isTiltThrottled = true;
+          requestAnimationFrame(() => {
+            const rect = heroVisual.getBoundingClientRect();
+            if (rect.width > 0 && rect.height > 0) {
+              const x = e.clientX - rect.left;
+              const y = e.clientY - rect.top;
+              const centerX = rect.width / 2;
+              const centerY = rect.height / 2;
+              const rotateX = ((y - centerY) / centerY) * -2;
+              const rotateY = ((x - centerX) / centerX) * 2;
+              terminalNode.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+            }
+            isTiltThrottled = false;
+          });
+        }, { passive: true });
+        
+        heroVisual.addEventListener('mouseleave', () => {
+          terminalNode.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg)`;
+        });
+      }
     }
   });
 </script>
@@ -534,7 +548,7 @@ import TerminalDemo from './TerminalDemo.astro';
     padding: 11px 22px;
     border-radius: var(--radius-md);
     font-weight: 700;
-    font-size: 0.94rem;
+    font-size: var(--text-sm);
     box-shadow: 0 0 24px var(--accent-glow-strong);
     transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.2s ease;
     text-decoration: none;
@@ -556,7 +570,7 @@ import TerminalDemo from './TerminalDemo.astro';
     padding: 10px 18px;
     border-radius: var(--radius-md);
     font-weight: 600;
-    font-size: 0.92rem;
+    font-size: var(--text-sm);
     text-decoration: none;
     transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   }
@@ -571,7 +585,7 @@ import TerminalDemo from './TerminalDemo.astro';
 
   .cta-badge {
     font-family: var(--font-mono);
-    font-size: 0.72rem;
+    font-size: var(--text-xs);
     padding: 1px 6px;
     border-radius: 4px;
     background: rgba(255, 255, 255, 0.08);
@@ -589,7 +603,7 @@ import TerminalDemo from './TerminalDemo.astro';
     align-items: center;
     gap: 6px;
     color: #a1a1aa;
-    font-size: 0.88rem;
+    font-size: var(--text-sm);
     font-weight: 500;
     text-decoration: none;
     padding: 8px 12px;
@@ -617,7 +631,7 @@ import TerminalDemo from './TerminalDemo.astro';
     width: 100%;
     max-width: 620px;
     margin-bottom: clamp(1.25rem, 2.5vw, 1.75rem);
-    background: rgba(8, 12, 20, 0.75);
+    background: var(--bg-card);
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
     border: 1px solid rgba(255, 255, 255, 0.1);
@@ -660,7 +674,7 @@ import TerminalDemo from './TerminalDemo.astro';
     background: transparent;
     border: none;
     font-family: var(--font-sans);
-    font-size: 0.78rem;
+    font-size: var(--text-xs);
     font-weight: 500;
     color: var(--text-muted);
     padding: 6px 12px;
@@ -686,7 +700,7 @@ import TerminalDemo from './TerminalDemo.astro';
   }
 
   .cat-icon {
-    font-size: 0.85rem;
+    font-size: var(--text-sm);
     line-height: 1;
   }
 
@@ -707,7 +721,7 @@ import TerminalDemo from './TerminalDemo.astro';
     background: rgba(255, 255, 255, 0.03);
     border: 1px solid rgba(255, 255, 255, 0.07);
     font-family: var(--font-mono);
-    font-size: 0.76rem;
+    font-size: var(--text-xs);
     color: var(--text-secondary);
     padding: 5px 11px;
     border-radius: var(--radius-md);
@@ -738,7 +752,7 @@ import TerminalDemo from './TerminalDemo.astro';
   }
 
   .chip-badge {
-    font-size: 0.65rem;
+    font-size: var(--text-xs);
     padding: 1px 5px;
     border-radius: 4px;
     background: rgba(0, 0, 0, 0.35);
@@ -752,7 +766,7 @@ import TerminalDemo from './TerminalDemo.astro';
   .terminal-command-box {
     display: flex;
     align-items: center;
-    background: #020408;
+    background: var(--bg-primary);
     border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: var(--radius-md);
     padding: 10px 14px;
@@ -801,7 +815,7 @@ import TerminalDemo from './TerminalDemo.astro';
 
   .install-code {
     font-family: var(--font-mono);
-    font-size: 0.83rem;
+    font-size: var(--text-xs);
     line-height: 1.4;
     white-space: nowrap;
     text-align: left;
@@ -833,7 +847,7 @@ import TerminalDemo from './TerminalDemo.astro';
     cursor: pointer;
     padding: 6px 11px;
     font-family: var(--font-sans);
-    font-size: 0.74rem;
+    font-size: var(--text-xs);
     font-weight: 600;
     display: inline-flex;
     align-items: center;
@@ -865,7 +879,7 @@ import TerminalDemo from './TerminalDemo.astro';
     justify-content: space-between;
     flex-wrap: wrap;
     gap: 10px;
-    font-size: 0.75rem;
+    font-size: var(--text-xs);
     padding-top: 2px;
   }
 
@@ -874,7 +888,7 @@ import TerminalDemo from './TerminalDemo.astro';
     align-items: center;
     gap: 8px;
     color: var(--text-secondary);
-    font-size: 0.75rem;
+    font-size: var(--text-xs);
     line-height: 1.4;
     flex: 1;
     min-width: 220px;
@@ -896,7 +910,7 @@ import TerminalDemo from './TerminalDemo.astro';
     gap: 5px;
     color: var(--accent-primary);
     font-weight: 500;
-    font-size: 0.75rem;
+    font-size: var(--text-xs);
     white-space: nowrap;
     text-decoration: none;
     transition: color 0.15s ease, transform 0.15s ease;

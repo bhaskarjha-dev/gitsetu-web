@@ -15,40 +15,42 @@ const isActive = (path: string) => {
       </a>
     </div>
 
-    <ul class="nav-links">
-      <li><a href="/docs/getting-started/installation" class={isActive('/docs/getting-started/installation')}>Installation</a></li>
-      <li><a href="/docs/getting-started/quickstart" class={isActive('/docs/getting-started/quickstart')}>Quickstart</a></li>
-      <li><a href="/docs/overview/architecture" class={isActive('/docs/overview/architecture')}>Architecture</a></li>
-      <li><a href="/docs/enterprise/security-privacy" class={isActive('/docs/enterprise/security-privacy')}>Security</a></li>
-    </ul>
+    <nav class="nav-menu" aria-label="Primary navigation">
+      <ul class="nav-links">
+        <li><a href="/docs/getting-started/installation" class={isActive('/docs/getting-started/installation')}>Installation</a></li>
+        <li><a href="/docs/getting-started/quickstart" class={isActive('/docs/getting-started/quickstart')}>Quickstart</a></li>
+        <li><a href="/docs/overview/architecture" class={isActive('/docs/overview/architecture')}>Architecture</a></li>
+        <li><a href="/docs/enterprise/security-privacy" class={isActive('/docs/enterprise/security-privacy')}>Security</a></li>
+      </ul>
+    </nav>
 
     <div class="nav-actions">
       <!-- Command Palette Trigger -->
       <button class="cmd-palette-btn" id="search-btn" aria-label="Search documentation and commands">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
         <span class="cmd-text">Search...</span>
         <kbd id="cmd-key">⌘K</kbd>
       </button>
 
       <a href="https://github.com/bhaskarjha-dev/gitsetu" target="_blank" rel="noopener" class="github-link" aria-label="GitHub Repository">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
       </a>
       <a href="/docs" class={`btn btn-outline ${isActive('/docs')}`}>Docs</a>
       <button class="mobile-nav-toggle" aria-expanded="false" aria-controls="mobile-menu" aria-label="Toggle mobile menu">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
       </button>
     </div>
   </div>
 
   <!-- Mobile Menu Dropdown -->
-  <div class="mobile-menu" id="mobile-menu">
+  <nav class="mobile-menu" id="mobile-menu" aria-label="Mobile navigation" aria-hidden="true">
     <a href="/docs/getting-started/installation" class={isActive('/docs/getting-started/installation')}>Installation</a>
     <a href="/docs/getting-started/quickstart" class={isActive('/docs/getting-started/quickstart')}>Quickstart</a>
     <a href="/docs/overview/architecture" class={isActive('/docs/overview/architecture')}>Architecture</a>
     <a href="/docs/enterprise/security-privacy" class={isActive('/docs/enterprise/security-privacy')}>Security</a>
     <a href="/docs" class={isActive('/docs')}>All Docs</a>
     <a href="https://github.com/bhaskarjha-dev/gitsetu" target="_blank" rel="noopener">GitHub</a>
-  </div>
+  </nav>
 </header>
 
 <script>
@@ -92,7 +94,9 @@ const isActive = (path: string) => {
 
       this.handleToggleClick = () => {
         const isExpanded = this.mobileToggle?.getAttribute('aria-expanded') === 'true';
-        this.mobileToggle?.setAttribute('aria-expanded', String(!isExpanded));
+        const nextState = !isExpanded;
+        this.mobileToggle?.setAttribute('aria-expanded', String(nextState));
+        this.mobileMenu?.setAttribute('aria-hidden', String(!nextState));
         this.mobileMenu?.classList.toggle('active');
       };
       this.mobileToggle?.addEventListener('click', this.handleToggleClick);
@@ -100,6 +104,7 @@ const isActive = (path: string) => {
       // Auto-close mobile menu when any navigation link is clicked
       this.handleMenuLinkClick = () => {
         this.mobileMenu?.classList.remove('active');
+        this.mobileMenu?.setAttribute('aria-hidden', 'true');
         this.mobileToggle?.setAttribute('aria-expanded', 'false');
       };
       this.mobileMenu?.querySelectorAll('a').forEach(a => {
@@ -160,17 +165,17 @@ const isActive = (path: string) => {
     transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     /* Liquid highlight edge */
     box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.1), 0 10px 30px rgba(0,0,0,0.5);
+    overflow: hidden;
   }
 
   .navbar.scrolled {
-    width: 80%;
-    max-width: calc(var(--max-width) * 0.8);
+    width: 88%;
+    max-width: calc(var(--max-width) * 0.92);
     top: var(--space-sm);
     background: rgba(0, 0, 0, 0.8);
     backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
     border-color: rgba(255, 255, 255, 0.2);
-    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.2), 0 20px 40px rgba(0,0,0,0.9), 0 0 20px rgba(0, 229, 255, 0.15);
+    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.2), 0 20px 40px rgba(0,0,0,0.9), 0 0 20px var(--accent-glow);
   }
 
   .nav-container {
@@ -208,6 +213,11 @@ const isActive = (path: string) => {
   .brand-logo {
     display: block;
     border-radius: var(--radius-sm);
+  }
+
+  .nav-menu {
+    display: flex;
+    align-items: center;
   }
 
   .nav-links {
@@ -273,9 +283,14 @@ const isActive = (path: string) => {
     border-color: var(--border-accent);
     box-shadow: 0 0 10px var(--accent-glow);
   }
+  .cmd-palette-btn:focus-visible {
+    outline: none;
+    border-color: var(--border-accent);
+    box-shadow: 0 0 0 1px rgba(0, 196, 204, 0.4), 0 0 12px var(--accent-glow);
+  }
   .cmd-palette-btn kbd {
     margin-left: var(--space-md);
-    background: linear-gradient(120deg, rgba(0,0,0,0.6) 25%, rgba(0, 229, 255, 0.3) 50%, rgba(0,0,0,0.6) 75%);
+    background: linear-gradient(120deg, rgba(0,0,0,0.6) 25%, rgba(0, 196, 204, 0.3) 50%, rgba(0,0,0,0.6) 75%);
     background-size: 200% 100%;
     animation: shimmer 3s infinite linear;
     border: 1px solid var(--border-card);
@@ -316,7 +331,7 @@ const isActive = (path: string) => {
   .btn-outline:hover {
     border-color: var(--border-accent);
     color: var(--accent-primary);
-    background: rgba(0, 229, 255, 0.05);
+    background: var(--accent-glow);
     box-shadow: 0 0 15px var(--accent-glow);
   }
 
@@ -338,6 +353,7 @@ const isActive = (path: string) => {
   }
 
   @media (max-width: 900px) {
+    .nav-menu,
     .nav-links {
       display: none;
     }
@@ -405,11 +421,15 @@ const isActive = (path: string) => {
     padding: 0;
     max-height: 0;
     overflow: hidden;
-    transition: max-height var(--transition-base), padding var(--transition-base);
+    visibility: hidden;
+    pointer-events: none;
+    transition: max-height var(--transition-base), padding var(--transition-base), visibility var(--transition-base);
   }
 
   .mobile-menu.active {
-    max-height: 300px;
+    visibility: visible;
+    pointer-events: auto;
+    max-height: 400px;
     padding: var(--space-md) 0;
   }
 

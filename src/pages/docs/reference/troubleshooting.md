@@ -1,6 +1,9 @@
 ---
 layout: ../../../layouts/DocsLayout.astro
 title: "Troubleshooting"
+description: "Diagnostic workflows and solutions for SSH permission errors, keychain locks, and hook conflicts."
+category: "reference"
+slug: "reference/troubleshooting"
 ---
 # Troubleshooting & Diagnostics
 

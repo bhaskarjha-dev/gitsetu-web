@@ -18,7 +18,7 @@ const comparisonData = [
 ];
 ---
 
-<section class="comparison section" id="comparison">
+<section class="comparison section reveal" id="comparison">
   <div class="container">
     <h2 class="section-title">How GitSetu compares.</h2>
     <p class="section-subtitle">Verified v1.0.0 GA specification against competing ecosystem tools.</p>
@@ -27,25 +27,25 @@ const comparisonData = [
       <table class="compare-table">
         <thead>
           <tr>
-            <th class="feature-col">Feature</th>
-            <th class="gitsetu-col">GitSetu</th>
-            <th>gitego</th>
-            <th>karn</th>
-            <th>gh CLI</th>
-            <th>GCM</th>
+            <th scope="col" class="feature-col">Feature</th>
+            <th scope="col" class="gitsetu-col">GitSetu</th>
+            <th scope="col">gitego</th>
+            <th scope="col">karn</th>
+            <th scope="col">gh CLI</th>
+            <th scope="col">GCM</th>
           </tr>
         </thead>
         <tbody>
           {comparisonData.map((row) => (
             <tr>
-              <td class="feature-cell">{row.feature}</td>
+              <th scope="row" class="feature-cell">{row.feature}</th>
               <td class="gitsetu-cell">
-                <span class={row.gitsetu === '✅' ? 'success' : (row.gitsetu === '⚡' ? 'warning' : 'neutral')}>
+                <span class={row.gitsetu === '✅' ? 'success' : (row.gitsetu === '⚡' ? 'warning' : 'neutral')} aria-label={row.gitsetu === '✅' ? 'Supported' : (row.gitsetu === '⚡' ? 'Partial' : 'Not supported')}>
                   {row.gitsetu}
                 </span>
               </td>
               <td class="competitor-cell">
-                <span class={row.gitego === '✅' ? 'success' : (row.gitego === '⚡' ? 'warning' : 'neutral')}>
+                <span class={row.gitego === '✅' ? 'success' : (row.gitego === '⚡' ? 'warning' : 'neutral')} aria-label={row.gitego === '✅' ? 'Supported' : (row.gitego === '⚡' ? 'Partial' : 'Not supported')}>
                   {row.gitego}
                 </span>
               </td>
@@ -192,7 +192,30 @@ const comparisonData = [
 
   @media (max-width: 768px) {
     .compare-table th, .compare-table td {
-      padding: var(--space-sm) var(--space-md);
+      padding: var(--space-xs) var(--space-sm);
+      font-size: var(--text-xs);
+    }
+  }
+
+  @media (max-width: 600px) {
+    .feature-col, .feature-cell {
+      max-width: 140px;
+      min-width: 120px;
+      white-space: normal;
+      word-break: break-word;
+      line-height: 1.3;
+      padding: 8px 6px;
+      box-shadow: 2px 0 6px rgba(0, 0, 0, 0.4);
+    }
+
+    .compare-table th, .compare-table td {
+      padding: 8px 8px;
+    }
+
+    .legend {
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-sm);
     }
   }
 </style>

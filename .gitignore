@@ -26,3 +26,9 @@ Thumbs.db
 
 # Generated Artifacts
 public/llms.txt
+
+# Test artifacts
+playwright.config.ts
+test-results/
+test-results.json
+tests/

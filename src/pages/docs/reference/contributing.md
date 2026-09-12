@@ -1,6 +1,9 @@
 ---
 layout: ../../../layouts/DocsLayout.astro
 title: "Contributing Guide"
+description: "Developer guidelines, coding conventions, test execution, and pull request workflows."
+category: "reference"
+slug: "reference/contributing"
 ---
 # Contributing to GitSetu
 

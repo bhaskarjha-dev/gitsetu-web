@@ -1,6 +1,9 @@
 ---
 layout: ../../../layouts/DocsLayout.astro
 title: "SSH Orchestrator"
+description: "Automated OpenSSH key generation, ~/.ssh/config profile management, and multi-host multiplexing."
+category: "core-engines"
+slug: "core-engines/ssh-orchestrator"
 ---
 # SSH Orchestrator Engine
 

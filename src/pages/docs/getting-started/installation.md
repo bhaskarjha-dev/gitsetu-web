@@ -1,6 +1,9 @@
 ---
 layout: ../../../layouts/DocsLayout.astro
 title: "Installation"
+description: "Installation guides across 9 distribution channels including Homebrew, WinGet, Scoop, AUR, Nix, and native scripts."
+category: "getting-started"
+slug: "getting-started/installation"
 ---
 # Installation
 

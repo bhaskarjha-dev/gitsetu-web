@@ -34,10 +34,13 @@ function readDocsRecursively(dir) {
       readDocsRecursively(fullPath);
     } else if (fullPath.endsWith('.md')) {
       const relativePath = path.relative(docsDir, fullPath).replace(/\\/g, '/');
-      const content = fs.readFileSync(fullPath, 'utf-8');
+      const rawContent = fs.readFileSync(fullPath, 'utf-8');
+      
+      // Strip Astro layout import and normalize frontmatter for clean LLM consumption
+      const cleanContent = rawContent.replace(/^layout:\s*.*?[\r\n]+/m, '');
       
       llmContent += `\n--- START OF FILE: ${relativePath} ---\n\n`;
-      llmContent += content;
+      llmContent += cleanContent;
       llmContent += `\n\n--- END OF FILE: ${relativePath} ---\n`;
     }
   }

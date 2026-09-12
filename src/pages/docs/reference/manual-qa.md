@@ -1,6 +1,9 @@
 ---
 layout: ../../../layouts/DocsLayout.astro
 title: "Manual QA Playbook"
+description: "Step-by-step manual quality assurance test scenarios and cross-platform verification matrices."
+category: "reference"
+slug: "reference/manual-qa"
 ---
 # GitSetu Manual QA Playbook
 

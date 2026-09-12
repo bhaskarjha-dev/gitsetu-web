@@ -28,14 +28,24 @@
 
 <script>
   class GitsetuCta extends HTMLElement {
+    private isThrottled = false;
+
     connectedCallback() {
       const ctaSection = this.querySelector('.cta-section') as HTMLElement;
       if (ctaSection) {
         ctaSection.addEventListener('mousemove', (e: MouseEvent) => {
-          const rect = ctaSection.getBoundingClientRect();
-          const x = ((e.clientX - rect.left) / rect.width) * 100;
-          ctaSection.style.setProperty('--mouse-x', `${x}%`);
-        });
+          if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+          if (this.isThrottled) return;
+          this.isThrottled = true;
+          requestAnimationFrame(() => {
+            const rect = ctaSection.getBoundingClientRect();
+            if (rect.width > 0) {
+              const x = ((e.clientX - rect.left) / rect.width) * 100;
+              ctaSection.style.setProperty('--mouse-x', `${x}%`);
+            }
+            this.isThrottled = false;
+          });
+        }, { passive: true });
       }
     }
   }
@@ -49,7 +59,7 @@
   .cta-section {
     position: relative;
     padding-top: var(--space-4xl);
-    padding-bottom: 150px;
+    padding-bottom: var(--space-4xl);
     margin-top: var(--space-2xl);
     overflow: hidden;
     --mouse-x: 50%;
@@ -74,9 +84,9 @@
     width: 100%;
     height: 100%;
     border-radius: 100% 100% 0 0;
-    background: radial-gradient(ellipse at top center, rgba(0, 196, 204, 0.08) 0%, transparent 60%);
-    border-top: 1px solid rgba(0, 196, 204, 0.2);
-    box-shadow: inset 0 20px 60px rgba(0, 196, 204, 0.05), 0 -20px 60px rgba(0, 196, 204, 0.1);
+    background: radial-gradient(ellipse at top center, rgba(0, 196, 204, 0.18) 0%, transparent 60%);
+    border-top: 1px solid rgba(0, 196, 204, 0.35);
+    box-shadow: inset 0 20px 60px rgba(0, 196, 204, 0.12), 0 -20px 80px rgba(0, 196, 204, 0.18);
     transition: background 0.3s ease;
   }
 
@@ -86,7 +96,7 @@
     width: 60%;
     height: 100%;
     border-radius: 100% 100% 0 0;
-    background: radial-gradient(ellipse at top var(--mouse-x), rgba(0, 196, 204, 0.15) 0%, transparent 50%);
+    background: radial-gradient(ellipse at top var(--mouse-x), rgba(0, 196, 204, 0.25) 0%, transparent 50%);
     filter: blur(20px);
     mix-blend-mode: screen;
   }
@@ -108,7 +118,7 @@
   }
   
   .glow-title {
-    text-shadow: 0 0 40px rgba(0, 196, 204, 0.5);
+    filter: drop-shadow(0 0 40px rgba(0, 196, 204, 0.6)) drop-shadow(0 0 80px rgba(0, 196, 204, 0.3));
   }
 
   .cta-subtitle {

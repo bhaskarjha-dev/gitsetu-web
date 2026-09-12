@@ -1,6 +1,9 @@
 ---
 layout: ../../../layouts/DocsLayout.astro
 title: "Vault Backups"
+description: "Encrypted profile backup, restoration, and cryptographic verification procedures."
+category: "guides"
+slug: "guides/vault-backups"
 ---
 # Vault Backups & Restoration
 

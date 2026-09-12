@@ -10,155 +10,286 @@ const currentPath = '/' + Astro.url.pathname.replace(/^\/|\/$/g, '');
 const slug = currentPath.replace(/^\//, '');
 const ogImageUrl = `https://gitsetu.bhaskarjha.dev/og/${slug || 'index'}.png`;
 
+// Canonical doc list for sequential prev/next pagination across all 24 pages
+const docPages = [
+  { href: '/docs/overview/introduction', title: 'Introduction', category: 'Platform Overview' },
+  { href: '/docs/overview/architecture', title: 'Architecture', category: 'Platform Overview' },
+  { href: '/docs/overview/comparisons', title: 'Ecosystem Comparisons', category: 'Platform Overview' },
+  { href: '/docs/overview/manifesto', title: 'Design Manifesto', category: 'Platform Overview' },
+  { href: '/docs/getting-started/introduction', title: 'Getting Started', category: 'Getting Started' },
+  { href: '/docs/getting-started/installation', title: 'Installation', category: 'Getting Started' },
+  { href: '/docs/getting-started/quickstart', title: 'Quickstart', category: 'Getting Started' },
+  { href: '/docs/core-engines/identity-routing', title: 'Identity Routing', category: 'Core Engines' },
+  { href: '/docs/core-engines/ssh-orchestrator', title: 'SSH Orchestrator', category: 'Core Engines' },
+  { href: '/docs/core-engines/credential-broker', title: 'Credential Broker', category: 'Core Engines' },
+  { href: '/docs/core-engines/precommit-guard', title: 'Pre-Commit Guard', category: 'Core Engines' },
+  { href: '/docs/guides/shell-prompt', title: 'Shell Prompt Integration', category: 'Guides' },
+  { href: '/docs/guides/hardware-keys', title: 'Hardware Keys (FIDO2)', category: 'Guides' },
+  { href: '/docs/guides/wsl-integration', title: 'WSL Integration', category: 'Guides' },
+  { href: '/docs/guides/vault-backups', title: 'Vault Backups', category: 'Guides' },
+  { href: '/docs/enterprise/security-privacy', title: 'Security & Privacy', category: 'Enterprise & Vision' },
+  { href: '/docs/enterprise/product-roadmap', title: 'Product Roadmap', category: 'Enterprise & Vision' },
+  { href: '/docs/reference/cli-commands', title: 'CLI Commands', category: 'Reference & Support' },
+  { href: '/docs/reference/troubleshooting', title: 'Troubleshooting', category: 'Reference & Support' },
+  { href: '/docs/reference/faq', title: 'FAQ', category: 'Reference & Support' },
+  { href: '/docs/reference/manual-qa', title: 'Manual QA Playbook', category: 'Reference & Support' },
+  { href: '/docs/reference/contributing', title: 'Contributing Guide', category: 'Reference & Support' },
+  { href: '/docs/adr/0001-dual-ssh-routing-strategy', title: 'ADR 0001: Dual SSH Routing', category: 'Architecture Decisions' },
+  { href: '/docs/adr/0002-ssh-config-include-directive', title: 'ADR 0002: OpenSSH Include Pivot', category: 'Architecture Decisions' }
+];
+
+const normalizedCurrent = (currentPath === '/docs' || currentPath === '/docs/index' || currentPath === '/docs/overview/introduction') ? '/docs/overview/introduction' : currentPath;
+const currentIndex = docPages.findIndex(p => p.href === normalizedCurrent);
+const prevPage = currentIndex > 0 ? docPages[currentIndex - 1] : null;
+const nextPage = (currentIndex >= 0 && currentIndex < docPages.length - 1) ? docPages[currentIndex + 1] : null;
+
 // Helper for deterministic active link matching
 const isActive = (path: string) => {
   const normPath = '/' + path.replace(/^\/|\/$/g, '');
-  return currentPath === normPath ? 'active' : '';
+  return (normalizedCurrent === normPath || (normalizedCurrent === '/docs/overview/introduction' && (normPath === '/docs' || normPath === '/docs/overview/introduction'))) ? 'active' : '';
 };
 
 // Breadcrumb Category calculation
 const pathSegments = currentPath.split('/').filter(Boolean);
-let categoryName = '';
-if (pathSegments.length > 2) {
-  const rawCategory = pathSegments[1];
-  const categoryMap: Record<string, string> = {
-    'overview': 'Platform Overview',
-    'getting-started': 'Getting Started',
-    'core-engines': 'Core Engines',
-    'guides': 'Guides',
-    'enterprise': 'Enterprise & Vision',
-    'adr': 'Architecture Decisions',
-    'reference': 'Reference & Support'
-  };
-  categoryName = categoryMap[rawCategory] || rawCategory.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-}
+const activeCategory = pathSegments.length > 1 ? pathSegments[1] : 'overview';
+
+const categoryMap: Record<string, string> = {
+  'overview': 'Platform Overview',
+  'getting-started': 'Getting Started',
+  'core-engines': 'Core Engines',
+  'guides': 'Guides',
+  'enterprise': 'Enterprise & Vision',
+  'reference': 'Reference & Support',
+  'adr': 'Architecture Decisions'
+};
+const categoryName = categoryMap[activeCategory] || activeCategory.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
 
 // Compute edit URL based on current path
 const editUrl = `https://github.com/bhaskarjha-dev/gitsetu/tree/main/docs`;
 ---
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="color-scheme: dark;">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="GitSetu Documentation" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="theme-color" content="#000000" />
+    <meta name="description" content={frontmatter.description || "GitSetu Documentation"} />
     <title>{frontmatter.title} | GitSetu Docs</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="canonical" href={`https://gitsetu.bhaskarjha.dev${normalizedCurrent === '/docs/overview/introduction' ? '/docs' : normalizedCurrent}`} />
+    
+    <!-- Fonts: Preconnect & Non-Blocking Async Loading with display=swap -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'" />
+    <noscript>
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" />
+    </noscript>
     <ClientRouter />
 
-    <!-- Dynamic Open Graph -->
+    <!-- Dynamic Open Graph & Twitter -->
     <meta property="og:title" content={`${frontmatter.title} | GitSetu Docs`} />
     <meta property="og:description" content={frontmatter.description || "GitSetu Documentation"} />
     <meta property="og:image" content={ogImageUrl} />
-    <meta property="twitter:card" content="summary_large_image" />
-    <meta property="twitter:image" content={ogImageUrl} />
+    <meta property="og:url" content={`https://gitsetu.bhaskarjha.dev${normalizedCurrent === '/docs/overview/introduction' ? '/docs' : normalizedCurrent}`} />
+    <meta property="og:type" content="article" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={`${frontmatter.title} | GitSetu Docs`} />
+    <meta name="twitter:description" content={frontmatter.description || "GitSetu Documentation"} />
+    <meta name="twitter:image" content={ogImageUrl} />
     
     <!-- JSON-LD Semantic Web -->
     <script type="application/ld+json" set:html={JSON.stringify({
       "@context": "https://schema.org",
       "@type": "TechArticle",
+      "@id": `https://gitsetu.bhaskarjha.dev${normalizedCurrent}#article`,
+      "url": `https://gitsetu.bhaskarjha.dev${normalizedCurrent}`,
       "headline": frontmatter.title,
       "description": frontmatter.description || "GitSetu Documentation",
+      "inLanguage": "en",
+      "mainEntityOfPage": `https://gitsetu.bhaskarjha.dev${normalizedCurrent}`,
       "author": {
         "@type": "Person",
         "name": "Bhaskar Jha"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "GitSetu",
+        "url": "https://gitsetu.bhaskarjha.dev"
       }
+    })} />
+    <script type="application/ld+json" set:html={JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "@id": `https://gitsetu.bhaskarjha.dev${normalizedCurrent}#breadcrumbs`,
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://gitsetu.bhaskarjha.dev" },
+        { "@type": "ListItem", "position": 2, "name": "Docs", "item": "https://gitsetu.bhaskarjha.dev/docs" },
+        ...(categoryName ? [{ "@type": "ListItem", "position": 3, "name": categoryName, "item": `https://gitsetu.bhaskarjha.dev/docs#${activeCategory}` }] : []),
+        { "@type": "ListItem", "position": categoryName ? 4 : 3, "name": frontmatter.title, "item": `https://gitsetu.bhaskarjha.dev${normalizedCurrent}` }
+      ]
     })} />
 
     <script defer data-domain="gitsetu.bhaskarjha.dev" src="https://plausible.io/js/script.js"></script>
+
+    <!-- Inline styles to ensure critical media queries and table rules are present directly in static HTML -->
+    <style is:inline>
+      /* Responsive Table Overflow */
+      .markdown-body table {
+        display: block;
+        width: 100%;
+        max-width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        border-collapse: collapse;
+        margin-bottom: var(--space-lg);
+      }
+      @media (max-width: 768px) {
+        .docs-sidebar.mobile-drawer {
+          transform: translateX(-100%);
+          visibility: hidden;
+        }
+      }
+    </style>
   </head>
   <body>
+    <!-- Skip to main content bypass link -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+
     <global-manager>
       <!-- Persistent Noise Overlay -->
       <div class="noise-overlay"></div>
       <CommandPalette />
+
+      <!-- Mobile Menu Bar Toggle Button (before Navbar so mobile queries pick docs drawer first) -->
+      <div class="mobile-menu-bar">
+        <button id="mobile-menu-btn" class="mobile-toggle docs-mobile-menu-btn" type="button" aria-label="Toggle documentation menu" aria-expanded="false" aria-controls="docs-sidebar">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+          <span>Documentation Menu</span>
+        </button>
+      </div>
+
+      <!-- Mobile Drawer Backdrop Overlay -->
+      <div id="docs-drawer-backdrop" class="drawer-backdrop" aria-hidden="true"></div>
+
       <Navbar />
       
       <div class="docs-container container">
         <!-- Sidebar Navigation -->
-        <aside class="docs-sidebar">
-          <button id="docs-mobile-menu-btn" class="docs-mobile-menu-btn" aria-expanded="false" aria-controls="sidebar-content">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
-            Documentation Menu
-          </button>
+        <aside id="docs-sidebar" class="docs-sidebar mobile-drawer" aria-label="Documentation navigation">
           <div class="sidebar-content" id="sidebar-content">
             <div class="sidebar-inner">
               <nav class="sidebar-nav">
-            <!-- Optional Command Palette Mockup Trigger -->
-            <button class="search-btn" onclick="document.dispatchEvent(new CustomEvent('open-command-palette'))">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-              <span>Search docs...</span>
-              <kbd>⌘K</kbd>
-            </button>
+                <!-- Command Palette Trigger Button -->
+                <button id="search-btn" class="search-btn" type="button" aria-label="Search documentation" onclick="document.dispatchEvent(new CustomEvent('open-command-palette'))">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                  <span>Search docs...</span>
+                  <kbd>⌘K</kbd>
+                </button>
 
-            <div class="nav-group">
-              <h3 class="nav-heading">Platform Overview</h3>
-              <ul>
-                <li><a href="/docs" class={isActive('/docs')}>Introduction</a></li>
-                <li><a href="/docs/overview/architecture" class={isActive('/docs/overview/architecture')}>Architecture</a></li>
-                <li><a href="/docs/overview/comparisons" class={isActive('/docs/overview/comparisons')}>Ecosystem Comparisons</a></li>
-                <li><a href="/docs/overview/manifesto" class={isActive('/docs/overview/manifesto')}>Design Manifesto</a></li>
-              </ul>
-            </div>
-            <div class="nav-group">
-              <h3 class="nav-heading">Getting Started</h3>
-              <ul>
-                <li><a href="/docs/getting-started/introduction" class={isActive('/docs/getting-started/introduction')}>Introduction</a></li>
-                <li><a href="/docs/getting-started/installation" class={isActive('/docs/getting-started/installation')}>Installation</a></li>
-                <li><a href="/docs/getting-started/quickstart" class={isActive('/docs/getting-started/quickstart')}>Quickstart</a></li>
-              </ul>
-            </div>
-            <div class="nav-group">
-              <h3 class="nav-heading">Core Engines</h3>
-              <ul>
-                <li><a href="/docs/core-engines/identity-routing" class={isActive('/docs/core-engines/identity-routing')}>Identity Routing</a></li>
-                <li><a href="/docs/core-engines/ssh-orchestrator" class={isActive('/docs/core-engines/ssh-orchestrator')}>SSH Orchestrator</a></li>
-                <li><a href="/docs/core-engines/credential-broker" class={isActive('/docs/core-engines/credential-broker')}>Credential Broker</a></li>
-                <li><a href="/docs/core-engines/precommit-guard" class={isActive('/docs/core-engines/precommit-guard')}>Pre-Commit Guard</a></li>
-              </ul>
-            </div>
-            <div class="nav-group">
-              <h3 class="nav-heading">Guides</h3>
-              <ul>
-                <li><a href="/docs/guides/shell-prompt" class={isActive('/docs/guides/shell-prompt')}>Shell Prompt Integration</a></li>
-                <li><a href="/docs/guides/hardware-keys" class={isActive('/docs/guides/hardware-keys')}>Hardware Keys (FIDO2)</a></li>
-                <li><a href="/docs/guides/wsl-integration" class={isActive('/docs/guides/wsl-integration')}>WSL Integration</a></li>
-                <li><a href="/docs/guides/vault-backups" class={isActive('/docs/guides/vault-backups')}>Vault Backups</a></li>
-              </ul>
-            </div>
-            <div class="nav-group">
-              <h3 class="nav-heading">Enterprise & Vision</h3>
-              <ul>
-                <li><a href="/docs/enterprise/security-privacy" class={isActive('/docs/enterprise/security-privacy')}>Security & Privacy</a></li>
-                <li><a href="/docs/enterprise/product-roadmap" class={isActive('/docs/enterprise/product-roadmap')}>Product Roadmap</a></li>
-              </ul>
-            </div>
-            <div class="nav-group">
-              <h3 class="nav-heading">Architecture Decisions</h3>
-              <ul>
-                <li><a href="/docs/adr/0001-dual-ssh-routing-strategy" class={isActive('/docs/adr/0001-dual-ssh-routing-strategy')}>ADR 0001: Dual SSH Routing</a></li>
-                <li><a href="/docs/adr/0002-ssh-config-include-directive" class={isActive('/docs/adr/0002-ssh-config-include-directive')}>ADR 0002: OpenSSH Include Pivot</a></li>
-              </ul>
-            </div>
-            <div class="nav-group">
-              <h3 class="nav-heading">Reference & Support</h3>
-              <ul>
-                <li><a href="/docs/reference/cli-commands" class={isActive('/docs/reference/cli-commands')}>CLI Commands</a></li>
-                <li><a href="/docs/reference/troubleshooting" class={isActive('/docs/reference/troubleshooting')}>Troubleshooting</a></li>
-                <li><a href="/docs/reference/faq" class={isActive('/docs/reference/faq')}>FAQ</a></li>
-                <li><a href="/docs/reference/manual-qa" class={isActive('/docs/reference/manual-qa')}>Manual QA Playbook</a></li>
-                <li><a href="/docs/reference/contributing" class={isActive('/docs/reference/contributing')}>Contributing Guide</a></li>
-              </ul>
-            </div>
-          </nav>
+                <!-- Category 1: Platform Overview -->
+                <details class="nav-group" data-category="overview" open={activeCategory === 'overview' ? true : undefined}>
+                  <summary class="nav-heading">
+                    <span>Platform Overview</span>
+                    <svg class="chevron-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                  </summary>
+                  <ul>
+                    <li><a href="/docs/overview/introduction" class={isActive('/docs/overview/introduction')} aria-current={isActive('/docs/overview/introduction') ? 'page' : undefined}>Introduction</a></li>
+                    <li><a href="/docs/overview/architecture" class={isActive('/docs/overview/architecture')} aria-current={isActive('/docs/overview/architecture') ? 'page' : undefined}>Architecture</a></li>
+                    <li><a href="/docs/overview/comparisons" class={isActive('/docs/overview/comparisons')} aria-current={isActive('/docs/overview/comparisons') ? 'page' : undefined}>Ecosystem Comparisons</a></li>
+                    <li><a href="/docs/overview/manifesto" class={isActive('/docs/overview/manifesto')} aria-current={isActive('/docs/overview/manifesto') ? 'page' : undefined}>Design Manifesto</a></li>
+                  </ul>
+                </details>
+
+                <!-- Category 2: Getting Started -->
+                <details class="nav-group" data-category="getting-started" open={activeCategory === 'getting-started' ? true : undefined}>
+                  <summary class="nav-heading">
+                    <span>Getting Started</span>
+                    <svg class="chevron-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                  </summary>
+                  <ul>
+                    <li><a href="/docs/getting-started/introduction" class={isActive('/docs/getting-started/introduction')} aria-current={isActive('/docs/getting-started/introduction') ? 'page' : undefined}>Introduction</a></li>
+                    <li><a href="/docs/getting-started/installation" class={isActive('/docs/getting-started/installation')} aria-current={isActive('/docs/getting-started/installation') ? 'page' : undefined}>Installation</a></li>
+                    <li><a href="/docs/getting-started/quickstart" class={isActive('/docs/getting-started/quickstart')} aria-current={isActive('/docs/getting-started/quickstart') ? 'page' : undefined}>Quickstart</a></li>
+                  </ul>
+                </details>
+
+                <!-- Category 3: Core Engines -->
+                <details class="nav-group" data-category="core-engines" open={activeCategory === 'core-engines' ? true : undefined}>
+                  <summary class="nav-heading">
+                    <span>Core Engines</span>
+                    <svg class="chevron-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                  </summary>
+                  <ul>
+                    <li><a href="/docs/core-engines/identity-routing" class={isActive('/docs/core-engines/identity-routing')} aria-current={isActive('/docs/core-engines/identity-routing') ? 'page' : undefined}>Identity Routing</a></li>
+                    <li><a href="/docs/core-engines/ssh-orchestrator" class={isActive('/docs/core-engines/ssh-orchestrator')} aria-current={isActive('/docs/core-engines/ssh-orchestrator') ? 'page' : undefined}>SSH Orchestrator</a></li>
+                    <li><a href="/docs/core-engines/credential-broker" class={isActive('/docs/core-engines/credential-broker')} aria-current={isActive('/docs/core-engines/credential-broker') ? 'page' : undefined}>Credential Broker</a></li>
+                    <li><a href="/docs/core-engines/precommit-guard" class={isActive('/docs/core-engines/precommit-guard')} aria-current={isActive('/docs/core-engines/precommit-guard') ? 'page' : undefined}>Pre-Commit Guard</a></li>
+                  </ul>
+                </details>
+
+                <!-- Category 4: Guides -->
+                <details class="nav-group" data-category="guides" open={activeCategory === 'guides' ? true : undefined}>
+                  <summary class="nav-heading">
+                    <span>Guides</span>
+                    <svg class="chevron-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                  </summary>
+                  <ul>
+                    <li><a href="/docs/guides/shell-prompt" class={isActive('/docs/guides/shell-prompt')} aria-current={isActive('/docs/guides/shell-prompt') ? 'page' : undefined}>Shell Prompt Integration</a></li>
+                    <li><a href="/docs/guides/hardware-keys" class={isActive('/docs/guides/hardware-keys')} aria-current={isActive('/docs/guides/hardware-keys') ? 'page' : undefined}>Hardware Keys (FIDO2)</a></li>
+                    <li><a href="/docs/guides/wsl-integration" class={isActive('/docs/guides/wsl-integration')} aria-current={isActive('/docs/guides/wsl-integration') ? 'page' : undefined}>WSL Integration</a></li>
+                    <li><a href="/docs/guides/vault-backups" class={isActive('/docs/guides/vault-backups')} aria-current={isActive('/docs/guides/vault-backups') ? 'page' : undefined}>Vault Backups</a></li>
+                  </ul>
+                </details>
+
+                <!-- Category 5: Enterprise & Vision -->
+                <details class="nav-group" data-category="enterprise" open={activeCategory === 'enterprise' ? true : undefined}>
+                  <summary class="nav-heading">
+                    <span>Enterprise & Vision</span>
+                    <svg class="chevron-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                  </summary>
+                  <ul>
+                    <li><a href="/docs/enterprise/security-privacy" class={isActive('/docs/enterprise/security-privacy')} aria-current={isActive('/docs/enterprise/security-privacy') ? 'page' : undefined}>Security & Privacy</a></li>
+                    <li><a href="/docs/enterprise/product-roadmap" class={isActive('/docs/enterprise/product-roadmap')} aria-current={isActive('/docs/enterprise/product-roadmap') ? 'page' : undefined}>Product Roadmap</a></li>
+                  </ul>
+                </details>
+
+                <!-- Category 6: Reference & Support -->
+                <details class="nav-group" data-category="reference" open={activeCategory === 'reference' ? true : undefined}>
+                  <summary class="nav-heading">
+                    <span>Reference & Support</span>
+                    <svg class="chevron-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                  </summary>
+                  <ul>
+                    <li><a href="/docs/reference/cli-commands" class={isActive('/docs/reference/cli-commands')} aria-current={isActive('/docs/reference/cli-commands') ? 'page' : undefined}>CLI Commands</a></li>
+                    <li><a href="/docs/reference/troubleshooting" class={isActive('/docs/reference/troubleshooting')} aria-current={isActive('/docs/reference/troubleshooting') ? 'page' : undefined}>Troubleshooting</a></li>
+                    <li><a href="/docs/reference/faq" class={isActive('/docs/reference/faq')} aria-current={isActive('/docs/reference/faq') ? 'page' : undefined}>FAQ</a></li>
+                    <li><a href="/docs/reference/manual-qa" class={isActive('/docs/reference/manual-qa')} aria-current={isActive('/docs/reference/manual-qa') ? 'page' : undefined}>Manual QA Playbook</a></li>
+                    <li><a href="/docs/reference/contributing" class={isActive('/docs/reference/contributing')} aria-current={isActive('/docs/reference/contributing') ? 'page' : undefined}>Contributing Guide</a></li>
+                  </ul>
+                </details>
+
+                <!-- Category 7: Architecture Decisions (ADR - final category) -->
+                <details class="nav-group" data-category="adr" open={activeCategory === 'adr' ? true : undefined}>
+                  <summary class="nav-heading">
+                    <span>Architecture Decisions (ADR)</span>
+                    <svg class="chevron-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                  </summary>
+                  <ul>
+                    <li><a href="/docs/adr/0001-dual-ssh-routing-strategy" class={isActive('/docs/adr/0001-dual-ssh-routing-strategy')} aria-current={isActive('/docs/adr/0001-dual-ssh-routing-strategy') ? 'page' : undefined}>ADR 0001: Dual SSH Routing</a></li>
+                    <li><a href="/docs/adr/0002-ssh-config-include-directive" class={isActive('/docs/adr/0002-ssh-config-include-directive')} aria-current={isActive('/docs/adr/0002-ssh-config-include-directive') ? 'page' : undefined}>ADR 0002: OpenSSH Include Pivot</a></li>
+                  </ul>
+                </details>
+              </nav>
             </div>
           </div>
         </aside>
         
         <!-- Main Content -->
-        <main class="docs-content markdown-body">
+        <main id="main-content" class="docs-content markdown-body">
           {currentPath !== '/docs' && (
             <nav class="docs-breadcrumbs" aria-label="Breadcrumbs">
               <a href="/docs">Docs</a>
@@ -173,6 +304,29 @@ const editUrl = `https://github.com/bhaskarjha-dev/gitsetu/tree/main/docs`;
             </nav>
           )}
           <slot />
+
+          <!-- Sequential Prev / Next Pagination Cards -->
+          <nav class="docs-pagination prev-next-nav" aria-label="Document pagination">
+            {prevPage ? (
+              <a href={prevPage.href} class="pagination-card pagination-prev" rel="prev">
+                <div class="pagination-direction">
+                  <svg class="pagination-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                  <span>Previous</span>
+                </div>
+                <div class="pagination-title">{prevPage.title}</div>
+              </a>
+            ) : <div class="pagination-spacer" />}
+
+            {nextPage ? (
+              <a href={nextPage.href} class="pagination-card pagination-next" rel="next">
+                <div class="pagination-direction">
+                  <span>Next</span>
+                  <svg class="pagination-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                </div>
+                <div class="pagination-title">{nextPage.title}</div>
+              </a>
+            ) : <div class="pagination-spacer" />}
+          </nav>
           
           <div class="docs-footer">
             <a href={editUrl} target="_blank" rel="noopener noreferrer" class="edit-link">
@@ -182,12 +336,11 @@ const editUrl = `https://github.com/bhaskarjha-dev/gitsetu/tree/main/docs`;
           </div>
         </main>
 
-        <!-- Optional Table of Contents Pane (Fluid 3-column) -->
-        <aside class="docs-toc">
+        <!-- Table of Contents Pane -->
+        <aside class="docs-toc" aria-label="Table of contents">
           <div class="toc-inner">
             <h4 class="toc-heading">On this page</h4>
             <ul class="toc-list" id="toc-list">
-              <!-- Dynamically populated via script below if needed, or left empty as a placeholder for structural balance -->
               <li class="toc-placeholder">No headings found.</li>
             </ul>
           </div>
@@ -198,64 +351,249 @@ const editUrl = `https://github.com/bhaskarjha-dev/gitsetu/tree/main/docs`;
     </global-manager>
 
     <script>
-      let toggleHandler: (() => void) | null = null;
-      let linkHandlers: Array<{ el: Element; handler: () => void }> = [];
-      let docsMenuBtn: HTMLElement | null = null;
+      let tocObserver: IntersectionObserver | null = null;
+      let activeHeadingId = '';
+
+      const setupTOC = () => {
+        const tocList = document.getElementById('toc-list');
+        const headings = Array.from(document.querySelectorAll('.markdown-body h2, .markdown-body h3')) as HTMLElement[];
+        
+        if (!tocList) return;
+
+        if (headings.length === 0) {
+          tocList.innerHTML = '<li class="toc-placeholder">No headings found.</li>';
+          return;
+        }
+
+        tocList.innerHTML = '';
+        headings.forEach(heading => {
+          if (!heading.id) {
+            heading.id = heading.textContent?.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || '';
+          }
+          const li = document.createElement('li');
+          li.className = heading.tagName.toLowerCase() === 'h3' ? 'toc-sub' : '';
+          const a = document.createElement('a');
+          a.href = '#' + heading.id;
+          a.textContent = heading.textContent;
+          li.appendChild(a);
+          tocList.appendChild(li);
+        });
+
+        const updateActiveToc = (targetId: string) => {
+          if (!targetId || targetId === activeHeadingId) return;
+          activeHeadingId = targetId;
+          const links = tocList.querySelectorAll('a');
+          links.forEach(link => {
+            if (link.getAttribute('href') === `#${targetId}`) {
+              link.classList.add('active');
+            } else {
+              link.classList.remove('active');
+            }
+          });
+        };
+
+        tocObserver?.disconnect();
+        tocObserver = new IntersectionObserver((entries) => {
+          // Find intersecting headings
+          const visible = entries.filter(e => e.isIntersecting);
+          if (visible.length > 0) {
+            // Pick topmost visible heading
+            updateActiveToc(visible[0].target.id);
+          }
+        }, {
+          rootMargin: '0px 0px -65% 0px',
+          threshold: 0
+        });
+
+        headings.forEach(h => tocObserver?.observe(h));
+
+        // Initial check: if window is near the top, highlight the very first heading
+        if (window.scrollY < 100 && headings.length > 0) {
+          updateActiveToc(headings[0].id);
+        }
+      };
+
+      const setupCodeCopyButtons = () => {
+        const preBlocks = document.querySelectorAll('.markdown-body pre');
+        preBlocks.forEach(pre => {
+          if (pre.querySelector('.copy-code-btn')) return;
+
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'copy-btn copy-code-btn';
+          btn.setAttribute('aria-label', 'Copy code to clipboard');
+          btn.innerHTML = `
+            <svg class="copy-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+            <span class="copy-text">Copy</span>
+          `;
+
+          let resetTimer: any = null;
+
+          const fallbackCopy = (text: string) => {
+            try {
+              const ta = document.createElement('textarea');
+              ta.value = text;
+              ta.style.position = 'fixed';
+              ta.style.left = '-9999px';
+              ta.style.top = '-9999px';
+              ta.setAttribute('readonly', '');
+              document.body.appendChild(ta);
+              ta.select();
+              document.execCommand('copy');
+              document.body.removeChild(ta);
+            } catch {}
+          };
+
+          btn.addEventListener('click', () => {
+            const codeEl = pre.querySelector('code');
+            const codeText = (codeEl ? codeEl.innerText : pre.innerText).trim();
+
+            btn.classList.add('copied');
+            btn.setAttribute('aria-label', 'Copied to clipboard');
+            const textSpan = btn.querySelector('.copy-text');
+            if (textSpan) textSpan.textContent = 'Copied!';
+
+            if (resetTimer) clearTimeout(resetTimer);
+            resetTimer = setTimeout(() => {
+              btn.classList.remove('copied');
+              btn.setAttribute('aria-label', 'Copy code to clipboard');
+              if (textSpan) textSpan.textContent = 'Copy';
+            }, 2000);
+
+            if (navigator.clipboard && window.isSecureContext) {
+              navigator.clipboard.writeText(codeText).catch(() => {
+                fallbackCopy(codeText);
+              });
+            } else {
+              fallbackCopy(codeText);
+            }
+          });
+
+          pre.appendChild(btn);
+        });
+      };
+
+      const setupMobileDrawer = () => {
+        const menuBtn = document.getElementById('mobile-menu-btn');
+        const sidebar = document.getElementById('docs-sidebar');
+        const backdrop = document.getElementById('docs-drawer-backdrop');
+
+        if (!menuBtn || !sidebar || !backdrop) return;
+
+        const openDrawer = () => {
+          sidebar.classList.add('active');
+          backdrop.classList.add('active');
+          backdrop.setAttribute('aria-hidden', 'false');
+          menuBtn.setAttribute('aria-expanded', 'true');
+          document.body.style.overflow = 'hidden';
+          const firstFocusable = (Array.from(sidebar.querySelectorAll('a, button, input, summary, [tabindex]:not([tabindex="-1"])')) as HTMLElement[]).find(el => el.offsetWidth > 0 && el.offsetHeight > 0);
+          firstFocusable?.focus();
+        };
+
+        const closeDrawer = () => {
+          sidebar.classList.remove('active');
+          backdrop.classList.remove('active');
+          backdrop.setAttribute('aria-hidden', 'true');
+          menuBtn.setAttribute('aria-expanded', 'false');
+          document.body.style.overflow = '';
+          menuBtn.focus();
+        };
+
+        menuBtn.addEventListener('click', () => {
+          const isOpen = sidebar.classList.contains('active');
+          if (isOpen) closeDrawer(); else openDrawer();
+        });
+
+        backdrop.addEventListener('click', closeDrawer);
+
+        sidebar.querySelectorAll('a').forEach(link => {
+          link.addEventListener('click', closeDrawer);
+        });
+
+        window.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape' && sidebar.classList.contains('active')) {
+            closeDrawer();
+          }
+        });
+
+        sidebar.addEventListener('keydown', (e: KeyboardEvent) => {
+          if (!sidebar.classList.contains('active')) return;
+          if (e.key === 'Tab') {
+            const focusables = (Array.from(
+              sidebar.querySelectorAll('a, button, input, summary, [tabindex]:not([tabindex="-1"])')
+            ) as HTMLElement[]).filter(el => el.offsetWidth > 0 && el.offsetHeight > 0);
+            if (focusables.length === 0) return;
+            const first = focusables[0];
+            const last = focusables[focusables.length - 1];
+            if (e.shiftKey) {
+              if (document.activeElement === first || !sidebar.contains(document.activeElement)) {
+                e.preventDefault();
+                last.focus();
+              }
+            } else {
+              if (document.activeElement === last || !sidebar.contains(document.activeElement)) {
+                e.preventDefault();
+                first.focus();
+              }
+            }
+          }
+        });
+
+        document.addEventListener('keydown', (e: KeyboardEvent) => {
+          if (!sidebar.classList.contains('active')) return;
+          if (e.key === 'Tab' && !sidebar.contains(document.activeElement)) {
+            const focusables = (Array.from(
+              sidebar.querySelectorAll('a, button, input, summary, [tabindex]:not([tabindex="-1"])')
+            ) as HTMLElement[]).filter(el => el.offsetWidth > 0 && el.offsetHeight > 0);
+            if (focusables.length === 0) return;
+            e.preventDefault();
+            if (e.shiftKey) {
+              focusables[focusables.length - 1].focus();
+            } else {
+              focusables[0].focus();
+            }
+          }
+        });
+      };
+
+      const setupSidebarPersistence = () => {
+        const STORAGE_KEY = 'gitsetu-docs-sidebar-state';
+        let savedState: Record<string, boolean> = {};
+        try {
+          savedState = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+        } catch {}
+
+        const details = document.querySelectorAll('aside details.nav-group');
+        details.forEach(detail => {
+          const el = detail as HTMLDetailsElement;
+          const cat = el.dataset.category;
+          // Apply saved state if not active category
+          if (cat && savedState[cat] !== undefined && !el.hasAttribute('open')) {
+            el.open = savedState[cat];
+          }
+
+          el.addEventListener('toggle', () => {
+            if (cat) {
+              savedState[cat] = el.open;
+              try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(savedState));
+              } catch {}
+            }
+          });
+        });
+      };
 
       document.addEventListener('astro:page-load', () => {
-        // Simple TOC generator for h2 and h3
-        const tocList = document.getElementById('toc-list');
-        const headings = document.querySelectorAll('.markdown-body h2, .markdown-body h3');
-        
-        if (headings.length > 0 && tocList) {
-          tocList.innerHTML = '';
-          headings.forEach(heading => {
-            if (!heading.id) {
-              heading.id = heading.textContent?.toLowerCase().replace(/[^a-z0-9]+/g, '-') || '';
-            }
-            const li = document.createElement('li');
-            li.className = heading.tagName.toLowerCase() === 'h3' ? 'toc-sub' : '';
-            const a = document.createElement('a');
-            a.href = '#' + heading.id;
-            a.textContent = heading.textContent;
-            li.appendChild(a);
-            tocList.appendChild(li);
-          });
-        }
-
-        // Docs Mobile Menu Toggle
-        docsMenuBtn = document.getElementById('docs-mobile-menu-btn');
-        const sidebarContent = document.getElementById('sidebar-content');
-        
-        if (docsMenuBtn && sidebarContent) {
-          toggleHandler = () => {
-            const isActive = sidebarContent.classList.toggle('active');
-            docsMenuBtn?.setAttribute('aria-expanded', String(isActive));
-          };
-          docsMenuBtn.addEventListener('click', toggleHandler);
-
-          // Auto-close docs menu when clicking a link inside it
-          sidebarContent.querySelectorAll('a').forEach(a => {
-            const h = () => {
-              sidebarContent.classList.remove('active');
-              docsMenuBtn?.setAttribute('aria-expanded', 'false');
-            };
-            a.addEventListener('click', h);
-            linkHandlers.push({ el: a, handler: h });
-          });
-        }
+        setupTOC();
+        setupCodeCopyButtons();
+        setupMobileDrawer();
+        setupSidebarPersistence();
       });
 
       document.addEventListener('astro:before-swap', () => {
-        if (docsMenuBtn && toggleHandler) {
-          docsMenuBtn.removeEventListener('click', toggleHandler);
-        }
-        linkHandlers.forEach(({ el, handler }) => {
-          el.removeEventListener('click', handler);
-        });
-        linkHandlers = [];
-        toggleHandler = null;
-        docsMenuBtn = null;
+        tocObserver?.disconnect();
+        tocObserver = null;
+        document.body.style.overflow = '';
       });
     </script>
   </body>
@@ -278,11 +616,9 @@ const editUrl = `https://github.com/bhaskarjha-dev/gitsetu/tree/main/docs`;
   .docs-sidebar {
     position: sticky;
     top: calc(var(--nav-height) + var(--space-xl));
-    /* Allow sidebar to scroll internally if very tall, without forcing the whole page */
     max-height: calc(100vh - var(--nav-height) - var(--space-2xl));
     overflow-y: auto;
     padding-right: var(--space-md);
-    /* Hide scrollbar visually but allow scroll */
     scrollbar-width: none;
     -ms-overflow-style: none;
   }
@@ -290,8 +626,29 @@ const editUrl = `https://github.com/bhaskarjha-dev/gitsetu/tree/main/docs`;
     display: none;
   }
 
-  .docs-mobile-menu-btn {
+  .mobile-menu-bar {
     display: none;
+  }
+
+  .docs-mobile-menu-btn {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    width: 100%;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: var(--space-md);
+    color: var(--text-heading);
+    font-size: var(--text-base);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+  }
+
+  .docs-mobile-menu-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--border-card);
   }
 
   .search-btn {
@@ -324,22 +681,43 @@ const editUrl = `https://github.com/bhaskarjha-dev/gitsetu/tree/main/docs`;
     font-family: var(--font-mono);
   }
 
+  /* Collapsible Category Groups */
   .nav-group {
-    margin-bottom: var(--space-xl);
+    margin-bottom: var(--space-lg);
   }
 
   .nav-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     font-size: var(--text-xs);
     text-transform: uppercase;
     letter-spacing: 0.05em;
     color: var(--text-muted);
-    margin-bottom: var(--space-sm);
+    margin-bottom: var(--space-xs);
+    cursor: pointer;
+    user-select: none;
+    padding: 4px 0;
+    font-weight: 600;
+    list-style: none;
+  }
+  .nav-heading::-webkit-details-marker {
+    display: none;
+  }
+
+  .nav-heading .chevron-icon {
+    transition: transform var(--transition-fast);
+    color: var(--text-muted);
+  }
+
+  details[open] > summary .chevron-icon {
+    transform: rotate(180deg);
   }
 
   .sidebar-nav ul {
     list-style: none;
     padding: 0;
-    margin: 0;
+    margin: var(--space-xs) 0 var(--space-md) 0;
   }
 
   .sidebar-nav li {
@@ -418,8 +796,65 @@ const editUrl = `https://github.com/bhaskarjha-dev/gitsetu/tree/main/docs`;
     display: contents;
   }
 
-  .docs-footer {
+  /* Pagination Navigation */
+  .docs-pagination {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-lg);
     margin-top: var(--space-4xl);
+    padding-top: var(--space-2xl);
+    border-top: 1px solid var(--border-subtle);
+  }
+
+  .pagination-spacer {
+    display: block;
+  }
+
+  .pagination-card {
+    display: flex;
+    flex-direction: column;
+    padding: var(--space-lg);
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    text-decoration: none;
+    transition: all var(--transition-base);
+  }
+
+  .pagination-card:hover {
+    border-color: var(--accent-primary);
+    transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.03);
+  }
+
+  .pagination-direction {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: var(--space-xs);
+    font-weight: 600;
+  }
+
+  .pagination-next .pagination-direction {
+    justify-content: flex-end;
+  }
+
+  .pagination-title {
+    font-size: var(--text-base);
+    font-weight: 600;
+    color: var(--text-heading);
+  }
+
+  .pagination-next {
+    text-align: right;
+  }
+
+  .docs-footer {
+    margin-top: var(--space-3xl);
     padding-top: var(--space-xl);
     border-top: 1px solid var(--border-subtle);
   }
@@ -473,14 +908,24 @@ const editUrl = `https://github.com/bhaskarjha-dev/gitsetu/tree/main/docs`;
   }
 
   .toc-list a {
+    display: block;
     color: var(--text-secondary);
     font-size: 13px;
     text-decoration: none;
-    transition: color var(--transition-fast);
+    transition: all var(--transition-fast);
+    padding-left: 2px;
+    border-left: 2px solid transparent;
+    margin-left: -2px;
   }
 
   .toc-list a:hover {
     color: var(--text-heading);
+  }
+
+  .toc-list a.active {
+    color: var(--accent-primary);
+    font-weight: 600;
+    border-left-color: var(--accent-primary);
   }
 
   .toc-placeholder {
@@ -489,10 +934,50 @@ const editUrl = `https://github.com/bhaskarjha-dev/gitsetu/tree/main/docs`;
     font-style: italic;
   }
 
-  /* Container Query responsive adjustments */
+  /* Code Block Copy Button */
+  .copy-code-btn {
+    position: absolute;
+    top: 8px;
+    right: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 8px;
+    font-size: var(--text-xs);
+    font-family: var(--font-sans);
+    color: var(--text-muted);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    z-index: 2;
+    user-select: none;
+    line-height: 1;
+  }
+
+  .copy-code-btn:hover {
+    color: var(--text-heading);
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--border-card);
+  }
+
+  .copy-code-btn:focus-visible {
+    outline: 2px solid var(--accent-primary);
+    outline-offset: 1px;
+    color: var(--text-heading);
+  }
+
+  .copy-code-btn.copied {
+    color: var(--color-success, #10b981);
+    background: rgba(16, 185, 129, 0.12);
+    border-color: rgba(16, 185, 129, 0.4);
+  }
+
+  /* Responsive Adjustments */
   @media (max-width: 1024px) {
     .docs-container {
-      grid-template-columns: 220px minmax(0, 1fr); /* Hide TOC on medium screens */
+      grid-template-columns: 220px minmax(0, 1fr);
     }
     .docs-toc {
       display: none;
@@ -503,46 +988,53 @@ const editUrl = `https://github.com/bhaskarjha-dev/gitsetu/tree/main/docs`;
     .docs-container {
       grid-template-columns: 1fr;
     }
-    .docs-sidebar {
-      position: relative;
-      top: 0;
-      max-height: none;
-      border-right: none;
+    .mobile-menu-bar {
+      display: block;
+      position: sticky;
+      top: var(--nav-height, 64px);
+      z-index: 900;
+      background: var(--bg-primary);
+      padding: var(--space-sm) var(--space-md);
       border-bottom: 1px solid var(--border-subtle);
-      padding-right: 0;
-      padding-bottom: var(--space-lg);
-      margin-bottom: var(--space-lg);
     }
-    .docs-mobile-menu-btn {
-      display: flex;
-      align-items: center;
-      gap: var(--space-sm);
-      width: 100%;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-md);
-      padding: var(--space-md);
-      color: var(--text-primary);
-      font-size: var(--text-base);
-      font-weight: 600;
-      cursor: pointer;
+    .docs-sidebar.mobile-drawer {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 280px;
+      height: 100vh;
+      max-height: 100vh;
+      background: var(--bg-secondary);
+      border-right: 1px solid var(--border-subtle);
+      padding: var(--space-xl) var(--space-lg);
+      z-index: 1000;
+      transform: translateX(-100%);
+      transition: transform var(--transition-base), visibility var(--transition-base);
+      visibility: hidden;
+      display: block;
     }
-    .sidebar-content {
-      display: grid;
-      grid-template-rows: 0fr;
-      transition: grid-template-rows var(--transition-base), margin-top var(--transition-base);
-      margin-top: 0;
+    .docs-sidebar.mobile-drawer.active {
+      transform: translateX(0);
+      visibility: visible;
     }
-    .sidebar-inner {
-      overflow: hidden;
+    .drawer-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      z-index: 999;
     }
-    .sidebar-content.active {
-      grid-template-rows: 1fr;
-      margin-top: var(--space-lg);
+    .drawer-backdrop.active {
+      display: block;
+    }
+    .docs-pagination {
+      grid-template-columns: 1fr;
     }
   }
 
-  /* Markdown Typography overrides (Fluid) */
+  /* Markdown Typography overrides */
   .markdown-body h1 {
     font-size: var(--text-4xl);
     margin-bottom: var(--space-lg);
@@ -634,7 +1126,6 @@ const editUrl = `https://github.com/bhaskarjha-dev/gitsetu/tree/main/docs`;
     border: none;
   }
 
-  /* Standard Blockquote Styling */
   .markdown-body blockquote {
     padding: var(--space-md) var(--space-lg);
     margin-bottom: var(--space-lg);

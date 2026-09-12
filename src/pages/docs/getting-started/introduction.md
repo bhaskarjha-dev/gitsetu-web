@@ -1,6 +1,9 @@
 ---
 layout: ../../../layouts/DocsLayout.astro
 title: "Getting Started"
+description: "Onboarding guide covering prerequisites, system requirements, and foundational GitSetu setup."
+category: "getting-started"
+slug: "getting-started/introduction"
 ---
 # Introduction
 

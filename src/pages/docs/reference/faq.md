@@ -1,6 +1,9 @@
 ---
 layout: ../../../layouts/DocsLayout.astro
 title: "FAQ"
+description: "Frequently asked questions regarding security, compatibility, key rotation, and performance."
+category: "reference"
+slug: "reference/faq"
 ---
 # Frequently Asked Questions
 

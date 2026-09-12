@@ -1,6 +1,9 @@
 ---
 layout: ../../../layouts/DocsLayout.astro
 title: "Quickstart"
+description: "Fast-track tutorial to configure your personal and work Git profiles in under three minutes."
+category: "getting-started"
+slug: "getting-started/quickstart"
 ---
 # Quickstart
 

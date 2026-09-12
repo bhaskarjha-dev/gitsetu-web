@@ -1,6 +1,9 @@
 ---
 layout: ../../../layouts/DocsLayout.astro
 title: "Credential Broker"
+description: "OS keychain integration and encrypted credential vault storing personal access tokens securely."
+category: "core-engines"
+slug: "core-engines/credential-broker"
 ---
 # Credential Broker Engine
 
