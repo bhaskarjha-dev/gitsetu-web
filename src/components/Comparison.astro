@@ -16,6 +16,20 @@ const comparisonData = [
   { feature: '32 Automated Test Suites (POSIX + Sandbox)', gitsetu: '✅', gitego: '❌', karn: '❌', gh: '❌', gcm: '❌' },
   { feature: 'Runtime', gitsetu: 'Bash 3.2', gitego: 'Go', karn: 'Go', gh: 'Go', gcm: '.NET' }
 ];
+
+const getCellClass = (val: string) => {
+  if (val === '✅') return 'success';
+  if (val === '⚡') return 'warning';
+  if (val === '❌') return 'neutral';
+  return 'runtime-val';
+};
+
+const getCellLabel = (val: string) => {
+  if (val === '✅') return 'Supported';
+  if (val === '⚡') return 'Partial';
+  if (val === '❌') return 'Not supported';
+  return undefined;
+};
 ---
 
 <section class="comparison section reveal" id="comparison">
@@ -40,27 +54,27 @@ const comparisonData = [
             <tr>
               <th scope="row" class="feature-cell">{row.feature}</th>
               <td class="gitsetu-cell">
-                <span class={row.gitsetu === '✅' ? 'success' : (row.gitsetu === '⚡' ? 'warning' : 'neutral')} aria-label={row.gitsetu === '✅' ? 'Supported' : (row.gitsetu === '⚡' ? 'Partial' : 'Not supported')}>
+                <span class={getCellClass(row.gitsetu)} aria-label={getCellLabel(row.gitsetu)}>
                   {row.gitsetu}
                 </span>
               </td>
               <td class="competitor-cell">
-                <span class={row.gitego === '✅' ? 'success' : (row.gitego === '⚡' ? 'warning' : 'neutral')} aria-label={row.gitego === '✅' ? 'Supported' : (row.gitego === '⚡' ? 'Partial' : 'Not supported')}>
+                <span class={getCellClass(row.gitego)} aria-label={getCellLabel(row.gitego)}>
                   {row.gitego}
                 </span>
               </td>
               <td class="competitor-cell">
-                <span class={row.karn === '✅' ? 'success' : (row.karn === '⚡' ? 'warning' : 'neutral')}>
+                <span class={getCellClass(row.karn)} aria-label={getCellLabel(row.karn)}>
                   {row.karn}
                 </span>
               </td>
               <td class="competitor-cell">
-                <span class={row.gh === '✅' ? 'success' : (row.gh === '⚡' ? 'warning' : 'neutral')}>
+                <span class={getCellClass(row.gh)} aria-label={getCellLabel(row.gh)}>
                   {row.gh}
                 </span>
               </td>
               <td class="competitor-cell">
-                <span class={row.gcm === '✅' ? 'success' : (row.gcm === '⚡' ? 'warning' : 'neutral')}>
+                <span class={getCellClass(row.gcm)} aria-label={getCellLabel(row.gcm)}>
                   {row.gcm}
                 </span>
               </td>

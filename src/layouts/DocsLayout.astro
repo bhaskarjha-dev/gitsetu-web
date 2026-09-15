@@ -64,8 +64,37 @@ const categoryMap: Record<string, string> = {
 };
 const categoryName = categoryMap[activeCategory] || activeCategory.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
 
-// Compute edit URL based on current path
-const editUrl = `https://github.com/bhaskarjha-dev/gitsetu/tree/main/docs`;
+// Compute direct GitHub edit URL based on current path
+const docSourceFileMap: Record<string, string> = {
+  '/docs': 'docs/overview/introduction.md',
+  '/docs/overview/introduction': 'docs/overview/introduction.md',
+  '/docs/overview/architecture': 'docs/overview/architecture.md',
+  '/docs/overview/comparisons': 'docs/overview/comparisons.md',
+  '/docs/overview/manifesto': 'docs/overview/manifesto.md',
+  '/docs/getting-started/introduction': 'docs/getting-started/introduction.md',
+  '/docs/getting-started/installation': 'docs/getting-started/installation.md',
+  '/docs/getting-started/quickstart': 'docs/getting-started/quickstart.md',
+  '/docs/core-engines/identity-routing': 'docs/core-engines/identity-routing.md',
+  '/docs/core-engines/ssh-orchestrator': 'docs/core-engines/ssh-orchestrator.md',
+  '/docs/core-engines/credential-broker': 'docs/core-engines/credential-broker.md',
+  '/docs/core-engines/precommit-guard': 'docs/core-engines/precommit-guard.md',
+  '/docs/guides/shell-prompt': 'docs/guides/shell-prompt.md',
+  '/docs/guides/hardware-keys': 'docs/guides/hardware-keys.md',
+  '/docs/guides/wsl-integration': 'docs/guides/wsl-integration.md',
+  '/docs/guides/vault-backups': 'docs/guides/vault-backups.md',
+  '/docs/enterprise/security-privacy': 'docs/enterprise/security-privacy.md',
+  '/docs/enterprise/product-roadmap': 'docs/enterprise/product-roadmap.md',
+  '/docs/reference/cli-commands': 'docs/reference/cli-commands.md',
+  '/docs/reference/troubleshooting': 'docs/reference/troubleshooting.md',
+  '/docs/reference/faq': 'docs/reference/faq.md',
+  '/docs/reference/manual-qa': 'docs/MANUAL_QA.md',
+  '/docs/reference/contributing': 'CONTRIBUTING.md',
+  '/docs/adr/0001-dual-ssh-routing-strategy': 'docs/adr/0001-dual-ssh-routing-strategy.md',
+  '/docs/adr/0002-ssh-config-include-directive': 'docs/adr/0002-ssh-config-include-directive.md'
+};
+
+const sourceFile = docSourceFileMap[normalizedCurrent] || (normalizedCurrent ? `${normalizedCurrent.replace(/^\/docs\/?/, 'docs/')}.md` : 'docs/overview/introduction.md');
+const editUrl = `https://github.com/bhaskarjha-dev/gitsetu/edit/main/${sourceFile}`;
 ---
 
 <!DOCTYPE html>
@@ -367,14 +396,24 @@ const editUrl = `https://github.com/bhaskarjha-dev/gitsetu/tree/main/docs`;
 
         tocList.innerHTML = '';
         headings.forEach(heading => {
+          let headingTitle = '';
+          heading.childNodes.forEach(node => {
+            if (node.nodeType === Node.TEXT_NODE) {
+              headingTitle += node.textContent;
+            } else if (node.nodeType === Node.ELEMENT_NODE && !(node as HTMLElement).classList.contains('heading-anchor')) {
+              headingTitle += (node as HTMLElement).innerText || node.textContent;
+            }
+          });
+          headingTitle = headingTitle.trim();
+
           if (!heading.id) {
-            heading.id = heading.textContent?.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || '';
+            heading.id = headingTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || '';
           }
           const li = document.createElement('li');
           li.className = heading.tagName.toLowerCase() === 'h3' ? 'toc-sub' : '';
           const a = document.createElement('a');
           a.href = '#' + heading.id;
-          a.textContent = heading.textContent;
+          a.textContent = headingTitle || heading.id;
           li.appendChild(a);
           tocList.appendChild(li);
         });
@@ -411,6 +450,118 @@ const editUrl = `https://github.com/bhaskarjha-dev/gitsetu/tree/main/docs`;
         if (window.scrollY < 100 && headings.length > 0) {
           updateActiveToc(headings[0].id);
         }
+      };
+
+      const setupHeadingAnchors = () => {
+        const headings = Array.from(document.querySelectorAll('.markdown-body h2, .markdown-body h3')) as HTMLElement[];
+        
+        headings.forEach(heading => {
+          if (heading.querySelector('.heading-anchor')) return;
+
+          let headingTitle = '';
+          heading.childNodes.forEach(node => {
+            if (node.nodeType === Node.TEXT_NODE) {
+              headingTitle += node.textContent;
+            } else if (node.nodeType === Node.ELEMENT_NODE && !(node as HTMLElement).classList.contains('heading-anchor')) {
+              headingTitle += (node as HTMLElement).innerText || node.textContent;
+            }
+          });
+          headingTitle = headingTitle.trim();
+
+          if (!heading.id) {
+            heading.id = headingTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || '';
+          }
+          const headingId = heading.id;
+          if (!headingId) return;
+
+          const anchor = document.createElement('a');
+          anchor.className = 'heading-anchor';
+          anchor.href = `#${headingId}`;
+          anchor.setAttribute('aria-label', `Direct link to section ${headingTitle}`);
+          anchor.setAttribute('title', 'Copy link to this section');
+          anchor.innerHTML = `
+            <span class="anchor-hash" aria-hidden="true">#</span>
+            <span class="anchor-copied-tooltip" role="status" aria-live="polite">Link copied!</span>
+          `;
+
+          let resetTimer: any = null;
+
+          anchor.addEventListener('click', () => {
+            const url = new URL(window.location.href);
+            url.hash = headingId;
+            const fullUrl = url.toString();
+
+            const fallbackCopyText = (text: string) => {
+              try {
+                const ta = document.createElement('textarea');
+                ta.value = text;
+                ta.style.position = 'fixed';
+                ta.style.left = '-9999px';
+                ta.style.top = '-9999px';
+                ta.setAttribute('readonly', '');
+                document.body.appendChild(ta);
+                ta.select();
+                document.execCommand('copy');
+                document.body.removeChild(ta);
+              } catch {}
+            };
+
+            if (navigator.clipboard && window.isSecureContext) {
+              navigator.clipboard.writeText(fullUrl).catch(() => {
+                fallbackCopyText(fullUrl);
+              });
+            } else {
+              fallbackCopyText(fullUrl);
+            }
+
+            anchor.classList.add('copied');
+            const announcer = document.getElementById('cmd-announcer');
+            if (announcer) {
+              announcer.textContent = `Direct link to ${headingTitle} copied to clipboard`;
+            }
+
+            if (resetTimer) clearTimeout(resetTimer);
+            resetTimer = setTimeout(() => {
+              anchor.classList.remove('copied');
+            }, 1800);
+          });
+
+          heading.appendChild(anchor);
+        });
+      };
+
+      const scrollActiveSidebarItem = (behavior: ScrollBehavior = 'smooth') => {
+        const sidebar = document.getElementById('docs-sidebar');
+        if (!sidebar) return;
+
+        const activeLink = sidebar.querySelector('.sidebar-nav a.active') as HTMLElement | null;
+        if (!activeLink) return;
+
+        const parentDetails = activeLink.closest('details.nav-group') as HTMLDetailsElement | null;
+        if (parentDetails && !parentDetails.open) {
+          parentDetails.open = true;
+        }
+
+        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const actualBehavior = prefersReducedMotion ? 'auto' : behavior;
+
+        requestAnimationFrame(() => {
+          const sidebarRect = sidebar.getBoundingClientRect();
+          const linkRect = activeLink.getBoundingClientRect();
+
+          const isComfortablyVisible = (
+            linkRect.top >= sidebarRect.top + 30 &&
+            linkRect.bottom <= sidebarRect.bottom - 30
+          );
+
+          if (!isComfortablyVisible) {
+            const targetTop = sidebar.scrollTop + (linkRect.top - sidebarRect.top) - (sidebar.clientHeight / 3);
+            sidebar.scrollTo({
+              top: Math.max(0, targetTop),
+              behavior: actualBehavior
+            });
+          }
+        });
       };
 
       const setupCodeCopyButtons = () => {
@@ -501,6 +652,7 @@ const editUrl = `https://github.com/bhaskarjha-dev/gitsetu/tree/main/docs`;
           backdrop.setAttribute('aria-hidden', 'false');
           menuBtn.setAttribute('aria-expanded', 'true');
           document.body.style.overflow = 'hidden';
+          scrollActiveSidebarItem('auto');
           const firstFocusable = (Array.from(sidebar.querySelectorAll('a, button, input, summary, [tabindex]:not([tabindex="-1"])')) as HTMLElement[]).find(el => el.offsetWidth > 0 && el.offsetHeight > 0);
           firstFocusable?.focus();
         };
@@ -601,9 +753,11 @@ const editUrl = `https://github.com/bhaskarjha-dev/gitsetu/tree/main/docs`;
       document.addEventListener('astro:page-load', () => {
         updatePlatformKeys();
         setupTOC();
+        setupHeadingAnchors();
         setupCodeCopyButtons();
         setupMobileDrawer();
         setupSidebarPersistence();
+        scrollActiveSidebarItem('smooth');
       });
 
       document.addEventListener('astro:before-swap', () => {
@@ -1066,12 +1220,96 @@ const editUrl = `https://github.com/bhaskarjha-dev/gitsetu/tree/main/docs`;
     margin-bottom: var(--space-md);
     padding-bottom: var(--space-xs);
     border-bottom: 1px solid var(--border-subtle);
+    scroll-margin-top: calc(var(--nav-height) + var(--space-xl));
   }
 
   .markdown-body h3 {
     font-size: var(--text-xl);
     margin-top: var(--space-2xl);
     margin-bottom: var(--space-sm);
+    scroll-margin-top: calc(var(--nav-height) + var(--space-xl));
+  }
+
+  .markdown-body h4 {
+    scroll-margin-top: calc(var(--nav-height) + var(--space-xl));
+  }
+
+  @media (max-width: 768px) {
+    .markdown-body h2,
+    .markdown-body h3,
+    .markdown-body h4 {
+      scroll-margin-top: calc(var(--nav-height) + 64px);
+    }
+  }
+
+  /* One-Click Copyable Heading Anchors */
+  .heading-anchor {
+    opacity: 0;
+    margin-left: 8px;
+    color: var(--accent-primary);
+    text-decoration: none !important;
+    font-weight: 500;
+    font-size: 0.85em;
+    padding: 2px 6px;
+    border-radius: var(--radius-sm);
+    transition: opacity var(--transition-fast), transform var(--transition-fast), color var(--transition-fast);
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    vertical-align: middle;
+    cursor: pointer;
+  }
+
+  .markdown-body h2:hover .heading-anchor,
+  .markdown-body h3:hover .heading-anchor,
+  .heading-anchor:focus-visible {
+    opacity: 1;
+  }
+
+  @media (hover: none) {
+    .heading-anchor {
+      opacity: 0.45;
+    }
+  }
+
+  .heading-anchor:hover {
+    color: var(--accent-hover);
+    transform: scale(1.15);
+  }
+
+  .heading-anchor .anchor-hash {
+    user-select: none;
+    line-height: 1;
+  }
+
+  .heading-anchor .anchor-copied-tooltip {
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%) translateY(4px);
+    background: var(--bg-tertiary);
+    color: var(--color-success, #10b981);
+    font-size: 11px;
+    font-family: var(--font-sans);
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 4px;
+    border: 1px solid rgba(16, 185, 129, 0.4);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    pointer-events: none;
+    opacity: 0;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    white-space: nowrap;
+    z-index: 10;
+  }
+
+  .heading-anchor.copied .anchor-copied-tooltip {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  .heading-anchor.copied .anchor-hash {
+    color: var(--color-success, #10b981);
   }
 
   .markdown-body p {
