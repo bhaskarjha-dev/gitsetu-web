@@ -1,5 +1,16 @@
 ---
 const pathname = Astro.url.pathname.replace(/\/$/, '') || '/';
+const isHome = pathname === '/';
+const navPrefix = isHome ? '' : '/';
+
+const navItems = [
+  { label: 'Capabilities', href: `${navPrefix}#capabilities`, targetId: 'capabilities' },
+  { label: 'Compare', href: `${navPrefix}#compare`, targetId: 'compare' },
+  { label: 'Features', href: `${navPrefix}#features`, targetId: 'features' },
+  { label: 'Philosophy', href: `${navPrefix}#philosophy`, targetId: 'philosophy' },
+  { label: 'Roadmap', href: `${navPrefix}#roadmap`, targetId: 'roadmap' }
+];
+
 const isActive = (path: string) => {
   if (path === '/') return pathname === '/' ? 'active' : '';
   return pathname === path || pathname.startsWith(path + '/') ? 'active' : '';
@@ -17,10 +28,13 @@ const isActive = (path: string) => {
 
     <nav class="nav-menu" aria-label="Primary navigation">
       <ul class="nav-links">
-        <li><a href="/docs/getting-started/installation" class={isActive('/docs/getting-started/installation')}>Installation</a></li>
-        <li><a href="/docs/getting-started/quickstart" class={isActive('/docs/getting-started/quickstart')}>Quickstart</a></li>
-        <li><a href="/docs/overview/architecture" class={isActive('/docs/overview/architecture')}>Architecture</a></li>
-        <li><a href="/docs/enterprise/security-privacy" class={isActive('/docs/enterprise/security-privacy')}>Security</a></li>
+        {navItems.map(item => (
+          <li>
+            <a href={item.href} data-section={item.targetId}>
+              {item.label}
+            </a>
+          </li>
+        ))}
       </ul>
     </nav>
 
@@ -42,15 +56,37 @@ const isActive = (path: string) => {
     </div>
   </div>
 
-  <!-- Mobile Menu Dropdown -->
+  <!-- Mobile Menu Dropdown Panel -->
   <nav class="mobile-menu" id="mobile-menu" aria-label="Mobile navigation" aria-hidden="true">
-    <a href="/docs/getting-started/installation" class={isActive('/docs/getting-started/installation')}>Installation</a>
-    <a href="/docs/getting-started/quickstart" class={isActive('/docs/getting-started/quickstart')}>Quickstart</a>
-    <a href="/docs/overview/architecture" class={isActive('/docs/overview/architecture')}>Architecture</a>
-    <a href="/docs/enterprise/security-privacy" class={isActive('/docs/enterprise/security-privacy')}>Security</a>
-    <a href="/docs" class={isActive('/docs')}>All Docs</a>
-    <a href="https://github.com/bhaskarjha-dev/gitsetu" target="_blank" rel="noopener">GitHub</a>
+    <div class="mobile-menu-inner">
+      <div class="mobile-group-title">Navigation</div>
+      <div class="mobile-nav-group">
+        {navItems.map(item => (
+          <a href={item.href} data-section={item.targetId} class="mobile-nav-link">
+            <span class="mobile-nav-bullet" aria-hidden="true"></span>
+            <span>{item.label}</span>
+          </a>
+        ))}
+      </div>
+
+      <div class="mobile-group-title">Resources</div>
+      <div class="mobile-nav-group">
+        <a href="/docs" class={`mobile-nav-link ${isActive('/docs')}`}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+          <span>Documentation</span>
+          <span class="mobile-link-badge">Docs</span>
+        </a>
+        <a href="https://github.com/bhaskarjha-dev/gitsetu" target="_blank" rel="noopener" class="mobile-nav-link">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+          <span>GitHub Repository</span>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" style="margin-left: auto; opacity: 0.5;"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+        </a>
+      </div>
+    </div>
   </nav>
+
+  <!-- Mobile Backdrop Overlay -->
+  <div class="mobile-menu-backdrop" id="mobile-menu-backdrop" aria-hidden="true"></div>
 </header>
 
 <script>
@@ -63,6 +99,9 @@ const isActive = (path: string) => {
     private handleSearchClick: (() => void) | null = null;
     private handleToggleClick: (() => void) | null = null;
     private handleMenuLinkClick: (() => void) | null = null;
+    private sectionObserver: IntersectionObserver | null = null;
+    private hashUpdateTimer: number | null = null;
+    private handleBeforeSwap: (() => void) | null = null;
 
     connectedCallback() {
       this.navbar = document.getElementById('navbar');
@@ -91,25 +130,131 @@ const isActive = (path: string) => {
 
       this.mobileToggle = document.querySelector('.mobile-nav-toggle');
       this.mobileMenu = document.getElementById('mobile-menu');
+      const backdrop = document.getElementById('mobile-menu-backdrop');
 
-      this.handleToggleClick = () => {
-        const isExpanded = this.mobileToggle?.getAttribute('aria-expanded') === 'true';
-        const nextState = !isExpanded;
-        this.mobileToggle?.setAttribute('aria-expanded', String(nextState));
-        this.mobileMenu?.setAttribute('aria-hidden', String(!nextState));
-        this.mobileMenu?.classList.toggle('active');
-      };
-      this.mobileToggle?.addEventListener('click', this.handleToggleClick);
-
-      // Auto-close mobile menu when any navigation link is clicked
-      this.handleMenuLinkClick = () => {
+      const closeMenu = () => {
         this.mobileMenu?.classList.remove('active');
         this.mobileMenu?.setAttribute('aria-hidden', 'true');
         this.mobileToggle?.setAttribute('aria-expanded', 'false');
+        this.navbar?.classList.remove('menu-open');
+        backdrop?.classList.remove('active');
+        document.body.style.overflow = '';
+      };
+
+      const openMenu = () => {
+        this.mobileMenu?.classList.add('active');
+        this.mobileMenu?.setAttribute('aria-hidden', 'false');
+        this.mobileToggle?.setAttribute('aria-expanded', 'true');
+        this.navbar?.classList.add('menu-open');
+        backdrop?.classList.add('active');
+        document.body.style.overflow = 'hidden';
+      };
+
+      this.handleToggleClick = () => {
+        const isExpanded = this.mobileToggle?.getAttribute('aria-expanded') === 'true';
+        if (isExpanded) {
+          closeMenu();
+        } else {
+          openMenu();
+        }
+      };
+      this.mobileToggle?.addEventListener('click', this.handleToggleClick);
+      backdrop?.addEventListener('click', closeMenu);
+
+      // Auto-close mobile menu when any navigation link is clicked
+      this.handleMenuLinkClick = () => {
+        closeMenu();
       };
       this.mobileMenu?.querySelectorAll('a').forEach(a => {
         a.addEventListener('click', this.handleMenuLinkClick!);
       });
+
+      // Close on Escape key
+      const handleEscape = (e: KeyboardEvent) => {
+        if (e.key === 'Escape' && this.mobileMenu?.classList.contains('active')) {
+          closeMenu();
+        }
+      };
+      window.addEventListener('keydown', handleEscape);
+
+      // Initialize Landing Scrollspy
+      this.setupScrollspy();
+
+      this.handleBeforeSwap = () => {
+        this.cleanupScrollspy();
+      };
+      document.addEventListener('astro:before-swap', this.handleBeforeSwap, { once: true });
+    }
+
+    private setupScrollspy() {
+      const sections = Array.from(document.querySelectorAll('main > section[id]')) as HTMLElement[];
+      if (sections.length === 0) return;
+
+      const navLinks = Array.from(document.querySelectorAll('.nav-links a[data-section], .mobile-menu a[data-section]')) as HTMLAnchorElement[];
+      if (navLinks.length === 0) return;
+
+      const setActiveSection = (activeId: string | null) => {
+        navLinks.forEach(link => {
+          const targetSection = link.getAttribute('data-section');
+          const isMatch = !!activeId && (
+            targetSection === activeId || 
+            (targetSection === 'compare' && activeId === 'comparison')
+          );
+          if (isMatch) {
+            link.classList.add('active');
+            link.setAttribute('aria-current', 'location');
+          } else {
+            link.classList.remove('active');
+            link.removeAttribute('aria-current');
+          }
+        });
+
+        // Non-intrusive URL hash sync without scroll jumps
+        if (activeId && window.location.pathname === '/') {
+          if (this.hashUpdateTimer) {
+            window.clearTimeout(this.hashUpdateTimer);
+          }
+          this.hashUpdateTimer = window.setTimeout(() => {
+            const currentHash = window.location.hash.replace('#', '');
+            if (currentHash !== activeId && activeId !== 'install') {
+              history.replaceState(null, '', `#${activeId}`);
+            } else if (activeId === 'install' && currentHash) {
+              history.replaceState(null, '', window.location.pathname);
+            }
+          }, 250);
+        }
+      };
+
+      this.sectionObserver = new IntersectionObserver((entries) => {
+        const visibleEntries = entries.filter(e => e.isIntersecting);
+        if (visibleEntries.length > 0) {
+          visibleEntries.sort((a, b) => {
+            return Math.abs(a.boundingClientRect.top) - Math.abs(b.boundingClientRect.top);
+          });
+          const bestId = visibleEntries[0].target.getAttribute('id');
+          if (bestId) {
+            setActiveSection(bestId);
+          }
+        } else if (window.scrollY < 120) {
+          setActiveSection(null);
+        }
+      }, {
+        rootMargin: '-20% 0px -50% 0px',
+        threshold: [0, 0.2, 0.5, 0.8]
+      });
+
+      sections.forEach(sec => this.sectionObserver?.observe(sec));
+    }
+
+    private cleanupScrollspy() {
+      if (this.sectionObserver) {
+        this.sectionObserver.disconnect();
+        this.sectionObserver = null;
+      }
+      if (this.hashUpdateTimer) {
+        window.clearTimeout(this.hashUpdateTimer);
+        this.hashUpdateTimer = null;
+      }
     }
 
     disconnectedCallback() {
@@ -130,6 +275,11 @@ const isActive = (path: string) => {
           a.removeEventListener('click', this.handleMenuLinkClick!);
         });
         this.handleMenuLinkClick = null;
+      }
+      this.cleanupScrollspy();
+      if (this.handleBeforeSwap) {
+        document.removeEventListener('astro:before-swap', this.handleBeforeSwap);
+        this.handleBeforeSwap = null;
       }
       this.navbar = null;
       this.searchBtn = null;
@@ -166,6 +316,11 @@ const isActive = (path: string) => {
     /* Liquid highlight edge */
     box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.1), 0 10px 30px rgba(0,0,0,0.5);
     overflow: hidden;
+  }
+
+  .navbar.menu-open,
+  .navbar:has(.mobile-menu.active) {
+    overflow: visible;
   }
 
   .navbar.scrolled {
@@ -407,45 +562,126 @@ const isActive = (path: string) => {
     }
   }
 
+  /* Mobile Backdrop Overlay */
+  .mobile-menu-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.82);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    z-index: 95;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .mobile-menu-backdrop.active {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+
   /* Mobile Menu Styles */
   .mobile-menu {
     position: absolute;
     top: 100%;
     left: 0;
     width: 100%;
-    background: rgba(10, 10, 10, 0.95);
-    backdrop-filter: blur(20px);
-    border-bottom: 1px solid var(--border-subtle);
+    background: #08080a;
+    border-bottom: 1px solid var(--border-accent);
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.9), 0 0 30px var(--accent-glow);
     display: flex;
     flex-direction: column;
-    padding: 0;
     max-height: 0;
     overflow: hidden;
     visibility: hidden;
     pointer-events: none;
-    transition: max-height var(--transition-base), padding var(--transition-base), visibility var(--transition-base);
+    transition: max-height 0.35s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    z-index: 99;
   }
 
   .mobile-menu.active {
     visibility: visible;
     pointer-events: auto;
-    max-height: 400px;
-    padding: var(--space-md) 0;
+    max-height: calc(100vh - 65px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
   }
 
-  .mobile-menu a {
+  .mobile-menu-inner {
+    padding: var(--space-md) var(--space-lg) var(--space-xl);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+
+  .mobile-group-title {
+    font-size: 11px;
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    padding: 0 var(--space-xs);
+    margin-top: var(--space-xs);
+  }
+
+  .mobile-nav-group {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    padding: 6px;
+  }
+
+  .mobile-nav-link {
     color: var(--text-primary);
-    padding: var(--space-md) var(--space-2xl);
-    font-size: var(--text-base);
+    padding: 10px 14px;
+    font-size: 14px;
     text-decoration: none;
     font-weight: 500;
-    border-left: 2px solid transparent;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    gap: 10px;
     transition: all var(--transition-fast);
   }
 
-  .mobile-menu a:hover {
-    background: rgba(255, 255, 255, 0.05);
-    border-left-color: var(--accent-primary);
+  .mobile-nav-link:hover {
+    background: rgba(255, 255, 255, 0.06);
     color: var(--text-heading);
+  }
+
+  .mobile-nav-link.active {
+    background: rgba(0, 196, 204, 0.12);
+    color: var(--accent-primary);
+    font-weight: 600;
+  }
+
+  .mobile-nav-bullet {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--text-muted);
+    transition: all var(--transition-fast);
+  }
+
+  .mobile-nav-link.active .mobile-nav-bullet {
+    background: var(--accent-primary);
+    box-shadow: 0 0 8px var(--accent-primary);
+    transform: scale(1.3);
+  }
+
+  .mobile-link-badge {
+    margin-left: auto;
+    font-size: 10px;
+    font-family: var(--font-mono);
+    background: rgba(0, 196, 204, 0.15);
+    color: var(--accent-primary);
+    border: 1px solid rgba(0, 196, 204, 0.3);
+    padding: 2px 6px;
+    border-radius: 4px;
   }
 </style>

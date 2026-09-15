@@ -334,3 +334,16 @@ nav a:focus {
   }
 }
 
+/* --- Landing Section Scroll Anchor Alignment --- */
+section[id],
+.section[id],
+#install,
+#capabilities,
+#compare,
+#features,
+#comparison,
+#philosophy,
+#roadmap {
+  scroll-margin-top: calc(60px + var(--space-xl));
+}
+

@@ -475,6 +475,83 @@
       }, 150);
     }
 
+    private escapeHtml(str: string): string {
+      return (str || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    private highlightTokens(text: string, query: string): string {
+      if (!query || !text) return this.escapeHtml(text || '');
+      const safeText = this.escapeHtml(text);
+      const trimmed = query.trim();
+      if (!trimmed) return safeText;
+
+      const terms = [trimmed, ...trimmed.split(/\s+/).filter(t => t.length >= 2)];
+      const uniqueTerms = Array.from(new Set(terms));
+      const pattern = uniqueTerms
+        .map(t => this.escapeHtml(t).replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+        .join('|');
+
+      if (!pattern) return safeText;
+      const regex = new RegExp(`(${pattern})`, 'gi');
+      return safeText.replace(regex, '<mark class="cmd-match-highlight">$1</mark>');
+    }
+
+    private getSearchSnippet(content: string, description: string, query: string): string {
+      const textToSearch = content || description || '';
+      if (!query || !textToSearch) {
+        return this.escapeHtml(description || '');
+      }
+
+      const lowerText = textToSearch.toLowerCase();
+      const lowerQuery = query.toLowerCase().trim();
+
+      let matchPos = lowerText.indexOf(lowerQuery);
+      let matchLen = query.length;
+
+      if (matchPos === -1) {
+        const tokens = lowerQuery.split(/\s+/).filter(t => t.length >= 2);
+        for (const token of tokens) {
+          const idx = lowerText.indexOf(token);
+          if (idx !== -1) {
+            matchPos = idx;
+            matchLen = token.length;
+            break;
+          }
+        }
+      }
+
+      if (matchPos !== -1) {
+        const start = Math.max(0, matchPos - 40);
+        const end = Math.min(textToSearch.length, matchPos + matchLen + 70);
+        let excerpt = textToSearch.slice(start, end);
+
+        if (start > 0) {
+          const firstSpace = excerpt.indexOf(' ');
+          if (firstSpace !== -1 && firstSpace < 16) {
+            excerpt = excerpt.slice(firstSpace + 1);
+          }
+          excerpt = '... ' + excerpt;
+        }
+
+        if (end < textToSearch.length) {
+          const lastSpace = excerpt.lastIndexOf(' ');
+          if (lastSpace !== -1 && lastSpace > excerpt.length - 16) {
+            excerpt = excerpt.slice(0, lastSpace);
+          }
+          excerpt = excerpt + ' ...';
+        }
+
+        return this.highlightTokens(excerpt, query);
+      }
+
+      return this.highlightTokens(description || textToSearch.slice(0, 140) + '...', query);
+    }
+
     async search(query: string) {
       if (query.length > 0) {
         this.defaultSections.forEach(sec => (sec as HTMLElement).style.display = 'none');
@@ -536,13 +613,13 @@
             html += titleMatches.map(item => `
               <li role="option" id="cmd-opt-${optionIndex++}">
                 <a href="${item.url}" class="cmd-item" tabindex="-1">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                  <div style="display: flex; flex-direction: column; gap: 2px;">
-                    <div style="display: flex; align-items: center; gap: 8px;">
-                      <span style="font-weight: 500;">${item.title}</span>
-                      ${item.category ? `<span class="cmd-badge">${item.category}</span>` : ''}
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                  <div class="cmd-item-text">
+                    <div class="cmd-item-header">
+                      <span class="cmd-item-title">${this.highlightTokens(item.title, query)}</span>
+                      ${item.category ? `<span class="cmd-badge">${this.escapeHtml(item.category)}</span>` : ''}
                     </div>
-                    ${item.description ? `<span style="font-size: 11px; opacity: 0.7; line-height: 1.3;">${item.description}</span>` : ''}
+                    <div class="cmd-snippet">${this.getSearchSnippet(item.content, item.description, query)}</div>
                   </div>
                 </a>
               </li>
@@ -559,13 +636,14 @@
             html += contentMatches.map(item => `
               <li role="option" id="cmd-opt-${optionIndex++}">
                 <a href="${item.url}" class="cmd-item" tabindex="-1">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                  <div style="display: flex; flex-direction: column; gap: 2px;">
-                    <div style="display: flex; align-items: center; gap: 8px;">
-                      <span style="font-weight: 500;">${item.title}</span>
-                      ${item.category ? `<span class="cmd-badge">${item.category}</span>` : ''}
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                  <div class="cmd-item-text">
+                    <div class="cmd-item-header">
+                      <span class="cmd-item-title">${this.escapeHtml(item.title)}</span>
+                      ${item.category ? `<span class="cmd-badge">${this.escapeHtml(item.category)}</span>` : ''}
+                      <span class="cmd-match-type">Mention</span>
                     </div>
-                    ${item.description ? `<span style="font-size: 11px; opacity: 0.7; line-height: 1.3;">${item.description}</span>` : `<span style="font-size: 11px; opacity: 0.7; color: var(--accent-primary);">Match found in contents</span>`}
+                    <div class="cmd-snippet">${this.getSearchSnippet(item.content, item.description, query)}</div>
                   </div>
                 </a>
               </li>
@@ -795,6 +873,58 @@
     border-radius: 4px;
     font-size: 10px;
     font-family: var(--font-mono);
+    color: var(--text-muted);
+  }
+
+  .cmd-item-text {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .cmd-item-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .cmd-item-title {
+    font-weight: 500;
+    color: var(--text-heading);
+  }
+
+  .cmd-snippet {
+    font-size: 11px;
+    line-height: 1.4;
+    color: var(--text-secondary);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    word-break: break-word;
+  }
+
+  .cmd-match-highlight {
+    background: rgba(0, 196, 204, 0.25);
+    color: #00f2fe;
+    font-weight: 600;
+    padding: 0 3px;
+    border-radius: 3px;
+    border-bottom: 1px solid rgba(0, 196, 204, 0.6);
+  }
+
+  .cmd-match-type {
+    font-size: 9px;
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 1px 5px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--border-subtle);
     color: var(--text-muted);
   }
 
