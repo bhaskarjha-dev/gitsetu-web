@@ -164,7 +164,9 @@ const editUrl = `https://github.com/bhaskarjha-dev/gitsetu/tree/main/docs`;
       <div class="noise-overlay"></div>
       <CommandPalette />
 
-      <!-- Mobile Menu Bar Toggle Button (before Navbar so mobile queries pick docs drawer first) -->
+      <Navbar />
+
+      <!-- Mobile Menu Bar Toggle Button -->
       <div class="mobile-menu-bar">
         <button id="mobile-menu-btn" class="mobile-toggle docs-mobile-menu-btn" type="button" aria-label="Toggle documentation menu" aria-expanded="false" aria-controls="docs-sidebar">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
@@ -174,8 +176,6 @@ const editUrl = `https://github.com/bhaskarjha-dev/gitsetu/tree/main/docs`;
 
       <!-- Mobile Drawer Backdrop Overlay -->
       <div id="docs-drawer-backdrop" class="drawer-backdrop" aria-hidden="true"></div>
-
-      <Navbar />
       
       <div class="docs-container container">
         <!-- Sidebar Navigation -->
@@ -184,10 +184,10 @@ const editUrl = `https://github.com/bhaskarjha-dev/gitsetu/tree/main/docs`;
             <div class="sidebar-inner">
               <nav class="sidebar-nav">
                 <!-- Command Palette Trigger Button -->
-                <button id="search-btn" class="search-btn" type="button" aria-label="Search documentation" onclick="document.dispatchEvent(new CustomEvent('open-command-palette'))">
+                <button id="docs-sidebar-search-btn" class="search-btn" type="button" aria-label="Search documentation" onclick="document.dispatchEvent(new CustomEvent('open-command-palette'))">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
                   <span>Search docs...</span>
-                  <kbd>⌘K</kbd>
+                  <kbd id="docs-cmd-key">⌘K</kbd>
                 </button>
 
                 <!-- Category 1: Platform Overview -->
@@ -197,7 +197,7 @@ const editUrl = `https://github.com/bhaskarjha-dev/gitsetu/tree/main/docs`;
                     <svg class="chevron-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
                   </summary>
                   <ul>
-                    <li><a href="/docs/overview/introduction" class={isActive('/docs/overview/introduction')} aria-current={isActive('/docs/overview/introduction') ? 'page' : undefined}>Introduction</a></li>
+                    <li><a href="/docs" class={isActive('/docs')} aria-current={isActive('/docs') ? 'page' : undefined}>Introduction</a></li>
                     <li><a href="/docs/overview/architecture" class={isActive('/docs/overview/architecture')} aria-current={isActive('/docs/overview/architecture') ? 'page' : undefined}>Architecture</a></li>
                     <li><a href="/docs/overview/comparisons" class={isActive('/docs/overview/comparisons')} aria-current={isActive('/docs/overview/comparisons') ? 'page' : undefined}>Ecosystem Comparisons</a></li>
                     <li><a href="/docs/overview/manifesto" class={isActive('/docs/overview/manifesto')} aria-current={isActive('/docs/overview/manifesto') ? 'page' : undefined}>Design Manifesto</a></li>
@@ -473,7 +473,22 @@ const editUrl = `https://github.com/bhaskarjha-dev/gitsetu/tree/main/docs`;
         });
       };
 
+      let drawerAbortController: AbortController | null = null;
+
+      const updatePlatformKeys = () => {
+        const docsCmdKey = document.getElementById('docs-cmd-key');
+        if (navigator.platform.toUpperCase().indexOf('MAC') < 0 && docsCmdKey) {
+          docsCmdKey.textContent = 'Ctrl+K';
+        }
+      };
+
       const setupMobileDrawer = () => {
+        if (drawerAbortController) {
+          drawerAbortController.abort();
+        }
+        drawerAbortController = new AbortController();
+        const { signal } = drawerAbortController;
+
         const menuBtn = document.getElementById('mobile-menu-btn');
         const sidebar = document.getElementById('docs-sidebar');
         const backdrop = document.getElementById('docs-drawer-backdrop');
@@ -502,19 +517,19 @@ const editUrl = `https://github.com/bhaskarjha-dev/gitsetu/tree/main/docs`;
         menuBtn.addEventListener('click', () => {
           const isOpen = sidebar.classList.contains('active');
           if (isOpen) closeDrawer(); else openDrawer();
-        });
+        }, { signal });
 
-        backdrop.addEventListener('click', closeDrawer);
+        backdrop.addEventListener('click', closeDrawer, { signal });
 
         sidebar.querySelectorAll('a').forEach(link => {
-          link.addEventListener('click', closeDrawer);
+          link.addEventListener('click', closeDrawer, { signal });
         });
 
         window.addEventListener('keydown', (e) => {
           if (e.key === 'Escape' && sidebar.classList.contains('active')) {
             closeDrawer();
           }
-        });
+        }, { signal });
 
         sidebar.addEventListener('keydown', (e: KeyboardEvent) => {
           if (!sidebar.classList.contains('active')) return;
@@ -537,7 +552,7 @@ const editUrl = `https://github.com/bhaskarjha-dev/gitsetu/tree/main/docs`;
               }
             }
           }
-        });
+        }, { signal });
 
         document.addEventListener('keydown', (e: KeyboardEvent) => {
           if (!sidebar.classList.contains('active')) return;
@@ -553,7 +568,7 @@ const editUrl = `https://github.com/bhaskarjha-dev/gitsetu/tree/main/docs`;
               focusables[0].focus();
             }
           }
-        });
+        }, { signal });
       };
 
       const setupSidebarPersistence = () => {
@@ -584,6 +599,7 @@ const editUrl = `https://github.com/bhaskarjha-dev/gitsetu/tree/main/docs`;
       };
 
       document.addEventListener('astro:page-load', () => {
+        updatePlatformKeys();
         setupTOC();
         setupCodeCopyButtons();
         setupMobileDrawer();
@@ -593,6 +609,8 @@ const editUrl = `https://github.com/bhaskarjha-dev/gitsetu/tree/main/docs`;
       document.addEventListener('astro:before-swap', () => {
         tocObserver?.disconnect();
         tocObserver = null;
+        drawerAbortController?.abort();
+        drawerAbortController = null;
         document.body.style.overflow = '';
       });
     </script>

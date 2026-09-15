@@ -19,7 +19,7 @@ import '@xterm/xterm/css/xterm.css';
     </div>
     
     <div class="terminal-body">
-      <div id="terminal-container" style="height: 340px; width: 100%; position: relative;">
+      <div id="terminal-container" style="height: 330px; width: 100%; position: relative; overflow: hidden;">
         <!-- Static SSR Placeholder for Instant First Paint (LCP) & Zero Initial JS -->
         <div class="terminal-placeholder" id="terminal-placeholder" aria-hidden="true">
           <div class="terminal-placeholder-line">
@@ -36,17 +36,23 @@ import '@xterm/xterm/css/xterm.css';
 </gitsetu-terminal>
 
 <script>
+  import { Terminal } from '@xterm/xterm';
+  import { FitAddon } from '@xterm/addon-fit';
+
   /**
    * GitSetu Interactive Terminal Web Component
    * Features:
    * 1. Box-Muller Gaussian human keystroke timing (mean ~65ms, stdDev >= 30.0ms + hesitation)
    * 2. ANSI color sequences (yellow prompts, green success, red Pre-Commit Guard mismatch)
    * 3. Non-destructive click & focus response (tabindex="0", active cursor, preserves buffer)
-   * 4. Critical path lazy-loading (zero initial xterm JS until user interaction/scroll)
-   * 5. Reduced motion accessibility (prefers-reduced-motion immediate rendering)
+   * 4. Static bundled Xterm & FitAddon with zero dynamic fetch failures and instant auto-start
+   * 5. Dynamic responsive fitting via @xterm/addon-fit across mobile and desktop
+   * 6. Reduced motion accessibility (prefers-reduced-motion immediate rendering)
    */
   class GitsetuTerminal extends HTMLElement {
-    term: any = null;
+    term: Terminal | null = null;
+    fitAddon: FitAddon | null = null;
+    resizeObserver: ResizeObserver | null = null;
     demoTimeout: any = null;
     processingInterval: any = null;
     abortController: AbortController | null = null;
@@ -65,44 +71,19 @@ import '@xterm/xterm/css/xterm.css';
     
     // Keystroke timing history for empirical Box-Muller variance guarantee
     timingHistory: number[] = [];
-    cleanupListeners: Array<() => void> = [];
+
+    getResponsiveFontSize(): number {
+      const container = this.querySelector('#terminal-container') as HTMLElement;
+      const width = container ? container.getBoundingClientRect().width : this.getBoundingClientRect().width;
+      if (width > 0 && width < 400) return 11;
+      if (width > 0 && width < 540) return 12;
+      return 13;
+    }
 
     connectedCallback() {
       if (!this.hasAttribute('tabindex')) {
         this.setAttribute('tabindex', '0');
       }
-
-      const container = this.querySelector('#terminal-container') as HTMLElement;
-      if (!container) return;
-
-      // Lazy-loading trigger: Zero Xterm JS on initial critical render path
-      const triggerBoot = (interactive = false) => {
-        this.removeTriggerListeners();
-        if (!this.isBooted && !this.isBooting) {
-          this.boot(container, interactive);
-        }
-      };
-
-      const onInteraction = () => triggerBoot(false);
-      const onDirectClick = () => triggerBoot(true);
-      const onScroll = () => triggerBoot(false);
-
-      // Listen for first user intent (hover, touch, keyboard focus) or page scroll
-      const interactionEvents = ['pointerover', 'mouseenter', 'touchstart', 'focusin'];
-      interactionEvents.forEach((evt) => {
-        this.addEventListener(evt, onInteraction, { once: true, passive: true });
-        this.cleanupListeners.push(() => this.removeEventListener(evt, onInteraction));
-      });
-
-      this.addEventListener('click', onDirectClick, { once: true });
-      this.cleanupListeners.push(() => this.removeEventListener('click', onDirectClick));
-
-      window.addEventListener('scroll', onScroll, { once: true, passive: true });
-      window.addEventListener('wheel', onScroll, { once: true, passive: true });
-      this.cleanupListeners.push(() => {
-        window.removeEventListener('scroll', onScroll);
-        window.removeEventListener('wheel', onScroll);
-      });
 
       // Keyboard navigation (Tab focus + Enter/Space to take control)
       this.addEventListener('keydown', (e: KeyboardEvent) => {
@@ -110,7 +91,7 @@ import '@xterm/xterm/css/xterm.css';
           if (this.isBooting) {
             this.pendingInteractive = true;
           } else if (!this.isBooted) {
-            triggerBoot(true);
+            this.boot(true);
           } else if (this.isAutoDemo) {
             this.pauseAutoDemoForInteraction();
           }
@@ -118,29 +99,29 @@ import '@xterm/xterm/css/xterm.css';
       });
 
       // Capture interaction intent during boot window
-      container.addEventListener('click', () => {
-        if (this.isBooting) {
-          this.pendingInteractive = true;
-        }
-      });
       this.addEventListener('click', () => {
         if (this.isBooting) {
           this.pendingInteractive = true;
         }
       });
-    }
 
-    removeTriggerListeners() {
-      this.cleanupListeners.forEach((fn) => fn());
-      this.cleanupListeners = [];
+      // Reliable auto-start: boot immediately once layout renders container dimensions
+      requestAnimationFrame(() => {
+        if (this.isConnected && !this.isBooted && !this.isBooting) {
+          this.boot(false);
+        }
+      });
     }
 
     disconnectedCallback() {
-      this.removeTriggerListeners();
       this.cleanup();
     }
 
     cleanup() {
+      if (this.resizeObserver) {
+        this.resizeObserver.disconnect();
+        this.resizeObserver = null;
+      }
       if (this.abortController) {
         this.abortController.abort();
         this.abortController = null;
@@ -153,8 +134,12 @@ import '@xterm/xterm/css/xterm.css';
         clearInterval(this.processingInterval);
         this.processingInterval = null;
       }
+      if (this.fitAddon) {
+        try { this.fitAddon.dispose(); } catch {}
+        this.fitAddon = null;
+      }
       if (this.term) {
-        this.term.dispose();
+        try { this.term.dispose(); } catch {}
         this.term = null;
       }
       this.isBooted = false;
@@ -269,79 +254,105 @@ import '@xterm/xterm/css/xterm.css';
       return true;
     }
 
-    async boot(container: HTMLElement, startInteractive = false) {
+    boot(startInteractive = false) {
       if (this.isBooted || this.isBooting) return;
       this.isBooting = true;
+
+      const targetContainer = this.querySelector('#terminal-container') as HTMLElement;
+      if (!targetContainer) {
+        this.isBooting = false;
+        return;
+      }
 
       const abortController = new AbortController();
       this.abortController = abortController;
       const currentSignal = abortController.signal;
 
-      let TerminalClass: any;
       try {
-        const mod: any = await import('@xterm/xterm');
-        TerminalClass = mod.Terminal || (mod.default && (mod.default.Terminal || mod.default));
-      } catch (err) {
-        console.warn('Failed to dynamically load @xterm/xterm:', err);
+        // Clear targetContainer contents safely
+        targetContainer.innerHTML = '';
+
+        const initialFontSize = this.getResponsiveFontSize();
+
+        this.term = new Terminal({
+          cursorBlink: true,
+          cursorStyle: startInteractive ? 'block' : 'bar',
+          fontFamily: '"JetBrains Mono", monospace',
+          fontSize: initialFontSize,
+          lineHeight: 1.25,
+          theme: {
+            background: 'transparent',
+            foreground: '#ededed',
+            cursor: '#00c4cc',
+            black: '#000000',
+            red: '#ef4444',
+            green: '#10b981',
+            yellow: '#f59e0b',
+            blue: '#0ea5e9',
+            magenta: '#a1a1aa',
+            cyan: '#00c4cc',
+            white: '#ffffff'
+          },
+          allowTransparency: true,
+          disableStdin: false
+        });
+
+        this.fitAddon = new FitAddon();
+        this.term.loadAddon(this.fitAddon);
+
+        this.term.open(targetContainer);
+
+        // Fit immediately to container bounds
+        try {
+          this.fitAddon.fit();
+        } catch {}
+
+        // Setup dynamic ResizeObserver to keep terminal responsive across viewport adjustments
+        if (typeof ResizeObserver !== 'undefined') {
+          this.resizeObserver = new ResizeObserver(() => {
+            if (this.term && targetContainer.clientWidth > 0) {
+              requestAnimationFrame(() => {
+                if (!this.term) return;
+                const targetFont = this.getResponsiveFontSize();
+                if (this.term.options.fontSize !== targetFont) {
+                  this.term.options.fontSize = targetFont;
+                }
+                if (this.fitAddon) {
+                  try {
+                    this.fitAddon.fit();
+                  } catch {}
+                }
+              });
+            }
+          });
+          this.resizeObserver.observe(targetContainer);
+        }
+
+        this.isBooted = true;
         this.isBooting = false;
-        return;
-      }
 
-      if (!this.isConnected || currentSignal.aborted) {
+        // Font upgrade
+        if (typeof document !== 'undefined' && document.fonts) {
+          document.fonts.load(`${initialFontSize}px "JetBrains Mono"`).then(() => {
+            if (this.term && !currentSignal.aborted) {
+              this.term.options.fontFamily = '"JetBrains Mono", monospace';
+              if (this.fitAddon && targetContainer.clientWidth > 0) {
+                try { this.fitAddon.fit(); } catch {}
+              }
+            }
+          }).catch(() => {});
+        }
+
+        this.attachTerminalEventListeners(currentSignal);
+
+        if (startInteractive || this.pendingInteractive) {
+          this.pauseAutoDemoForInteraction();
+        } else if (this.isAutoDemo && !this.isDemoRunning) {
+          this.runAutoDemo();
+        }
+      } catch (bootErr) {
+        console.error('Terminal initialization error:', bootErr);
         this.isBooting = false;
-        return;
-      }
-
-      // Remove static SSR placeholder
-      const placeholder = container.querySelector('#terminal-placeholder');
-      if (placeholder) placeholder.remove();
-
-      this.term = new TerminalClass({
-        cols: 70,
-        rows: 15,
-        cursorBlink: true,
-        cursorStyle: startInteractive ? 'block' : 'bar',
-        fontFamily: '"JetBrains Mono", monospace',
-        fontSize: 13,
-        theme: {
-          background: 'transparent',
-          foreground: '#ededed',
-          cursor: '#00c4cc',
-          black: '#000000',
-          red: '#ef4444',
-          green: '#10b981',
-          yellow: '#f59e0b',
-          blue: '#0ea5e9',
-          magenta: '#a1a1aa',
-          cyan: '#00c4cc',
-          white: '#ffffff'
-        },
-        allowTransparency: true,
-        disableStdin: false
-      });
-
-      this.term.open(container);
-      this.term.clearTextureAtlas();
-
-      this.isBooted = true;
-      this.isBooting = false;
-
-      // Font upgrade
-      if (typeof document !== 'undefined' && document.fonts) {
-        document.fonts.load('13px "JetBrains Mono"').then(() => {
-          if (this.term && !currentSignal.aborted) {
-            this.term.options.fontFamily = '"JetBrains Mono", monospace';
-            this.term.clearTextureAtlas();
-          }
-        }).catch(() => {});
-      }
-
-      this.attachTerminalEventListeners(currentSignal);
-
-      if (startInteractive) {
-        this.pauseAutoDemoForInteraction();
-      } else if (this.isAutoDemo && !this.isDemoRunning) {
-        this.runAutoDemo();
       }
     }
 
@@ -349,6 +360,7 @@ import '@xterm/xterm/css/xterm.css';
       const demoBtn = this.querySelector('#mode-demo') as HTMLButtonElement;
       const interactiveBtn = this.querySelector('#mode-interactive') as HTMLButtonElement;
       const hint = this.querySelector('#terminal-hint') as HTMLElement;
+      const terminalWindow = this.querySelector('.terminal-window') as HTMLElement;
 
       this.isAutoDemo = false;
       this.isDemoRunning = false;
@@ -366,6 +378,7 @@ import '@xterm/xterm/css/xterm.css';
       demoBtn?.setAttribute('aria-pressed', 'false');
       interactiveBtn?.classList.add('active');
       interactiveBtn?.setAttribute('aria-pressed', 'true');
+      terminalWindow?.classList.add('is-interactive');
 
       if (hint) {
         hint.textContent = "Sandbox active — type 'help', 'status', or 'setup'";
@@ -389,11 +402,13 @@ import '@xterm/xterm/css/xterm.css';
       const interactiveBtn = this.querySelector('#mode-interactive') as HTMLButtonElement;
       const container = this.querySelector('#terminal-container') as HTMLElement;
       const hint = this.querySelector('#terminal-hint') as HTMLElement;
+      const terminalWindow = this.querySelector('.terminal-window') as HTMLElement;
 
+      // Auto-Demo button: ALWAYS resets and restarts the auto-demo cleanly
       demoBtn?.addEventListener('click', () => {
-        if (this.isAutoDemo) return;
         this.isAutoDemo = true;
         this.isDemoRunning = false;
+        terminalWindow?.classList.remove('is-interactive');
 
         demoBtn.classList.add('active');
         demoBtn.setAttribute('aria-pressed', 'true');
@@ -401,21 +416,29 @@ import '@xterm/xterm/css/xterm.css';
         interactiveBtn?.setAttribute('aria-pressed', 'false');
         if (hint) {
           hint.textContent = 'Click terminal or press Tab to take control';
-          hint.style.opacity = '0.7';
+          hint.style.opacity = '0.75';
         }
 
-        if (this.term) {
-          this.term.reset();
-          this.term.clearTextureAtlas();
-          this.term.options.cursorStyle = 'bar';
+        if (this.demoTimeout) {
+          clearTimeout(this.demoTimeout);
+          this.demoTimeout = null;
+        }
+        if (this.processingInterval) {
+          clearInterval(this.processingInterval);
+          this.processingInterval = null;
         }
 
         this.setupState = 'IDLE';
         this.currentLine = '';
         this.profileName = '';
 
-        if (this.demoTimeout) clearTimeout(this.demoTimeout);
-        if (this.processingInterval) clearInterval(this.processingInterval);
+        if (this.term) {
+          this.term.reset();
+          this.term.options.cursorStyle = 'bar';
+          if (this.fitAddon) {
+            try { this.fitAddon.fit(); } catch {}
+          }
+        }
 
         this.runAutoDemo();
       }, { signal: currentSignal });
@@ -582,11 +605,11 @@ import '@xterm/xterm/css/xterm.css';
         this.setupState = 'PROCESSING';
         this.simulateProcessing(() => {
           if (!this.term) return;
-          this.term.write(`  \x1b[32m✔\x1b[0m Workspace provisioned: \x1b[33m${targetDir}\x1b[0m (mkdir -p)\r\n`);
-          this.term.write(`  \x1b[32m✔\x1b[0m SSH key generated: \x1b[33m~/.ssh/id_ed25519_${this.profileName}\x1b[0m\r\n`);
-          this.term.write(`  \x1b[32m✔\x1b[0m Git config written: \x1b[33m~/.config/gitsetu/profiles/${this.profileName}.gitconfig\x1b[0m\r\n`);
-          this.term.write(`  \x1b[32m✔\x1b[0m OpenSSH config updated: \x1b[33m~/.ssh/config\x1b[0m\r\n`);
-          this.term.write(`  \x1b[32m✔\x1b[0m Profile '${this.profileName}' created successfully (v1.0.0 GA)\r\n\r\n`);
+          this.term.write(`  \x1b[32m✔\x1b[0m Provisioned: \x1b[33m${targetDir}\x1b[0m (mkdir -p)\r\n`);
+          this.term.write(`  \x1b[32m✔\x1b[0m Key generated: \x1b[33m~/.ssh/id_ed25519_${this.profileName}\x1b[0m\r\n`);
+          this.term.write(`  \x1b[32m✔\x1b[0m Config: \x1b[33m~/.config/gitsetu/profiles/${this.profileName}.gitconfig\x1b[0m\r\n`);
+          this.term.write(`  \x1b[32m✔\x1b[0m OpenSSH linked: \x1b[33m~/.ssh/config\x1b[0m\r\n`);
+          this.term.write(`  \x1b[32m✔\x1b[0m Profile '${this.profileName}' active (v1.0.0 GA)\r\n\r\n`);
           this.term.write(this.prompt);
           this.setupState = 'IDLE';
         });
@@ -596,6 +619,10 @@ import '@xterm/xterm/css/xterm.css';
     async runAutoDemo() {
       if (this.isDemoRunning || !this.isAutoDemo || !this.term || this.abortController?.signal.aborted) return;
       this.isDemoRunning = true;
+
+      const terminalWindow = this.querySelector('.terminal-window') as HTMLElement;
+      terminalWindow?.classList.remove('is-interactive');
+
       this.term.write(this.prompt);
 
       const checkAndContinue = async (ms: number) => {
@@ -609,14 +636,14 @@ import '@xterm/xterm/css/xterm.css';
         this.term.write('  \x1b[33m?\x1b[0m \x1b[1;33mProfile name:\x1b[0m work\r\n');
         this.term.write('  \x1b[33m?\x1b[0m \x1b[1;33mGit email:\x1b[0m dev@company.com\r\n');
         this.term.write('  \x1b[33m?\x1b[0m \x1b[1;33mDirectory:\x1b[0m ~/work\r\n');
-        this.term.write('  \x1b[32m✔\x1b[0m Workspace provisioned: \x1b[33m~/work\x1b[0m (mkdir -p)\r\n');
-        this.term.write('  \x1b[32m✔\x1b[0m SSH key generated: \x1b[33m~/.ssh/id_ed25519_work\x1b[0m\r\n');
-        this.term.write('  \x1b[32m✔\x1b[0m Git config written: \x1b[33m~/.config/gitsetu/profiles/work.gitconfig\x1b[0m\r\n');
-        this.term.write('  \x1b[32m✔\x1b[0m OpenSSH config updated: \x1b[33m~/.ssh/config\x1b[0m\r\n');
-        this.term.write('  \x1b[31m✘ [Pre-Commit Guard]\x1b[0m \x1b[31mIdentity mismatch: dev@company.com != me@bhaskarjha.dev\x1b[0m\r\n');
-        this.term.write('  \x1b[33m⚡ Zero-Trust Guard auto-resolving identity for ~/work...\x1b[0m\r\n');
-        this.term.write('  \x1b[32m✔ [Pre-Commit Guard]\x1b[0m \x1b[1;32mIdentity aligned: dev@company.com (id_ed25519_work)\x1b[0m\r\n');
-        this.term.write('  \x1b[1;32m✨ Zero-Trust sandbox active — commit authorized! (v1.0.0 GA)\x1b[0m\r\n\r\n');
+        this.term.write('  \x1b[32m✔\x1b[0m Provisioned: \x1b[33m~/work\x1b[0m (mkdir -p)\r\n');
+        this.term.write('  \x1b[32m✔\x1b[0m Key generated: \x1b[33m~/.ssh/id_ed25519_work\x1b[0m\r\n');
+        this.term.write('  \x1b[32m✔\x1b[0m Config: \x1b[33m~/.config/gitsetu/profiles/work.gitconfig\x1b[0m\r\n');
+        this.term.write('  \x1b[32m✔\x1b[0m OpenSSH linked: \x1b[33m~/.ssh/config\x1b[0m\r\n');
+        this.term.write('  \x1b[31m✘ [Guard]\x1b[0m \x1b[31mdev@company.com != me@bhaskarjha.dev\x1b[0m\r\n');
+        this.term.write('  \x1b[33m⚡ Guard auto-resolving identity for ~/work...\x1b[0m\r\n');
+        this.term.write('  \x1b[32m✔ [Guard]\x1b[0m \x1b[1;32mAligned: dev@company.com (id_ed25519_work)\x1b[0m\r\n');
+        this.term.write('  \x1b[1;32m✨ Sandbox active — commit authorized! (v1.0.0 GA)\x1b[0m\r\n\r\n');
         this.term.write(this.prompt);
         this.isDemoRunning = false;
         return;
@@ -654,46 +681,57 @@ import '@xterm/xterm/css/xterm.css';
       if (!await checkAndContinue(200)) { this.isDemoRunning = false; return; }
       this.term.write('\x1b[2K\r'); // Erase line
 
-      this.term.write('  \x1b[32m✔\x1b[0m Workspace provisioned: \x1b[33m~/work\x1b[0m (mkdir -p)\r\n');
+      this.term.write('  \x1b[32m✔\x1b[0m Provisioned: \x1b[33m~/work\x1b[0m (mkdir -p)\r\n');
       if (!await checkAndContinue(180)) { this.isDemoRunning = false; return; }
 
-      this.term.write('  \x1b[32m✔\x1b[0m SSH key generated: \x1b[33m~/.ssh/id_ed25519_work\x1b[0m\r\n');
+      this.term.write('  \x1b[32m✔\x1b[0m Key generated: \x1b[33m~/.ssh/id_ed25519_work\x1b[0m\r\n');
       if (!await checkAndContinue(180)) { this.isDemoRunning = false; return; }
 
-      this.term.write('  \x1b[32m✔\x1b[0m Git config written: \x1b[33m~/.config/gitsetu/profiles/work.gitconfig\x1b[0m\r\n');
+      this.term.write('  \x1b[32m✔\x1b[0m Config: \x1b[33m~/.config/gitsetu/profiles/work.gitconfig\x1b[0m\r\n');
       if (!await checkAndContinue(180)) { this.isDemoRunning = false; return; }
 
-      this.term.write('  \x1b[32m✔\x1b[0m OpenSSH config updated: \x1b[33m~/.ssh/config\x1b[0m\r\n');
+      this.term.write('  \x1b[32m✔\x1b[0m OpenSSH linked: \x1b[33m~/.ssh/config\x1b[0m\r\n');
       if (!await checkAndContinue(400)) { this.isDemoRunning = false; return; }
 
       // Pre-Commit Guard Demonstration: Red error resolving to Green success
-      this.term.write('  \x1b[31m✘ [Pre-Commit Guard]\x1b[0m \x1b[31mIdentity mismatch: dev@company.com != me@bhaskarjha.dev\x1b[0m\r\n');
+      this.term.write('  \x1b[31m✘ [Guard]\x1b[0m \x1b[31mdev@company.com != me@bhaskarjha.dev\x1b[0m\r\n');
       if (!await checkAndContinue(500)) { this.isDemoRunning = false; return; }
 
-      this.term.write('  \x1b[33m⚡ Zero-Trust Guard auto-resolving identity for ~/work...\x1b[0m\r\n');
+      this.term.write('  \x1b[33m⚡ Guard auto-resolving identity for ~/work...\x1b[0m\r\n');
       if (!await checkAndContinue(600)) { this.isDemoRunning = false; return; }
 
-      this.term.write('  \x1b[32m✔ [Pre-Commit Guard]\x1b[0m \x1b[1;32mIdentity aligned: dev@company.com (id_ed25519_work)\x1b[0m\r\n');
-      this.term.write('  \x1b[1;32m✨ Zero-Trust sandbox active — commit authorized! (v1.0.0 GA)\x1b[0m\r\n\r\n');
+      this.term.write('  \x1b[32m✔ [Guard]\x1b[0m \x1b[1;32mAligned: dev@company.com (id_ed25519_work)\x1b[0m\r\n');
+      this.term.write('  \x1b[1;32m✨ Sandbox active — commit authorized! (v1.0.0 GA)\x1b[0m\r\n\r\n');
 
       if (!await checkAndContinue(600)) { this.isDemoRunning = false; return; }
 
       this.term.write(this.prompt);
       this.isDemoRunning = false;
 
-      // Clean loop after 7 seconds if still in Auto-Demo mode
-      if (await checkAndContinue(7000)) {
+      // Clean loop after 3.5 seconds if still in Auto-Demo mode
+      if (await checkAndContinue(3500)) {
         if (this.isAutoDemo && !this.isDemoRunning && this.term && !this.abortController?.signal.aborted) {
           this.term.reset();
-          this.term.clearTextureAtlas();
+          if (this.fitAddon) {
+            try { this.fitAddon.fit(); } catch {}
+          }
           this.runAutoDemo();
         }
       }
     }
   }
 
-  if (typeof window !== 'undefined' && !customElements.get('gitsetu-terminal')) {
-    customElements.define('gitsetu-terminal', GitsetuTerminal);
+  if (typeof window !== 'undefined') {
+    if (!customElements.get('gitsetu-terminal')) {
+      customElements.define('gitsetu-terminal', GitsetuTerminal);
+    }
+    // Handle Astro ClientRouter navigation
+    document.addEventListener('astro:page-load', () => {
+      const termEl = document.querySelector('gitsetu-terminal') as GitsetuTerminal | null;
+      if (termEl && !termEl.isBooted && !termEl.isBooting) {
+        termEl.boot(false);
+      }
+    });
   }
 </script>
 
@@ -797,15 +835,18 @@ import '@xterm/xterm/css/xterm.css';
   }
 
   .terminal-body {
-    padding: var(--space-md);
+    padding: 12px 14px;
     background: transparent;
     cursor: text;
-    overflow-x: auto; /* Handle fixed 70 cols on small screens safely */
-    scrollbar-width: none; /* Hide scrollbar for cleaner UI */
+    overflow: hidden;
+    position: relative;
   }
-  
-  .terminal-body::-webkit-scrollbar {
-    display: none;
+
+  #terminal-container {
+    height: 330px;
+    width: 100%;
+    position: relative;
+    overflow: hidden;
   }
 
   /* Static SSR Placeholder */
@@ -818,7 +859,7 @@ import '@xterm/xterm/css/xterm.css';
     padding: 8px;
     font-family: 'JetBrains Mono', monospace;
     font-size: 13px;
-    line-height: 1.4;
+    line-height: 1.25;
     color: #ededed;
     pointer-events: none;
   }
@@ -842,31 +883,60 @@ import '@xterm/xterm/css/xterm.css';
 
   .terminal-hint {
     position: absolute;
-    bottom: 16px;
-    right: 16px;
+    bottom: 14px;
+    right: 14px;
     font-family: var(--font-sans);
     font-size: 11px;
     color: var(--text-muted);
-    background: rgba(0, 0, 0, 0.6);
+    background: rgba(0, 0, 0, 0.65);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     padding: 4px 8px;
     border-radius: 4px;
     pointer-events: none;
-    opacity: 0.7;
+    opacity: 0.75;
     transition: opacity 0.3s ease;
+    z-index: 10;
   }
 
   .terminal-window:focus-within .terminal-hint {
     opacity: 0;
   }
 
-  /* Xterm CSS Overrides to match theme */
-  :global(.xterm-viewport) {
-    background-color: transparent !important;
-    overflow: hidden !important; /* Force prevent rogue scrollbars */
+  /* Xterm CSS Overrides for Seamless Responsive Fit */
+  :global(.terminal-window .xterm) {
+    height: 100%;
+    width: 100%;
   }
-  
-  :global(.xterm-screen) {
-    padding-left: 8px;
+
+  :global(.terminal-window .xterm .xterm-viewport) {
+    background-color: transparent !important;
+    overflow-y: hidden !important;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 196, 204, 0.35) transparent;
+  }
+
+  :global(.terminal-window.is-interactive .xterm .xterm-viewport),
+  :global(.terminal-window:focus-within .xterm .xterm-viewport) {
+    overflow-y: auto !important;
+  }
+
+  :global(.terminal-window .xterm .xterm-viewport::-webkit-scrollbar) {
+    width: 5px;
+  }
+
+  :global(.terminal-window .xterm .xterm-viewport::-webkit-scrollbar-track) {
+    background: transparent;
+  }
+
+  :global(.terminal-window .xterm .xterm-viewport::-webkit-scrollbar-thumb) {
+    background: rgba(255, 255, 255, 0.18);
+    border-radius: 4px;
+  }
+
+  :global(.terminal-window .xterm .xterm-viewport::-webkit-scrollbar-thumb:hover) {
+    background: var(--accent-primary);
   }
 
   @media (prefers-reduced-motion: reduce) {
