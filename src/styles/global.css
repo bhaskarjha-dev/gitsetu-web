@@ -345,10 +345,12 @@ nav a:focus {
 section[id],
 .section[id],
 #install,
+#how-it-works,
 #capabilities,
 #compare,
 #features,
 #comparison,
+#syntax-compare,
 #philosophy,
 #roadmap {
   scroll-margin-top: calc(60px + var(--space-xl));
