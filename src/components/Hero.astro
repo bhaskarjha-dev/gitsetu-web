@@ -7,19 +7,26 @@ import TerminalDemo from './TerminalDemo.astro';
     
     <div class="hero-content">
       <!-- Badge -->
-      <div class="hero-badge">
+      <a href="https://github.com/bhaskarjha-dev/gitsetu/releases/tag/v1.0.0" target="_blank" rel="noopener noreferrer" class="hero-badge">
         <span class="badge-dot"></span>
-        <span class="badge-text">v1.0.0 — Day 1 General Availability</span>
-      </div>
+        <span class="badge-text">v1.0.0 GA • 36 Test Suites Passing • 9 Distribution Channels</span>
+        <svg class="badge-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+      </a>
       
       <h1 class="hero-title">
-        The Zero-Trust <br/>
-        <span class="text-gradient">Identity Guard</span> for Git.
+        One command. All identities.<br/>
+        <span class="text-gradient">Every single machine.</span>
       </h1>
       
       <p class="hero-subtitle">
-        Stop leaking credentials and committing to the wrong profiles. GitSetu cryptographically sandboxes your work, personal, and client identities with zero background processes.
+        Stop pushing freelance commits with your corporate email. GitSetu automatically switches Git configs, isolated SSH keys, and credentials by directory with zero background daemons.
       </p>
+
+      <!-- Safety Pill Callout -->
+      <div class="hero-safety-pill">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="safety-icon"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><polyline points="9 12 11 14 15 10"></polyline></svg>
+        <span><strong>100% Non-Destructive:</strong> Preserves existing manual configs &amp; SSH keys. Auto-discovers identities.</span>
+      </div>
 
       <!-- Dedicated Hero CTA Row -->
       <div class="hero-cta-group">
@@ -152,15 +159,15 @@ import TerminalDemo from './TerminalDemo.astro';
       <div class="hero-trust">
         <div class="trust-item">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-success"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-          Zero Trust
+          36 Test Suites
         </div>
         <div class="trust-item">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-accent"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-          FIDO2 Ready
+          Zero Daemons
         </div>
         <div class="trust-item">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-secondary"><path d="M4 11a9 9 0 0 1 9 9"></path><path d="M4 4a16 16 0 0 1 16 16"></path><circle cx="5" cy="19" r="1"></circle></svg>
-          Bash 3.2 Core
+          Bash 3.2+ Core
         </div>
       </div>
     </div>
@@ -190,7 +197,7 @@ import TerminalDemo from './TerminalDemo.astro';
       windows: {
         cmd: 'irm https://gitsetu.bhaskarjha.dev/install.ps1 | iex',
         html: '<span class="tok-cmd">irm</span> <span class="tok-url">https://gitsetu.bhaskarjha.dev/install.ps1</span> <span class="tok-pipe">|</span> <span class="tok-sh">iex</span>',
-        note: 'Native PowerShell one-liner. Auto-generates cmd/ps1 shims and adds to PATH.',
+        note: 'Native PowerShell one-liner. Auto-generates cmd/ps1 shims. Prerequisite: Git for Windows (winget install Git.Git).',
         category: 'direct'
       },
       npx: {
@@ -202,7 +209,7 @@ import TerminalDemo from './TerminalDemo.astro';
       winget: {
         cmd: 'winget install BhaskarJha.GitSetu',
         html: '<span class="tok-cmd">winget</span> <span class="tok-arg">install</span> <span class="tok-pkg">BhaskarJha.GitSetu</span>',
-        note: 'Microsoft Windows Package Manager (v1.6.0 portable alias). Native execution in any shell.',
+        note: 'Official WinGet identifier. Also supports "winget install GitSetu". Prerequisite: Git for Windows.',
         category: 'pkg'
       },
       brew: {
@@ -212,8 +219,8 @@ import TerminalDemo from './TerminalDemo.astro';
         category: 'pkg'
       },
       scoop: {
-        cmd: 'scoop bucket add gitsetu https://github.com/bhaskarjha-dev/scoop-bucket && scoop install gitsetu',
-        html: '<span class="tok-cmd">scoop</span> <span class="tok-arg">bucket add</span> <span class="tok-pkg">gitsetu</span> <span class="tok-url">https://github.com/bhaskarjha-dev/scoop-bucket</span> <span class="tok-pipe">&amp;&amp;</span> <span class="tok-cmd">scoop</span> <span class="tok-arg">install</span> <span class="tok-pkg">gitsetu</span>',
+        cmd: 'scoop bucket add gitsetu https://github.com/bhaskarjha-dev/scoop-gitsetu && scoop install gitsetu',
+        html: '<span class="tok-cmd">scoop</span> <span class="tok-arg">bucket add</span> <span class="tok-pkg">gitsetu</span> <span class="tok-url">https://github.com/bhaskarjha-dev/scoop-gitsetu</span> <span class="tok-pipe">&amp;&amp;</span> <span class="tok-cmd">scoop</span> <span class="tok-arg">install</span> <span class="tok-pkg">gitsetu</span>',
         note: 'Windows Scoop bucket installation with isolated portable shim management.',
         category: 'pkg'
       },
@@ -500,6 +507,25 @@ import TerminalDemo from './TerminalDemo.astro';
     color: var(--text-primary);
     margin-bottom: clamp(0.75rem, 1.5vw, 1.25rem);
     backdrop-filter: blur(10px);
+    text-decoration: none;
+    transition: all 0.2s ease;
+  }
+
+  .hero-badge:hover {
+    background: rgba(0, 196, 204, 0.12);
+    border-color: rgba(0, 196, 204, 0.4);
+    transform: translateY(-1px);
+    color: #ffffff;
+  }
+
+  .badge-arrow {
+    opacity: 0.6;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+  }
+
+  .hero-badge:hover .badge-arrow {
+    opacity: 1;
+    transform: translateX(2px);
   }
 
   .badge-dot {
@@ -520,11 +546,35 @@ import TerminalDemo from './TerminalDemo.astro';
   }
 
   .hero-subtitle {
-    margin-bottom: clamp(1rem, 2vw, 1.4rem);
+    margin-bottom: clamp(0.75rem, 1.5vw, 1rem);
     font-size: clamp(0.95rem, 1.2vw, 1.08rem);
     color: #d4d4d8;
     max-width: 96%;
     line-height: 1.6;
+  }
+
+  /* Safety Callout Pill */
+  .hero-safety-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(16, 185, 129, 0.08);
+    border: 1px solid rgba(16, 185, 129, 0.22);
+    border-radius: var(--radius-full);
+    padding: 6px 14px;
+    font-size: 0.82rem;
+    color: #a7f3d0;
+    margin-bottom: clamp(1rem, 2vw, 1.35rem);
+    line-height: 1.4;
+  }
+
+  .hero-safety-pill strong {
+    color: #34d399;
+  }
+
+  .safety-icon {
+    color: #10b981;
+    flex-shrink: 0;
   }
 
   /* -------------------------------------------------------------
