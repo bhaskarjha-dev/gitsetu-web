@@ -787,15 +787,38 @@ const editUrl = `https://github.com/bhaskarjha-dev/gitsetu/edit/main/${sourceFil
   /* Sidebar styling */
   .docs-sidebar {
     position: sticky;
-    top: calc(var(--nav-height) + var(--space-xl));
-    max-height: calc(100vh - var(--nav-height) - var(--space-2xl));
+    top: calc(var(--nav-height) + 1rem);
+    max-height: calc(100vh - var(--nav-height) - 1.5rem);
     overflow-y: auto;
-    padding-right: var(--space-md);
-    scrollbar-width: none;
-    -ms-overflow-style: none;
+    padding-right: 6px;
+    padding-bottom: 2.5rem;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.2) rgba(255, 255, 255, 0.02);
   }
+
   .docs-sidebar::-webkit-scrollbar {
-    display: none;
+    width: 5px;
+    display: block;
+  }
+
+  .docs-sidebar::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: var(--radius-full);
+  }
+
+  .docs-sidebar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.18);
+    border-radius: var(--radius-full);
+    transition: background var(--transition-fast);
+  }
+
+  .docs-sidebar:hover::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.35);
+  }
+
+  .docs-sidebar::-webkit-scrollbar-thumb:hover {
+    background: var(--accent-primary);
+    box-shadow: 0 0 8px rgba(0, 196, 204, 0.5);
   }
 
   .mobile-menu-bar {
@@ -835,7 +858,7 @@ const editUrl = `https://github.com/bhaskarjha-dev/gitsetu/edit/main/${sourceFil
     color: var(--text-secondary);
     font-size: var(--text-sm);
     cursor: pointer;
-    margin-bottom: var(--space-xl);
+    margin-bottom: var(--space-md);
     transition: all var(--transition-fast);
   }
   .search-btn:hover {
@@ -889,7 +912,7 @@ const editUrl = `https://github.com/bhaskarjha-dev/gitsetu/edit/main/${sourceFil
   .sidebar-nav ul {
     list-style: none;
     padding: 0;
-    margin: var(--space-xs) 0 var(--space-md) 0;
+    margin: 3px 0 8px 0;
   }
 
   .sidebar-nav li {
@@ -1048,9 +1071,30 @@ const editUrl = `https://github.com/bhaskarjha-dev/gitsetu/edit/main/${sourceFil
   /* Table of Contents */
   .docs-toc {
     position: sticky;
-    top: calc(var(--nav-height) + var(--space-xl));
-    max-height: calc(100vh - var(--nav-height) - var(--space-2xl));
+    top: calc(var(--nav-height) + 1rem);
+    max-height: calc(100vh - var(--nav-height) - 1.5rem);
     overflow-y: auto;
+    padding-bottom: 2rem;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.16) transparent;
+  }
+
+  .docs-toc::-webkit-scrollbar {
+    width: 4px;
+    display: block;
+  }
+
+  .docs-toc::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .docs-toc::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.14);
+    border-radius: var(--radius-full);
+  }
+
+  .docs-toc:hover::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
   }
 
   .toc-inner {
