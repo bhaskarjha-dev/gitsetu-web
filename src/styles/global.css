@@ -168,6 +168,13 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: 600;
   line-height: 1.1;
   letter-spacing: -0.03em;
+  text-wrap: balance;
+}
+
+p,
+.section-subtitle,
+.markdown-body p {
+  text-wrap: pretty;
 }
 
 a {
@@ -358,5 +365,20 @@ section[id],
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border: 0;
+}
+
+/* --- Accessibility: Scrollable Table Keyboard Focus --- */
+.table-container:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 3px;
+  border-radius: var(--radius-lg);
+}
+
+/* --- Performance: Off-screen Layout Deferral (Core Web Vitals & INP) --- */
+.bento-section,
+.comparison,
+.roadmap {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 650px;
 }
 

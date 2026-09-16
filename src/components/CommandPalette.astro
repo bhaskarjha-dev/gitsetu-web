@@ -231,6 +231,7 @@
 
     disconnectedCallback() {
       document.body.style.overflow = '';
+      this.getInertTargets().forEach(el => el.removeAttribute('inert'));
       document.removeEventListener('open-command-palette', this.handleGlobalOpen);
       document.removeEventListener('keydown', this.handleGlobalKeydown);
       document.removeEventListener('keydown', this.handleKeydown);
@@ -306,6 +307,10 @@
       }
     }
 
+    private getInertTargets(): HTMLElement[] {
+      return Array.from(document.querySelectorAll('main, header, footer, .navbar, .site-footer, .docs-container, .mobile-menu-bar')) as HTMLElement[];
+    }
+
     openPalette() {
       if (this.backdrop?.classList.contains('active')) return;
       this.previousActiveElement = (document.activeElement as HTMLElement) || null;
@@ -314,6 +319,7 @@
       this.backdrop?.setAttribute('aria-hidden', 'false');
       document.body.style.overflow = 'hidden';
       this.selectedIndex = -1;
+      this.getInertTargets().forEach(el => el.setAttribute('inert', ''));
       
       this.input?.setAttribute('aria-expanded', 'true');
       
@@ -335,6 +341,7 @@
       this.backdrop?.setAttribute('aria-hidden', 'true');
       document.body.style.overflow = '';
       this.selectedIndex = -1;
+      this.getInertTargets().forEach(el => el.removeAttribute('inert'));
       
       if (this.dynamicSection) {
         this.dynamicSection.classList.remove('active');

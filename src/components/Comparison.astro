@@ -13,7 +13,7 @@ const comparisonData = [
   { feature: 'FIDO2 / YubiKey Support', gitsetu: '✅', gitego: '❌', karn: '❌', gh: '❌', gcm: '❌' },
   { feature: '9 Distribution Channels (npx, brew, winget, etc.)', gitsetu: '✅', gitego: '❌', karn: '❌', gh: '⚡', gcm: '⚡' },
   { feature: 'Standalone monolith bundle (no git clone)', gitsetu: '✅', gitego: '❌', karn: '❌', gh: '❌', gcm: '❌' },
-  { feature: '32 Automated Test Suites (POSIX + Sandbox)', gitsetu: '✅', gitego: '❌', karn: '❌', gh: '❌', gcm: '❌' },
+  { feature: '33 Automated Test Suites (POSIX + Sandbox)', gitsetu: '✅', gitego: '❌', karn: '❌', gh: '❌', gcm: '❌' },
   { feature: 'Runtime', gitsetu: 'Bash 3.2', gitego: 'Go', karn: 'Go', gh: 'Go', gcm: '.NET' }
 ];
 
@@ -37,7 +37,7 @@ const getCellLabel = (val: string) => {
     <h2 class="section-title">How GitSetu compares.</h2>
     <p class="section-subtitle">Verified v1.0.0 GA specification against competing ecosystem tools.</p>
 
-    <div class="table-container">
+    <div class="table-container" tabindex="0" role="region" aria-label="Ecosystem feature comparison table">
       <table class="compare-table">
         <thead>
           <tr>

@@ -21,7 +21,10 @@ const isActive = (path: string) => {
   <div class="nav-container">
     <div class="nav-brand">
       <a href="/" aria-label="GitSetu Home">
-        <img src="/logo.png" alt="GitSetu" class="brand-logo" width="24" height="24" />
+        <picture>
+          <source srcset="/logo.webp" type="image/webp" />
+          <img src="/logo.png" alt="GitSetu" class="brand-logo" width="24" height="24" loading="eager" decoding="async" />
+        </picture>
         GitSetu
       </a>
     </div>
@@ -131,6 +134,7 @@ const isActive = (path: string) => {
       this.mobileToggle = document.querySelector('.mobile-nav-toggle');
       this.mobileMenu = document.getElementById('mobile-menu');
       const backdrop = document.getElementById('mobile-menu-backdrop');
+      const getBackgroundElements = () => Array.from(document.querySelectorAll('main, footer, .site-footer')) as HTMLElement[];
 
       const closeMenu = () => {
         this.mobileMenu?.classList.remove('active');
@@ -139,6 +143,7 @@ const isActive = (path: string) => {
         this.navbar?.classList.remove('menu-open');
         backdrop?.classList.remove('active');
         document.body.style.overflow = '';
+        getBackgroundElements().forEach(el => el.removeAttribute('inert'));
       };
 
       const openMenu = () => {
@@ -148,6 +153,7 @@ const isActive = (path: string) => {
         this.navbar?.classList.add('menu-open');
         backdrop?.classList.add('active');
         document.body.style.overflow = 'hidden';
+        getBackgroundElements().forEach(el => el.setAttribute('inert', ''));
       };
 
       this.handleToggleClick = () => {
@@ -277,6 +283,7 @@ const isActive = (path: string) => {
         this.handleMenuLinkClick = null;
       }
       this.cleanupScrollspy();
+      document.querySelectorAll('main, footer, .site-footer').forEach(el => el.removeAttribute('inert'));
       if (this.handleBeforeSwap) {
         document.removeEventListener('astro:before-swap', this.handleBeforeSwap);
         this.handleBeforeSwap = null;
