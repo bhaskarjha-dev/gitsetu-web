@@ -534,6 +534,7 @@ import '@xterm/xterm/css/xterm.css';
           this.term.write('     \x1b[32m✔\x1b[0m [work] ➔ ~/work/ (dev@company.com, ed25519_work)\r\n');
           this.term.write('     \x1b[32m✔\x1b[0m [personal] ➔ [Global Fallback] (me@bhaskarjha.dev, ed25519_personal)\r\n');
           this.term.write('     \x1b[32m✔\x1b[0m OpenSSH Include isolation injected\r\n');
+          this.term.write('     \x1b[32m✔\x1b[0m Preserved pre-existing configs & SSH keys (non-destructive)\r\n');
           this.term.write('  \x1b[1;32m✨ Provisioned 2 profiles in 0.8s with zero prompts! (v1.0.0 GA)\x1b[0m\r\n\r\n');
           this.term.write(this.prompt);
         } else if (lower === 'gitsetu setup' || lower === 'gitsetu init' || lower === 'setup' || lower === 'init') {
@@ -559,8 +560,8 @@ import '@xterm/xterm/css/xterm.css';
           this.term.write('  \x1b[32m✔\x1b[0m OpenSSH 7.3+ (Include directive verified)\r\n');
           this.term.write('  \x1b[32m✔\x1b[0m POSIX Shell: Bash 3.2+ compatible\r\n');
           this.term.write('  \x1b[32m✔\x1b[0m Directory routing: Longest-match active\r\n');
-          this.term.write('  \x1b[32m✔\x1b[0m 32 regression test suites: 100% green\r\n');
-          this.term.write('  \x1b[32m✔\x1b[0m 24-phase Windows Sandbox audit: 70/70 checks passed\r\n\r\n');
+          this.term.write('  \x1b[32m✔\x1b[0m 36 regression test suites: 100% green\r\n');
+          this.term.write('  \x1b[32m✔\x1b[0m 31-phase Windows Sandbox VM audit: 100/100 checks passed\r\n\r\n');
           this.term.write(this.prompt);
         } else if (lower === 'gitsetu --version' || lower === 'gitsetu -v' || lower === 'gitsetu version' || lower === 'version') {
           this.term.write('  gitsetu v1.0.0 (Day 1 General Availability)\r\n\r\n');

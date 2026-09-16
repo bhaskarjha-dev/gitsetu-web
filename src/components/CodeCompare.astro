@@ -17,23 +17,19 @@
           <span class="file-name">~/.ssh/config</span>
         </div>
         <div class="panel-body">
-          <pre><code><span class="comment"># I hope I remember to use git@github-work.com...</span>
+          <pre><code><span class="comment"># Fragile host aliases break standard clone URLs</span>
 <span class="keyword">Host</span> github-work.com
   <span class="keyword">HostName</span> github.com
   <span class="keyword">User</span> git
   <span class="keyword">IdentityFile</span> ~/.ssh/id_rsa_work
   <span class="keyword">IdentitiesOnly</span> yes
 
-<span class="keyword">Host</span> github-personal.com
-  <span class="keyword">HostName</span> github.com
-  <span class="keyword">User</span> git
-  <span class="keyword">IdentityFile</span> ~/.ssh/id_rsa_personal
-
-<span class="comment"># ...and 15 other random aliases</span></code></pre>
+<span class="comment"># Must remember mangled clone URL:</span>
+git clone git@github-work.com:acme/core.git</code></pre>
         </div>
         <div class="panel-footer error-footer">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-          Error-prone, leaks identities globally.
+          Mangles clone URLs, breaks for teammates.
         </div>
       </div>
 
@@ -44,16 +40,16 @@
           <span class="file-name">~/.gitconfig & ~/.ssh/config</span>
         </div>
         <div class="panel-body">
-          <pre><code><span class="comment"># ~/.gitconfig — longest-match conditional include</span>
+          <pre><code><span class="comment"># Native longest-match directory include</span>
 <span class="keyword">[includeIf</span> <span class="string">"gitdir:~/work/"</span><span class="keyword">]</span>
   <span class="keyword">path</span> = ~/.config/gitsetu/profiles/work.gitconfig
 
-<span class="comment"># ~/.ssh/config — OpenSSH isolation (ADR 0002)</span>
-<span class="keyword">Include</span> ~/.config/gitsetu/profiles/ssh_config</code></pre>
+<span class="comment"># Standard clone URLs everywhere:</span>
+git clone git@github.com:acme/core.git</code></pre>
         </div>
         <div class="panel-footer success-footer">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
-          Zero-Trust, Longest-Match, Automatic.
+          Standard clone URLs, 100% non-destructive.
         </div>
       </div>
 
