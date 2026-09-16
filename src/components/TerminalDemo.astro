@@ -577,6 +577,27 @@ import '@xterm/xterm/css/xterm.css';
           this.term.write('    guard           Pre-commit identity verification\r\n');
           this.term.write('    vault           AES-256 encrypted profile backup/restore\r\n\r\n');
           this.term.write(this.prompt);
+        } else if (lower.startsWith('gitsetu vault') || lower === 'vault') {
+          this.term.write('  \x1b[1;36mGitSetu Encrypted Vault Engine v1.0.0 GA\x1b[0m\r\n');
+          this.term.write('  🔒 \x1b[32m✔\x1b[0m OpenSSL AES-256-CBC envelope encryption verified\r\n');
+          this.term.write('  📦 \x1b[32m✔\x1b[0m Encrypted profiles: work, personal\r\n');
+          this.term.write('  ✨ \x1b[1;32m✔\x1b[0m Vault archive saved: ~/.config/gitsetu/vault_backup.enc\r\n\r\n');
+          this.term.write(this.prompt);
+        } else if (lower.startsWith('gitsetu remove') || lower === 'remove') {
+          this.term.write('  \x1b[1;36mGitSetu Safe Unmounter v1.0.0 GA\x1b[0m\r\n');
+          this.term.write('  🔒 \x1b[32m✔\x1b[0m GitSetu includeIf directives safely unmounted\r\n');
+          this.term.write('  🛡️  \x1b[32m✔\x1b[0m Pre-existing manual configs & SSH keys left 100% intact\r\n\r\n');
+          this.term.write(this.prompt);
+        } else if (lower.startsWith('gitsetu test') || lower === 'test') {
+          this.term.write('  \x1b[1;36mGitSetu Test Engine v1.0.0 GA\x1b[0m\r\n');
+          this.term.write('  ✔ All 36 test suites passed cleanly (260+ assertions)\r\n');
+          this.term.write('  ✔ 31-phase Windows Sandbox VM audit: 100/100 checks passed\r\n\r\n');
+          this.term.write(this.prompt);
+        } else if (lower.startsWith('npx gitsetu') || lower === 'npx') {
+          this.term.write('  \x1b[1;36mRunning GitSetu via npx (Zero-Install)...\x1b[0m\r\n');
+          this.term.write('  🔍 \x1b[36mScanning workstation...\x1b[0m Active author: \x1b[33mme@bhaskarjha.dev\x1b[0m\r\n');
+          this.term.write('  ✨ \x1b[1;32m✔ Initialized in 0.8s without global pollution!\x1b[0m\r\n\r\n');
+          this.term.write(this.prompt);
         } else if (lower === 'clear' || lower === 'cls') {
           this.term.reset();
           this.term.write(this.prompt);

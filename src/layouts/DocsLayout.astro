@@ -320,17 +320,24 @@ const editUrl = `https://github.com/bhaskarjha-dev/gitsetu/edit/main/${sourceFil
         <!-- Main Content -->
         <main id="main-content" class="docs-content markdown-body">
           {currentPath !== '/docs' && (
-            <nav class="docs-breadcrumbs" aria-label="Breadcrumbs">
-              <a href="/docs">Docs</a>
-              {categoryName && (
-                <>
-                  <span class="crumb-separator">/</span>
-                  <span class="crumb-category">{categoryName}</span>
-                </>
-              )}
-              <span class="crumb-separator">/</span>
-              <span class="crumb-current" aria-current="page">{frontmatter.title}</span>
-            </nav>
+            <div class="docs-header-wrapper">
+              <nav class="docs-breadcrumbs" aria-label="Breadcrumbs">
+                <a href="/docs">Docs</a>
+                {categoryName && (
+                  <>
+                    <span class="crumb-separator">/</span>
+                    <span class="crumb-category">{categoryName}</span>
+                  </>
+                )}
+                <span class="crumb-separator">/</span>
+                <span class="crumb-current" aria-current="page">{frontmatter.title}</span>
+              </nav>
+              <div class="docs-spec-badges" aria-label="Document Specification Metadata">
+                <span class="doc-badge badge-ga">v1.0.0 GA</span>
+                <span class="doc-badge">Pure Bash 3.2+ &amp; Win32</span>
+                <span class="doc-badge badge-safe">100% Non-Destructive</span>
+              </div>
+            </div>
           )}
           <slot />
 
@@ -985,6 +992,55 @@ const editUrl = `https://github.com/bhaskarjha-dev/gitsetu/edit/main/${sourceFil
   .crumb-current {
     color: var(--accent-primary);
     font-weight: 500;
+  }
+
+  .docs-header-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-xl);
+    padding-bottom: var(--space-sm);
+    border-bottom: 1px solid var(--border-subtle);
+  }
+
+  .docs-header-wrapper .docs-breadcrumbs {
+    margin-bottom: 0;
+    padding-bottom: 0;
+  }
+
+  .docs-spec-badges {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .doc-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: var(--radius-full, 9999px);
+    font-size: 0.6875rem;
+    font-family: var(--font-mono);
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-subtle);
+  }
+
+  .doc-badge.badge-ga {
+    background: rgba(0, 240, 255, 0.08);
+    color: var(--accent-primary, #00f0ff);
+    border-color: rgba(0, 240, 255, 0.25);
+  }
+
+  .doc-badge.badge-safe {
+    background: rgba(16, 185, 129, 0.08);
+    color: #10b981;
+    border-color: rgba(16, 185, 129, 0.25);
   }
 
   global-manager {
