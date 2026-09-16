@@ -288,22 +288,25 @@ img {
   outline-offset: 2px;
 }
 
+/* Suppress focus rings on pointer interactions (mouse/touch click) while preserving strict accessibility for keyboard */
+:focus:not(:focus-visible) {
+  outline: none !important;
+}
+
 a:focus-visible,
 button:focus-visible,
-input:focus-visible,
 summary:focus-visible,
 [tabindex]:focus-visible {
   outline: 2px solid var(--accent-primary);
   outline-offset: 2px;
 }
 
-/* Header and navigation links focus fallback */
-header a:focus-visible,
-nav a:focus-visible,
-header a:focus,
-nav a:focus {
+/* Standalone form inputs focus state */
+input:not([type="hidden"]):focus-visible,
+textarea:focus-visible,
+select:focus-visible {
   outline: 2px solid var(--accent-primary);
-  outline-offset: 2px;
+  outline-offset: 1px;
 }
 
 /* --- Accessibility: Reduced Motion --- */

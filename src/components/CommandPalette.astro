@@ -753,11 +753,22 @@
     padding: 0 var(--space-lg);
     border-bottom: 1px solid var(--border-subtle);
     background: rgba(255, 255, 255, 0.02);
+    transition: border-color var(--transition-fast), background var(--transition-fast);
+  }
+
+  .cmd-modal:has(.cmd-input:focus) .cmd-header {
+    border-bottom-color: rgba(0, 240, 255, 0.3);
+    background: rgba(0, 240, 255, 0.02);
   }
 
   .cmd-search-icon {
     color: var(--accent-primary);
     margin-right: var(--space-sm);
+    transition: filter var(--transition-fast);
+  }
+
+  .cmd-modal:has(.cmd-input:focus) .cmd-search-icon {
+    filter: drop-shadow(0 0 8px rgba(0, 240, 255, 0.6));
   }
 
   .cmd-input {
@@ -767,8 +778,15 @@
     color: var(--text-heading);
     font-size: var(--text-lg);
     padding: var(--space-lg) 0;
-    outline: none;
+    outline: none !important;
+    box-shadow: none !important;
     font-family: var(--font-sans);
+  }
+
+  .cmd-input:focus,
+  .cmd-input:focus-visible {
+    outline: none !important;
+    box-shadow: none !important;
   }
 
   .cmd-input::placeholder {
