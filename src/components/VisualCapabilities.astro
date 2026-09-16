@@ -11,13 +11,32 @@
 
     <div class="visualizer-stage reveal delay-200">
       
+      <!-- Interactive Terminal Directory Switcher -->
+      <div class="stage-switcher" role="tablist" aria-label="Simulate Directory Traversal">
+        <span class="switcher-prompt" aria-hidden="true">terminal:~$</span>
+        <div class="switcher-buttons">
+          <button class="switcher-btn active" id="btn-work" role="tab" aria-selected="true" aria-controls="work-node" data-target="work">
+            <span class="folder-icon">📁</span>
+            <span class="btn-cmd">cd ~/work/acme</span>
+            <span class="active-dot" aria-hidden="true"></span>
+          </button>
+          <button class="switcher-btn" id="btn-personal" role="tab" aria-selected="false" aria-controls="personal-node" data-target="personal">
+            <span class="folder-icon">📁</span>
+            <span class="btn-cmd">cd ~/projects/oss</span>
+            <span class="active-dot" aria-hidden="true"></span>
+          </button>
+        </div>
+      </div>
+
       <!-- Central Hub / Core Engine -->
-      <div class="core-node interactive-node" role="button" tabindex="0" data-node="core" aria-expanded="false" aria-controls="runtime-inspector-hud" aria-label="Inspect GitSetu Core Engine Architecture">
+      <div class="core-node" aria-label="GitSetu Zero-Daemon Core Engine">
         <div class="pulse-ring"></div>
         <div class="node-inner">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-          <span>GitSetu</span>
-          <span class="node-hint-badge">Inspect</span>
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          <div class="core-text">
+            <span class="core-title">GitSetu Core</span>
+            <span class="core-tag">Zero-Daemon Engine</span>
+          </div>
         </div>
       </div>
 
@@ -33,84 +52,83 @@
       <div class="data-orb work-orb" aria-hidden="true"></div>
       <div class="data-orb personal-orb" aria-hidden="true"></div>
 
-      <!-- Work Environment Node -->
-      <div class="env-node work-node interactive-node" role="button" tabindex="0" data-node="work" aria-expanded="false" aria-controls="runtime-inspector-hud" aria-label="Inspect Work Environment Runtime Variables">
-        <div class="env-header">
+      <!-- Work Environment Card -->
+      <div class="env-card work-card is-active" id="work-node" role="tabpanel" tabindex="0" data-env="work" aria-label="Work Profile Environment">
+        <div class="card-status-badge">
+          <span class="status-dot"></span>
+          <span class="status-label">ACTIVE IDENTITY</span>
+        </div>
+        <div class="card-header">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
-          <span>~/work/acme</span>
-          <span class="node-hint-badge">Inspect</span>
+          <span class="card-dir">~/work/acme</span>
         </div>
-        <div class="env-body">
-          <div class="config-item active">
-            <span class="label">Key:</span>
-            <span class="value">ed25519-sk (YubiKey)</span>
+        <div class="card-body">
+          <div class="card-row">
+            <span class="row-label">Author</span>
+            <span class="row-val">eng@acme.corp</span>
           </div>
-          <div class="config-item active">
-            <span class="label">Email:</span>
-            <span class="value">eng@acme.corp</span>
+          <div class="card-row">
+            <span class="row-label">SSH Key</span>
+            <span class="row-val">Hardware FIDO2 (YubiKey)</span>
+          </div>
+          <div class="card-row">
+            <span class="row-label">Isolation</span>
+            <span class="row-val text-emerald">Strict /dev/null Shield</span>
           </div>
         </div>
-        <div class="boundary-shield"></div>
       </div>
 
-      <!-- Personal Environment Node -->
-      <div class="env-node personal-node interactive-node" role="button" tabindex="0" data-node="personal" aria-expanded="false" aria-controls="runtime-inspector-hud" aria-label="Inspect Personal Environment Runtime Variables">
-        <div class="env-header">
+      <!-- Personal Environment Card -->
+      <div class="env-card personal-card is-shielded" id="personal-node" role="tabpanel" tabindex="0" data-env="personal" aria-label="Personal Profile Environment">
+        <div class="card-status-badge">
+          <span class="status-dot"></span>
+          <span class="status-label">SHIELDED (INACTIVE)</span>
+        </div>
+        <div class="card-header">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-          <span>~/projects/oss</span>
-          <span class="node-hint-badge">Inspect</span>
+          <span class="card-dir">~/projects/oss</span>
         </div>
-        <div class="env-body">
-          <div class="config-item">
-            <span class="label">Key:</span>
-            <span class="value">id_rsa_github</span>
+        <div class="card-body">
+          <div class="card-row">
+            <span class="row-label">Author</span>
+            <span class="row-val">me@bhaskarjha.dev</span>
           </div>
-          <div class="config-item">
-            <span class="label">Email:</span>
-            <span class="value">me@bhaskarjha.dev</span>
+          <div class="card-row">
+            <span class="row-label">SSH Key</span>
+            <span class="row-val">id_ed25519 (Personal)</span>
+          </div>
+          <div class="card-row">
+            <span class="row-label">Isolation</span>
+            <span class="row-val text-muted">Zero Crossover</span>
           </div>
         </div>
-        <div class="boundary-shield"></div>
       </div>
 
-    </div>
-
-    <!-- Live Runtime Telemetry Inspector HUD -->
-    <div class="runtime-inspector-hud reveal delay-300" id="runtime-inspector-hud" role="region" aria-label="Runtime Environment Telemetry Inspector">
-      <div class="hud-topbar">
-        <div class="hud-indicator">
-          <span class="hud-beacon"></span>
-          <span class="hud-title-text" id="hud-title">Runtime Telemetry Inspector</span>
+      <!-- Interactive Context Strip & Architectural Guarantees -->
+      <div class="stage-footer">
+        <div class="live-explanation" id="live-explanation">
+          <span class="exp-icon" aria-hidden="true">💡</span>
+          <span class="exp-text" id="exp-text">
+            <strong>In this folder:</strong> Every <code>git commit</code> automatically signs as <strong>eng@acme.corp</strong> using your corporate hardware key. Your personal keys are locked out.
+          </span>
         </div>
 
-        <div class="hud-tabs" role="tablist" aria-label="Environment Telemetry Tabs">
-          <button class="hud-tab active" role="tab" id="tab-work" aria-selected="true" aria-controls="hud-panel" data-target="work">
-            Work Profile
-          </button>
-          <button class="hud-tab" role="tab" id="tab-personal" aria-selected="false" aria-controls="hud-panel" data-target="personal">
-            Personal Profile
-          </button>
-          <button class="hud-tab" role="tab" id="tab-core" aria-selected="false" aria-controls="hud-panel" data-target="core">
-            Core Engine
-          </button>
-        </div>
-
-        <div class="hud-status-badge" id="hud-status-badge">
-          SECURE_ISOLATED
+        <div class="stage-badges">
+          <div class="guarantee-badge" title="No background process or daemon">
+            <span class="badge-icon">🍃</span>
+            <span>0 KB Resident RAM</span>
+          </div>
+          <div class="guarantee-badge" title="Sub-millisecond native Git resolution">
+            <span class="badge-icon">⚡</span>
+            <span>&lt; 1.8ms Switch Time</span>
+          </div>
+          <div class="guarantee-badge" title="Fail-closed pre-commit guard">
+            <span class="badge-icon">🛡️</span>
+            <span>Zero Credential Leaks</span>
+          </div>
         </div>
       </div>
 
-      <div class="hud-content-panel" id="hud-panel" role="tabpanel" aria-labelledby="tab-work">
-        <div class="hud-var-grid" id="hud-var-grid">
-          <!-- Injected dynamically via JS -->
-        </div>
-
-        <div class="hud-footer-note" id="hud-footer-note">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-          <span id="hud-footer-text">Hardware token enforced. Global Git config contamination shielded via <code>/dev/null</code> redirect.</span>
-        </div>
-      </div>
-      <div id="hud-announcer" class="sr-only" aria-live="polite"></div>
     </div>
 
   </div>
@@ -125,18 +143,20 @@
   .visualizer-stage {
     position: relative;
     width: 100%;
-    min-height: 500px;
+    min-height: 560px;
     background: var(--bg-secondary);
     border: 1px solid var(--border-card);
     border-radius: var(--radius-xl);
     overflow: hidden;
     display: flex;
+    flex-direction: column;
     align-items: center;
-    justify-content: center;
+    justify-content: space-between;
+    padding: var(--space-xl) var(--space-xl) var(--space-lg);
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), inset 0 0 100px var(--accent-glow);
   }
 
-  /* Grid Background */
+  /* Ambient Grid Background */
   .visualizer-stage::before {
     content: '';
     position: absolute;
@@ -148,31 +168,140 @@
     background-position: center;
     z-index: 0;
     opacity: 0.5;
+    pointer-events: none;
   }
 
-  /* Central Core Engine Node */
+  /* --- Top Terminal Switcher Bar --- */
+  .stage-switcher {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    background: rgba(0, 0, 0, 0.7);
+    border: 1px solid var(--border-subtle);
+    padding: 6px 10px;
+    border-radius: var(--radius-full);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  }
+
+  .switcher-prompt {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--accent-primary);
+    font-weight: 600;
+    padding-left: 6px;
+    user-select: none;
+  }
+
+  .switcher-buttons {
+    display: flex;
+    gap: 6px;
+  }
+
+  .switcher-btn {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-subtle);
+    color: var(--text-secondary);
+    padding: 6px 14px;
+    border-radius: var(--radius-full);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all var(--transition-fast);
+  }
+
+  .switcher-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text-heading);
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+
+  .switcher-btn:focus-visible {
+    outline: 2px solid var(--accent-primary);
+    outline-offset: 2px;
+  }
+
+  .switcher-btn.active {
+    background: rgba(0, 196, 204, 0.15);
+    color: var(--accent-primary);
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 16px var(--accent-glow);
+    font-weight: 600;
+  }
+
+  .switcher-btn[data-target="personal"].active {
+    background: rgba(167, 139, 250, 0.15);
+    color: #c4b5fd;
+    border-color: #a78bfa;
+    box-shadow: 0 0 16px rgba(167, 139, 250, 0.25);
+  }
+
+  .active-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: 0;
+    transition: opacity var(--transition-fast);
+  }
+
+  .switcher-btn.active .active-dot {
+    opacity: 1;
+    box-shadow: 0 0 6px currentColor;
+  }
+
+  /* --- Central Core Engine Hub --- */
   .core-node {
     position: absolute;
-    top: 50%;
+    top: 48%;
     left: 50%;
     transform: translate(-50%, -50%);
     z-index: 10;
   }
 
   .node-inner {
-    background: var(--bg-tertiary);
+    background: rgba(18, 18, 18, 0.9);
     border: 1px solid var(--border-accent);
-    padding: var(--space-md) var(--space-lg);
+    padding: 12px 20px;
     border-radius: var(--radius-full);
     display: flex;
     align-items: center;
-    gap: var(--space-sm);
+    gap: 12px;
     color: var(--accent-primary);
-    font-family: var(--font-mono);
-    font-size: var(--text-sm);
     box-shadow: 0 0 30px var(--accent-glow-strong);
     position: relative;
     z-index: 2;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+
+  .core-text {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+  }
+
+  .core-title {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-heading);
+    letter-spacing: -0.01em;
+  }
+
+  .core-tag {
+    font-size: 10px;
+    font-family: var(--font-mono);
+    color: var(--accent-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
   }
 
   .pulse-ring {
@@ -186,10 +315,17 @@
     border: 2px solid var(--accent-primary);
     animation: ping 3s cubic-bezier(0, 0, 0.2, 1) infinite;
     z-index: 1;
-    opacity: 0.5;
+    opacity: 0.4;
   }
 
-  /* SVG Connection Lines */
+  @keyframes ping {
+    75%, 100% {
+      transform: translate(-50%, -50%) scale(1.8);
+      opacity: 0;
+    }
+  }
+
+  /* --- SVG Connection Lines --- */
   .connection-lines {
     position: absolute;
     top: 0;
@@ -204,536 +340,381 @@
     fill: none;
     stroke: var(--border-subtle);
     stroke-width: 2;
+    transition: stroke 0.4s ease, stroke-width 0.4s ease, opacity 0.4s ease;
   }
 
   .work-path {
-    stroke: var(--accent-glow-strong);
+    stroke: var(--accent-primary);
+    opacity: 0.8;
   }
 
-  /* Data Orbs */
+  .personal-path {
+    stroke: #a78bfa;
+    opacity: 0.25;
+  }
+
+  .personal-active .work-path {
+    opacity: 0.25;
+    stroke: var(--border-subtle);
+  }
+
+  .personal-active .personal-path {
+    opacity: 0.8;
+    stroke: #a78bfa;
+  }
+
+  /* --- Data Orbs --- */
   .data-orb {
     position: absolute;
     top: 0; left: 0;
     width: 12px; height: 12px;
     border-radius: 50%;
     offset-distance: 0%;
-    z-index: 4; /* Travels UNDER the env-nodes for 3D depth */
+    z-index: 4;
     opacity: 0;
     pointer-events: none;
-    transition: opacity var(--transition-base);
+    transition: opacity 0.3s ease;
   }
+
   .data-orb.active {
     opacity: 1;
   }
+
   .work-orb {
     background: var(--accent-primary);
     box-shadow: 0 0 15px var(--accent-primary), 0 0 30px var(--accent-primary);
     offset-path: var(--work-path);
     animation: flowOrb 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
   }
+
   .personal-orb {
-    background: var(--text-secondary);
-    box-shadow: 0 0 15px var(--text-secondary);
+    background: #c4b5fd;
+    box-shadow: 0 0 15px #a78bfa, 0 0 30px #a78bfa;
     offset-path: var(--personal-path);
-    animation: flowOrb 2.5s cubic-bezier(0.4, 0, 0.2, 1) infinite 1.25s;
-  }
-  @keyframes flowOrb {
-    0% { offset-distance: 0%; opacity: 0; transform: scale(0.5); }
-    10% { opacity: 1; transform: scale(1); }
-    90% { opacity: 1; transform: scale(1); }
-    100% { offset-distance: 100%; opacity: 0; transform: scale(2); }
+    animation: flowOrb 2.2s cubic-bezier(0.4, 0, 0.2, 1) infinite 0.5s;
+    opacity: 0.3;
   }
 
-  /* Environment Nodes */
-  .env-node {
+  .personal-active .personal-orb {
+    opacity: 1;
+  }
+
+  .personal-active .work-orb {
+    opacity: 0.2;
+  }
+
+  @keyframes flowOrb {
+    0% { offset-distance: 0%; opacity: 0; transform: scale(0.5); }
+    15% { opacity: 1; transform: scale(1); }
+    85% { opacity: 1; transform: scale(1); }
+    100% { offset-distance: 100%; opacity: 0; transform: scale(1.8); }
+  }
+
+  /* --- Environment Cards --- */
+  .env-card {
     position: absolute;
-    width: 280px;
-    background: var(--bg-code);
+    width: 290px;
+    background: rgba(14, 14, 16, 0.85);
     border: 1px solid var(--border-card);
     border-radius: var(--radius-lg);
     z-index: 5;
-    transition: transform var(--transition-base), box-shadow var(--transition-base);
-  }
-
-  .env-node:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.6);
-  }
-
-  /* Node Heartbeat */
-  @keyframes nodeHeartbeat {
-    0%, 90% { box-shadow: 0 0 20px var(--accent-glow); }
-    95% { box-shadow: 0 0 40px var(--accent-glow-strong), inset 0 0 20px var(--accent-glow); border-color: var(--accent-primary); }
-    100% { box-shadow: 0 0 20px var(--accent-glow); }
-  }
-
-  .work-node {
-    top: 20%;
-    left: 10%;
-    border-color: var(--border-accent);
-    animation: nodeHeartbeat 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-  }
-
-  .personal-node {
-    bottom: 20%;
-    right: 10%;
-    border-color: rgba(255, 255, 255, 0.1);
-    animation: personalHeartbeat 2.5s cubic-bezier(0.4, 0, 0.2, 1) infinite 1.25s;
-    opacity: 0.85;
-  }
-
-  @keyframes personalHeartbeat {
-    0%, 90% { box-shadow: 0 0 20px rgba(255, 255, 255, 0.02); }
-    95% { box-shadow: 0 0 40px rgba(255, 255, 255, 0.15), inset 0 0 20px rgba(255, 255, 255, 0.05); border-color: rgba(255, 255, 255, 0.3); }
-    100% { box-shadow: 0 0 20px rgba(255, 255, 255, 0.02); }
-  }
-
-  .env-header {
-    background: rgba(255, 255, 255, 0.02);
-    padding: var(--space-sm) var(--space-md);
-    border-bottom: 1px solid var(--border-subtle);
-    display: flex;
-    align-items: center;
-    gap: var(--space-sm);
-    color: var(--text-heading);
-    font-family: var(--font-mono);
-    font-size: var(--text-sm);
-  }
-
-  .env-body {
-    padding: var(--space-md);
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-sm);
-  }
-
-  .config-item {
-    display: flex;
-    justify-content: space-between;
-    font-size: var(--text-xs);
-    font-family: var(--font-mono);
-    padding: 6px;
-    background: var(--bg-tertiary);
-    border-radius: 4px;
-    border: 1px solid var(--border-subtle);
-  }
-
-  .config-item.active {
-    border-color: var(--border-accent);
-    color: var(--accent-primary);
-  }
-
-  .label { color: var(--text-muted); }
-  .value { color: var(--text-secondary); }
-  .active .value { color: var(--accent-primary); }
-
-  .boundary-shield {
-    position: absolute;
-    inset: -10px;
-    border: 1px dashed var(--border-subtle);
-    border-radius: calc(var(--radius-lg) + 10px);
-    pointer-events: none;
-    z-index: -1;
-  }
-
-  .work-node .boundary-shield {
-    border-color: var(--border-accent);
-    background: var(--accent-glow);
-  }
-
-  @keyframes ping {
-    75%, 100% {
-      transform: translate(-50%, -50%) scale(2);
-      opacity: 0;
-    }
-  }
-
-  @keyframes dashFlow {
-    to { stroke-dashoffset: -1000; }
-  }
-
-  /* Interactive Node Triggers */
-  .interactive-node {
+    padding: 14px 16px;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
     cursor: pointer;
     outline: none;
   }
 
-  .interactive-node:focus-visible {
+  .env-card:hover {
+    transform: translateY(-3px);
+  }
+
+  .env-card:focus-visible {
     outline: 2px solid var(--accent-primary);
     outline-offset: 4px;
   }
 
-  .node-hint-badge {
-    font-size: 10px;
-    font-family: var(--font-mono);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    padding: 2px 6px;
-    border-radius: var(--radius-full);
-    background: rgba(0, 196, 204, 0.15);
-    color: var(--accent-primary);
-    border: 1px solid rgba(0, 196, 204, 0.3);
-    margin-left: auto;
-    transition: all var(--transition-fast);
+  .work-card {
+    top: 22%;
+    left: 8%;
   }
 
-  .interactive-node:hover .node-hint-badge,
-  .interactive-node:focus-visible .node-hint-badge {
-    background: var(--accent-primary);
-    color: #000;
-    box-shadow: 0 0 10px var(--accent-glow);
+  .personal-card {
+    bottom: 22%;
+    right: 8%;
   }
 
-  .work-node.is-inspecting {
+  /* Active vs Shielded States */
+  .env-card.is-active {
     border-color: var(--accent-primary);
-    box-shadow: 0 0 35px var(--accent-glow-strong), inset 0 0 15px var(--accent-glow);
-  }
-
-  .personal-node.is-inspecting {
-    border-color: #a78bfa;
-    box-shadow: 0 0 35px rgba(167, 139, 250, 0.4), inset 0 0 15px rgba(167, 139, 250, 0.2);
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.6), 0 0 25px var(--accent-glow-strong);
     opacity: 1;
   }
 
-  .core-node.is-inspecting .node-inner {
-    border-color: var(--accent-primary);
-    box-shadow: 0 0 40px var(--accent-glow-strong);
+  .personal-card.is-active {
+    border-color: #a78bfa;
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.6), 0 0 25px rgba(167, 139, 250, 0.25);
   }
 
-  .core-node.is-inspecting .pulse-ring {
-    animation-duration: 1.2s;
-    border-color: var(--accent-primary);
+  .env-card.is-shielded {
+    opacity: 0.45;
+    border-style: dashed;
+    border-color: rgba(255, 255, 255, 0.12);
+    box-shadow: none;
   }
 
-  /* Live Runtime Telemetry Inspector HUD */
-  .runtime-inspector-hud {
-    margin-top: var(--space-xl);
-    width: 100%;
-    background: rgba(10, 10, 10, 0.85);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid var(--border-accent);
-    border-radius: var(--radius-xl);
-    padding: var(--space-lg);
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.1);
-    transition: all var(--transition-base);
+  .env-card.is-shielded:hover {
+    opacity: 0.75;
+    border-color: rgba(255, 255, 255, 0.25);
   }
 
-  .hud-topbar {
+  /* Card Inner Elements */
+  .card-status-badge {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: var(--space-md);
-    border-bottom: 1px solid var(--border-subtle);
-    padding-bottom: var(--space-md);
+    gap: 6px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    margin-bottom: 8px;
   }
 
-  .hud-indicator {
-    display: flex;
-    align-items: center;
-    gap: var(--space-sm);
+  .work-card.is-active .card-status-badge {
+    color: var(--accent-primary);
   }
 
-  @keyframes beaconPulse {
-    0%, 100% { opacity: 1; transform: scale(1); box-shadow: 0 0 8px var(--accent-primary); }
-    50% { opacity: 0.5; transform: scale(0.85); box-shadow: 0 0 2px var(--accent-primary); }
+  .personal-card.is-active .card-status-badge {
+    color: #c4b5fd;
   }
 
-  .hud-beacon {
-    width: 8px;
-    height: 8px;
+  .env-card.is-shielded .card-status-badge {
+    color: var(--text-muted);
+  }
+
+  .status-dot {
+    width: 6px;
+    height: 6px;
     border-radius: 50%;
-    background: var(--accent-primary);
+    background: currentColor;
+  }
+
+  .env-card.is-active .status-dot {
+    box-shadow: 0 0 8px currentColor;
     animation: beaconPulse 2s infinite;
   }
 
-  .hud-title-text {
-    font-family: var(--font-mono);
-    font-size: var(--text-sm);
-    font-weight: 600;
-    color: var(--text-heading);
-    letter-spacing: -0.01em;
+  @keyframes beaconPulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.8); }
   }
 
-  .hud-tabs {
+  .card-header {
     display: flex;
-    gap: 4px;
-    background: rgba(0, 0, 0, 0.5);
-    padding: 3px;
-    border-radius: var(--radius-full);
-    border: 1px solid var(--border-subtle);
-  }
-
-  .hud-tab {
-    background: transparent;
-    border: 1px solid transparent;
-    color: var(--text-secondary);
-    padding: 6px 14px;
-    border-radius: var(--radius-full);
-    font-size: var(--text-xs);
-    font-weight: 500;
-    cursor: pointer;
-    transition: all var(--transition-fast);
-  }
-
-  .hud-tab:hover {
+    align-items: center;
+    gap: 8px;
     color: var(--text-heading);
-  }
-
-  .hud-tab:focus-visible {
-    outline: 2px solid var(--accent-primary);
-    outline-offset: 1px;
-  }
-
-  .hud-tab.active {
-    background: rgba(0, 196, 204, 0.15);
-    color: var(--accent-primary);
-    border-color: rgba(0, 196, 204, 0.4);
-    box-shadow: 0 0 10px rgba(0, 196, 204, 0.2);
+    font-family: var(--font-mono);
+    font-size: 13px;
     font-weight: 600;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border-subtle);
+    margin-bottom: 10px;
   }
 
-  .hud-status-badge {
+  .card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .card-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     font-family: var(--font-mono);
     font-size: 11px;
-    font-weight: 600;
-    padding: 4px 10px;
-    border-radius: var(--radius-full);
-    background: rgba(0, 196, 204, 0.1);
-    color: var(--accent-primary);
-    border: 1px solid rgba(0, 196, 204, 0.3);
   }
 
-  .hud-status-badge.personal-mode {
-    background: rgba(167, 139, 250, 0.1);
-    color: #a78bfa;
-    border-color: rgba(167, 139, 250, 0.3);
+  .row-label {
+    color: var(--text-muted);
   }
 
-  .hud-content-panel {
-    padding-top: var(--space-md);
-  }
-
-  .hud-var-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
-    gap: var(--space-sm);
-  }
-
-  .hud-var-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: rgba(0, 0, 0, 0.4);
-    border: 1px solid var(--border-card);
-    border-radius: var(--radius-md);
-    padding: 8px 12px;
-    font-family: var(--font-mono);
-    font-size: var(--text-xs);
-    gap: var(--space-sm);
-    transition: border-color var(--transition-fast);
-  }
-
-  .hud-var-row:hover {
-    border-color: rgba(255, 255, 255, 0.2);
-  }
-
-  .hud-var-meta {
-    display: flex;
-    align-items: baseline;
-    gap: 6px;
-    min-width: 0;
-    overflow: hidden;
-  }
-
-  .hud-var-key {
+  .row-val {
     color: var(--text-secondary);
-    font-weight: 600;
-    white-space: nowrap;
+    font-weight: 500;
   }
 
-  .hud-var-eq {
+  .text-emerald {
+    color: var(--color-success);
+  }
+
+  .text-muted {
     color: var(--text-muted);
   }
 
-  .hud-var-val {
-    color: var(--accent-primary);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+  /* --- Bottom Stage Footer (Live Context & Badges) --- */
+  .stage-footer {
+    position: relative;
+    z-index: 10;
+    width: 100%;
+    margin-top: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
   }
 
-  .hud-var-val.val-alt {
-    color: #a78bfa;
-  }
-
-  .hud-copy-btn {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid var(--border-subtle);
-    color: var(--text-muted);
-    border-radius: 4px;
-    padding: 4px 8px;
-    cursor: pointer;
+  .live-explanation {
+    background: rgba(0, 0, 0, 0.7);
+    border: 1px solid var(--border-accent);
+    border-radius: var(--radius-lg);
+    padding: 10px 16px;
     display: flex;
     align-items: center;
-    gap: 4px;
-    font-size: 10px;
-    font-family: var(--font-sans);
+    gap: 10px;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    transition: border-color 0.3s ease;
+  }
+
+  .personal-active .live-explanation {
+    border-color: rgba(167, 139, 250, 0.4);
+  }
+
+  .exp-icon {
+    font-size: 16px;
     flex-shrink: 0;
+  }
+
+  .exp-text {
+    font-size: 13px;
+    color: var(--text-primary);
+    line-height: 1.45;
+  }
+
+  .exp-text strong {
+    color: var(--text-heading);
+  }
+
+  .exp-text code {
+    font-family: var(--font-mono);
+    background: rgba(255, 255, 255, 0.08);
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-size: 12px;
+    color: var(--accent-primary);
+  }
+
+  .personal-active .exp-text code {
+    color: #c4b5fd;
+  }
+
+  .stage-badges {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+  }
+
+  .guarantee-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-subtle);
+    padding: 4px 12px;
+    border-radius: var(--radius-full);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-secondary);
     transition: all var(--transition-fast);
   }
 
-  .hud-copy-btn:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: var(--text-primary);
-    border-color: var(--border-accent);
+  .guarantee-badge:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.2);
+    color: var(--text-heading);
   }
 
-  .hud-copy-btn.copied {
-    background: rgba(0, 196, 204, 0.2);
-    color: var(--accent-primary);
-    border-color: var(--accent-primary);
+  .badge-icon {
+    font-size: 12px;
   }
 
-  .hud-footer-note {
-    margin-top: var(--space-md);
-    display: flex;
-    align-items: center;
-    gap: var(--space-sm);
-    font-size: var(--text-xs);
-    color: var(--text-muted);
-    padding: 8px 12px;
-    background: rgba(255, 255, 255, 0.02);
-    border-radius: var(--radius-md);
-    border: 1px solid var(--border-subtle);
-  }
-
-  .hud-footer-note svg {
-    flex-shrink: 0;
-    color: var(--accent-primary);
-  }
-
-  .hud-footer-note code {
-    font-family: var(--font-mono);
-    color: var(--text-secondary);
-    background: rgba(255, 255, 255, 0.05);
-    padding: 2px 4px;
-    border-radius: 3px;
-  }
-
-  /* Responsive Media Layout */
+  /* --- Responsive Layout (< 800px) --- */
   @media (max-width: 800px) {
     .visualizer-stage {
-      flex-direction: column;
-      height: auto;
       min-height: auto;
-      padding: var(--space-4xl) var(--space-md);
-      gap: var(--space-3xl);
+      padding: var(--space-lg) var(--space-md);
+      gap: var(--space-xl);
     }
 
-    .core-node, .env-node {
+    .stage-switcher {
+      width: 100%;
+      flex-direction: column;
+      border-radius: var(--radius-md);
+      padding: var(--space-sm);
+    }
+
+    .switcher-buttons {
+      width: 100%;
+      flex-direction: column;
+    }
+
+    .switcher-btn {
+      width: 100%;
+      justify-content: center;
+    }
+
+    .core-node, .env-card {
       position: relative;
       top: auto;
       left: auto;
       right: auto;
       bottom: auto;
       transform: none;
-    }
-
-    .connection-lines {
-      opacity: 0.6; /* Ensure lines are visible on mobile to guide the orbs */
-    }
-
-    .env-node {
       width: 100%;
       max-width: 320px;
       margin: 0 auto;
     }
 
-    .hud-topbar {
+    .connection-lines {
+      opacity: 0.6;
+    }
+
+    .live-explanation {
       flex-direction: column;
       align-items: flex-start;
+      text-align: left;
     }
 
-    .hud-tabs {
+    .stage-badges {
+      flex-direction: column;
       width: 100%;
-      justify-content: space-between;
     }
 
-    .hud-tab {
-      flex: 1;
-      text-align: center;
-      padding: 8px 6px;
-    }
-
-    .hud-var-grid {
-      grid-template-columns: 1fr;
+    .guarantee-badge {
+      width: 100%;
+      justify-content: center;
     }
   }
 </style>
 
 <script>
-  interface TelemetryField {
-    key: string;
-    value: string;
-    copyValue: string;
+  interface FolderExplanation {
+    text: string;
   }
 
-  interface ProfileTelemetry {
-    title: string;
-    status: string;
-    isAlt?: boolean;
-    note: string;
-    fields: TelemetryField[];
-  }
-
-  const TELEMETRY_DATA: Record<string, ProfileTelemetry> = {
-    work: {
-      title: 'Work Profile Telemetry (~/work/acme)',
-      status: 'HARDWARE_TOKEN_ENFORCED',
-      note: 'Hardware token enforced. Global Git config contamination shielded via <code>/dev/null</code> redirect.',
-      fields: [
-        { key: 'GITSETU_PROFILE', value: 'work', copyValue: 'export GITSETU_PROFILE=work' },
-        { key: 'GIT_AUTHOR_EMAIL', value: 'eng@acme.corp', copyValue: 'git config user.email "eng@acme.corp"' },
-        { key: 'SSH_AUTH_SOCK', value: '/run/user/1000/yubikey.sock', copyValue: 'export SSH_AUTH_SOCK="/run/user/1000/yubikey.sock"' },
-        { key: 'GIT_CONFIG_GLOBAL', value: '/dev/null (Shielded)', copyValue: 'export GIT_CONFIG_GLOBAL=/dev/null' },
-        { key: 'GPG_KEY_ID', value: '0x4A8F9C2D (FIDO2 Bound)', copyValue: 'git config user.signingkey 0x4A8F9C2D' },
-        { key: 'PRECOMMIT_GUARD', value: 'STRICT_EMAIL_ENFORCE', copyValue: 'gitsetu guard --verify' }
-      ]
-    },
-    personal: {
-      title: 'Personal Profile Telemetry (~/projects/oss)',
-      status: 'STANDARD_UNIX_SOCKET',
-      isAlt: true,
-      note: 'Standard agent socket active. Personal signing keys and open-source identity isolated from corporate vault.',
-      fields: [
-        { key: 'GITSETU_PROFILE', value: 'personal', copyValue: 'export GITSETU_PROFILE=personal' },
-        { key: 'GIT_AUTHOR_EMAIL', value: 'me@bhaskarjha.dev', copyValue: 'git config user.email "me@bhaskarjha.dev"' },
-        { key: 'SSH_AUTH_SOCK', value: '~/.ssh/agent.sock', copyValue: 'export SSH_AUTH_SOCK="$HOME/.ssh/agent.sock"' },
-        { key: 'GIT_CONFIG_GLOBAL', value: '/dev/null (Shielded)', copyValue: 'export GIT_CONFIG_GLOBAL=/dev/null' },
-        { key: 'GPG_KEY_ID', value: '0x3D4E5F6A (OpenPGP)', copyValue: 'git config user.signingkey 0x3D4E5F6A' },
-        { key: 'PRECOMMIT_GUARD', value: 'OPEN_SOURCE_MODE', copyValue: 'gitsetu guard --verify' }
-      ]
-    },
-    core: {
-      title: 'Core Engine Telemetry (GitSetu Dispatcher)',
-      status: 'ZERO_TRUST_VERIFIED',
-      note: 'Zero-daemon architecture. Pure Bash 3.2 execution pipeline exits in sub-2ms without resident RAM.',
-      fields: [
-        { key: 'ROUTING_ENGINE', value: 'Daemonless Hook Dispatcher', copyValue: 'gitsetu status' },
-        { key: 'SHELL_TARGET', value: 'POSIX / Bash 3.2 Compatible', copyValue: 'bash --version' },
-        { key: 'EXEC_LATENCY', value: '< 1.8ms (Ephemeral)', copyValue: 'time gitsetu route' },
-        { key: 'RESIDENT_MEMORY', value: '0 KB (Zero Daemon)', copyValue: 'ps aux | grep gitsetu' },
-        { key: 'SOCKET_MULTIPLEX', value: 'Dynamic Symlink Bridge', copyValue: 'readlink ~/.gitsetu/current_sock' },
-        { key: 'SECURITY_BOUNDARY', value: 'Process-Level Isolation', copyValue: 'gitsetu doctor' }
-      ]
-    }
+  const FOLDER_EXPLANATIONS: Record<string, string> = {
+    work: '<strong>In this folder:</strong> Every <code>git commit</code> automatically signs as <strong>eng@acme.corp</strong> using your corporate hardware key. Your personal keys are locked out.',
+    personal: '<strong>In this folder:</strong> Every <code>git commit</code> seamlessly uses <strong>me@bhaskarjha.dev</strong>. Corporate credentials and tokens cannot be accessed.'
   };
 
   class VisualCapabilities extends HTMLElement {
     private resizeObserver: ResizeObserver | null = null;
-    private activeNode: string = 'work';
+    private activeEnv: string = 'work';
 
     connectedCallback() {
       const stage = this.querySelector('.visualizer-stage');
@@ -742,8 +723,8 @@
       this.resizeObserver = new ResizeObserver(() => this.drawLines());
       this.resizeObserver.observe(stage);
 
-      this.setupInspectionInteractions();
-      this.renderTelemetry(this.activeNode);
+      this.setupInteractiveSwitcher();
+      this.setEnvironment(this.activeEnv);
     }
 
     disconnectedCallback() {
@@ -753,128 +734,92 @@
       }
     }
 
-    private setupInspectionInteractions() {
-      // Node triggers
-      const interactiveNodes = this.querySelectorAll('.interactive-node');
-      interactiveNodes.forEach((node) => {
-        const nodeType = node.getAttribute('data-node');
-        if (!nodeType) return;
+    private setupInteractiveSwitcher() {
+      // Switcher Buttons
+      const buttons = this.querySelectorAll('.switcher-btn');
+      buttons.forEach((btn) => {
+        const target = btn.getAttribute('data-target');
+        if (!target) return;
 
-        node.addEventListener('click', () => {
-          this.renderTelemetry(nodeType);
+        btn.addEventListener('click', () => {
+          this.setEnvironment(target);
+        });
+      });
+
+      // Cards also act as interactive targets
+      const cards = this.querySelectorAll('.env-card');
+      cards.forEach((card) => {
+        const env = card.getAttribute('data-env');
+        if (!env) return;
+
+        card.addEventListener('click', () => {
+          this.setEnvironment(env);
         });
 
-        node.addEventListener('keydown', (e: Event) => {
+        card.addEventListener('keydown', (e: Event) => {
           const ke = e as KeyboardEvent;
           if (ke.key === 'Enter' || ke.key === ' ') {
             ke.preventDefault();
-            this.renderTelemetry(nodeType);
+            this.setEnvironment(env);
           }
         });
       });
-
-      // HUD Tab triggers
-      const tabs = this.querySelectorAll('.hud-tab');
-      tabs.forEach((tab) => {
-        const target = tab.getAttribute('data-target');
-        if (!target) return;
-
-        tab.addEventListener('click', () => {
-          this.renderTelemetry(target);
-        });
-      });
-
-      // Delegated Copy Actions
-      this.addEventListener('click', (e: Event) => {
-        const target = e.target as HTMLElement;
-        const copyBtn = target.closest('.hud-copy-btn') as HTMLElement | null;
-        if (!copyBtn) return;
-
-        e.preventDefault();
-        e.stopPropagation();
-        const text = copyBtn.getAttribute('data-copy') || '';
-        if (!text) return;
-
-        const originalText = copyBtn.querySelector('.hud-copy-label')?.textContent || 'Copy';
-        const labelEl = copyBtn.querySelector('.hud-copy-label');
-        if (labelEl) labelEl.textContent = 'Copied!';
-        copyBtn.classList.add('copied');
-
-        if (navigator.clipboard && window.isSecureContext) {
-          navigator.clipboard.writeText(text).catch(() => {});
-        }
-
-        window.setTimeout(() => {
-          if (labelEl) labelEl.textContent = originalText;
-          copyBtn.classList.remove('copied');
-        }, 1800);
-      });
     }
 
-    private renderTelemetry(nodeType: string) {
-      this.activeNode = nodeType;
-      const data = TELEMETRY_DATA[nodeType];
-      if (!data) return;
+    private setEnvironment(env: string) {
+      this.activeEnv = env;
+      const stage = this.querySelector('.visualizer-stage');
+      if (!stage) return;
 
-      // Update Node active classes and aria
-      const interactiveNodes = this.querySelectorAll('.interactive-node');
-      interactiveNodes.forEach((n) => {
-        const nType = n.getAttribute('data-node');
-        const isActive = nType === nodeType;
-        n.classList.toggle('is-inspecting', isActive);
-        n.setAttribute('aria-expanded', String(isActive));
-      });
+      const isPersonal = env === 'personal';
+      stage.classList.toggle('personal-active', isPersonal);
 
-      // Update Tabs
-      const tabs = this.querySelectorAll('.hud-tab');
-      tabs.forEach((tab) => {
-        const target = tab.getAttribute('data-target');
-        const isActive = target === nodeType;
-        tab.classList.toggle('active', isActive);
-        tab.setAttribute('aria-selected', String(isActive));
-      });
+      // Update Switcher Buttons
+      const btnWork = this.querySelector('#btn-work');
+      const btnPersonal = this.querySelector('#btn-personal');
 
-      // Update Header Title & Badges
-      const titleEl = this.querySelector('#hud-title');
-      if (titleEl) titleEl.textContent = data.title;
-
-      const badgeEl = this.querySelector('#hud-status-badge');
-      if (badgeEl) {
-        badgeEl.textContent = data.status;
-        badgeEl.classList.toggle('personal-mode', !!data.isAlt);
+      if (btnWork) {
+        btnWork.classList.toggle('active', !isPersonal);
+        btnWork.setAttribute('aria-selected', String(!isPersonal));
+      }
+      if (btnPersonal) {
+        btnPersonal.classList.toggle('active', isPersonal);
+        btnPersonal.setAttribute('aria-selected', String(isPersonal));
       }
 
-      // Update Variable Grid
-      const gridEl = this.querySelector('#hud-var-grid');
-      if (gridEl) {
-        gridEl.innerHTML = data.fields.map((f) => `
-          <div class="hud-var-row">
-            <div class="hud-var-meta">
-              <span class="hud-var-key">${f.key}</span>
-              <span class="hud-var-eq">=</span>
-              <span class="hud-var-val ${data.isAlt ? 'val-alt' : ''}" title="${f.value}">${f.value}</span>
-            </div>
-            <button class="hud-copy-btn" data-copy="${f.copyValue}" aria-label="Copy ${f.key} variable" title="Copy ${f.key}">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-              <span class="hud-copy-label">Copy</span>
-            </button>
-          </div>
-        `).join('');
+      // Update Cards (Active vs Shielded)
+      const workCard = this.querySelector('#work-node');
+      const personalCard = this.querySelector('#personal-node');
+
+      if (workCard) {
+        workCard.classList.toggle('is-active', !isPersonal);
+        workCard.classList.toggle('is-shielded', isPersonal);
+        const badgeLabel = workCard.querySelector('.status-label');
+        if (badgeLabel) {
+          badgeLabel.textContent = !isPersonal ? 'ACTIVE IDENTITY' : 'SHIELDED (INACTIVE)';
+        }
       }
 
-      // Update Footer Note
-      const footerText = this.querySelector('#hud-footer-text');
-      if (footerText) footerText.innerHTML = data.note;
+      if (personalCard) {
+        personalCard.classList.toggle('is-active', isPersonal);
+        personalCard.classList.toggle('is-shielded', !isPersonal);
+        const badgeLabel = personalCard.querySelector('.status-label');
+        if (badgeLabel) {
+          badgeLabel.textContent = isPersonal ? 'ACTIVE IDENTITY' : 'SHIELDED (INACTIVE)';
+        }
+      }
 
-      // Screen Reader Announcement
-      const announcer = this.querySelector('#hud-announcer');
-      if (announcer) announcer.textContent = `Inspecting ${data.title}. ${data.status}.`;
+      // Update Live Explanation Text
+      const expText = this.querySelector('#exp-text');
+      if (expText && FOLDER_EXPLANATIONS[env]) {
+        expText.innerHTML = FOLDER_EXPLANATIONS[env];
+      }
     }
 
     drawLines() {
       const core = this.querySelector('.core-node');
-      const work = this.querySelector('.work-node');
-      const personal = this.querySelector('.personal-node');
+      const work = this.querySelector('.work-card');
+      const personal = this.querySelector('.personal-card');
       const svg = this.querySelector('.connection-lines');
       const workPath = this.querySelector('.work-path');
       const personalPath = this.querySelector('.personal-path');
