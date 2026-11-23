@@ -9,28 +9,25 @@ slug: "enterprise/security-policy"
 
 ## Supported Versions
 
-The v1.1.0 release is distributed via GitHub Releases and npm. Cryptographic release artifacts and provenance are published to the official GitHub repository releases page.
+Currently, only the latest `main` branch and the latest official release are receiving security updates.
 
-| Version/channel | Security handling |
-| --------------- | ----------------- |
-| v1.1.0 release | Actively supported |
-| Latest official release | Supported according to the maintainers' release policy |
-| Older development snapshots | Not supported |
-
-Only install release artifacts downloaded from verified release channels with matching cryptographic signatures.
+| Version | Supported          |
+| ------- | ------------------ |
+| >= 1.0.0| :white_check_mark: |
+| < 1.0.0 | :x:                |
 
 ## Reporting a Vulnerability
 
-Security issues involving identity routing, private keys, credential helpers, vaults, installers, or update provenance should be reported privately. Do not open a public issue containing exploit details or secrets.
+Security is the absolute highest priority for GitSetu. As an identity-bootstrapping and credential-management tool, we treat all security flaws as critical emergencies.
 
-Use GitHub Security Advisories for the repository, or contact `security@bhaskarjha.dev`.
+**DO NOT** report security vulnerabilities through public GitHub issues. 
 
-Please include:
+Please report all security vulnerabilities privately to **security@bhaskarjha.dev** or through [GitHub Security Advisories](https://github.com/bhaskarjha-dev/gitsetu/security/advisories/new).
 
-- affected version/channel and commit;
-- operating system, Bash version, Git version, and relevant package manager;
-- minimal reproduction steps;
-- expected and observed authorization, identity, or confidentiality impact;
-- whether a real token or private key was exposed (redact it; never send the secret itself).
+### What to include in your report:
+- A description of the vulnerability.
+- Steps to reproduce the issue (including OS, Bash version, and environment details).
+- Any potential impact on users (e.g., token leakage, SSH key exposure, privilege escalation).
 
-Maintainers will acknowledge reports within 48 hours when possible and coordinate disclosure after a verified fix is available.
+### Response SLA
+Maintainers will actively acknowledge your report within **48 hours**, and you will receive regular updates on our progress towards a fix. We will work with you to responsibly disclose the vulnerability once a patch has been shipped.

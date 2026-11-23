@@ -7,9 +7,9 @@ slug: "reference/troubleshooting"
 ---
 # Troubleshooting & Diagnostics
 
-**Diagnose and resolve common Git, SSH, credential, and platform configuration issues.**
+**A comprehensive guide to rapidly surfacing and resolving environmental configuration drift.**
 
-While GitSetu validates configuration and fails closed on integrity checks, host-level Git configs, SSH agents, OS keychains, and virtualization layers (such as WSL) can introduce connectivity or identity issues. This reference provides resolution paths for common failure modes.
+GitSetu is engineered to self-heal and fail-closed natively, but localized Git configurations, OS keychain constraints, and complex virtualization bounds frequently introduce obscure connectivity issues. This reference provides immediate resolution paths for the most common errors.
 
 ---
 
@@ -18,10 +18,10 @@ While GitSetu validates configuration and fails closed on integrity checks, host
 Before executing manual log investigation, rely on GitSetu's built-in advanced diagnostic execution paths:
 
 ### `gitsetu status`
-Surfaces configuration context. Run this inside the affected repository. It evaluates your current directory path against managed `includeIf` rules and states which identity Git currently resolves.
+Instantly surfaces context. Run this inside the broken target repository. It evaluates your current directory path against global `includeIf` matrices and explicitly states which identity Git currently *believes* it should execute under.
 
 ### `gitsetu doctor`
-Runs offline structural, configuration, permission, and identity diagnostics. It does not test provider connectivity; use an explicit SSH or provider test for network failures.
+The ultimate configuration health scanner. It deeply verifies global `~/.gitconfig` syntax integrity, `~/.ssh/config` block placement, agent availability, and cross-checks local repository state overrides.
 
 ---
 
@@ -34,13 +34,13 @@ Runs offline structural, configuration, permission, and identity diagnostics. It
 If GitSetu generated a fresh keypair for your target profile, you **must** manually associate the public side of that signature with your upstream provider (GitHub, GitLab, Bitbucket).
 1. Output the public signature: `cat ~/.ssh/id_ed25519_<profile>.pub`
 2. Navigate to your provider's SSH Settings portal and paste the block exactly.
-3. Verify connection manually using the generated alias when needed: `ssh -T git@gitsetu-<profile>` (for example, `gitsetu-work`).
+3. Verify connection manually using the isolated alias: `ssh -T git@github-<profile>`
 
 > [!IMPORTANT]
 > **"Key already exists" Error on GitHub:** GitHub strictly enforces a 1-to-1 mapping. Each SSH public key can only be attached to **ONE** GitHub account. If you see this error, you are trying to add a key to your `work` account that is already attached to your `personal` account. You must generate a unique key for each account (which `gitsetu setup` handles automatically).
 
 > [!NOTE]
-> **"Could not resolve hostname gitsetu-pro":** GitSetu generates aliases such as `gitsetu-work` for explicit external workflows. You do not need to use them for ordinary clones; continue with standard `git@github.com:...` URLs and review the effective SSH configuration.
+> **"Could not resolve hostname github-pro":** GitSetu generates host aliases (like `github-pro`) **purely for testing connectivity**. You do NOT need to use them when cloning repositories. You can continue cloning using standard `git@github.com:...` strings.
 
 ### Resolution: Agent Saturation ("Too many authentication failures")
 If you manually loaded multiple legacy keys into your global `ssh-agent`, target hosts may disconnect after your host attempts to cycle blindly through incorrect signatures.
@@ -67,13 +67,8 @@ git config --local --unset user.email
 git config --local --unset user.name
 ```
 
-> [!IMPORTANT]
-> **Do not bypass the identity guard.** Do not use `git commit --no-verify` or
-> `git commit -n` to work around an identity mismatch. Clear the local override,
-> select the correct managed profile, or investigate the effective configuration
-> with `gitsetu status` and `git config --show-origin`. A deliberate policy
-> exception must be handled as a separately reviewed change, not as a
-> troubleshooting shortcut.
+> [!TIP]
+> **Bypassing the Guard:** If you intentionally want to bypass the Identity Guard for a specific, isolated commit without clearing your local overrides, you can utilize Git's native `--no-verify` flag: `git commit -m "wip" --no-verify`.
 
 ---
 
@@ -85,7 +80,7 @@ If you navigate into a configured directory and your terminal `$PS1` integration
 Git is highly pedantic regarding target path strings.
 1. **Trailing Slashes:** Ensure the mapped path ends in `/`. GitSetu handles this natively during `setup`.
 2. **Mount Point Normalization:** If you are operating inside WSL or virtualized Windows mounts (`/mnt/c/`), ensure you utilized the absolute Linux `/mnt/c/` path structure during `gitsetu setup`, not the abstract Windows path.
-3. **Safe Directory Checks:** If your target `.git` repository folder is owned by a different internal OS user (e.g. `root` inside a container mount), Git may refuse to inspect it. Use `git config --global --add safe.directory /path/to/target/repository` only after verifying the path and ownership; prefer a command-scoped or container-specific trust decision where possible.
+3. **Safe Directory Checks:** If your target `.git` repository folder is owned by a different internal OS user (e.g. `root` inside Docker mounts), Git aborts `includeIf` logic instantly. Utilize Git's native safe directory bypass: `git config --global --add safe.directory /path/to/target/repository`.
 
 ---
 
@@ -100,6 +95,17 @@ Under Linux/macOS, OpenSSH strictly demands `chmod 600` for private keys. On Win
 - **Drive Letters**: Always use forward slashes in Git configurations (e.g. `C:/Users/name/work` rather than `C:\Users\name\work`). GitSetu automatically normalizes all paths to canonical `C:/path` format.
 - **Case Sensitivity**: Windows paths are case-insensitive. GitSetu automatically injects `gitdir/i:` so directory matching works whether paths are referenced with uppercase or lowercase drive letters (`C:` vs `c:`).
 
+### Isolated Verification via Windows Sandbox
+If you want to verify GitSetu, test adding profiles, or debug configurations in total isolation from your host:
+```powershell
+# Native PowerShell:
+powershell -ExecutionPolicy Bypass -File .\sandbox\launch_sandbox.ps1
+
+# Or via Command Prompt / Explorer:
+.\sandbox\launch_sandbox.bat
+```
+This boots a clean, disposable Windows Sandbox container, runs the entire regression test suite (all 36 test suites), and simulates multi-profile Git commits without any risk to your host setup.
+
 ---
 
 ## ☢️ The Nuclear Option: Clean State Teardown
@@ -110,4 +116,4 @@ If your environment is irrecoverably corrupted by cross-platform manual file tam
 gitsetu teardown
 ```
 
-This operation cleans the recognized GitSetu-managed boundaries in `~/.gitconfig` and OpenSSH paths without modifying unrelated user content, allowing a fresh `gitsetu setup` workflow after review.
+This operation meticulously cleans all GitSetu managed layout boundaries from `~/.gitconfig` and OpenSSH paths safely without modifying your localized aliases, allowing you to execute `gitsetu setup` seamlessly against a fresh baseline.

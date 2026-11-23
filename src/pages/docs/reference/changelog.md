@@ -12,35 +12,6 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.1.0] - 2026-10-31
-
-### Added
-- Retrospective identity commit audit command (`gitsetu audit [count]`).
-- Configuration explanation and diagnostics command (`gitsetu explain`).
-- Interactive and scripted profile import command (`gitsetu import`).
-- Automatic remote URL routing via `--remote` (`hasconfig:remote.*.url:`).
-- Machine-readable `--json` and `--porcelain` output flags.
-- Explicit `--guard` and `--no-guard` identity verification flags.
-- Explicit `--provider-user` support for HTTPS profile mappings.
-- Backward-compatible v1 profile registry migration (`profiles.conf` v1 -> v2).
-
-### Changed
-- Profile registry uses versioned, strictly escaped v2 format (`profiles.conf`).
-- Backup vault uses authenticated v2 PBKDF2/AES-256-CTR encryption with transactional restore verification.
-- Generated OpenSSH host aliases updated from `github-<label>` to `gitsetu-<label>` to avoid host routing ambiguity.
-- Tightened input/path validation, canonical worktree routing, lock ownership, and FIDO2 fallback handling.
-- Fail-closed pre-commit guard with fail-open behavior on unmanaged repositories.
-
-### Removed
-- Removed native credential broker and token storage in favor of OS-native credential helpers.
-- Removed legacy package manager templates (AUR, Scoop, WinGet, Nix, Homebrew) and GitHub CLI extension; official distribution is focused on GitHub Releases and npm.
-- Removed `update --development` mutable branch updater.
-
-### Breaking Changes
-- Profile registry migrated to v2 format automatically; older v1-only tooling cannot read v2 registry.
-- SSH host aliases renamed from `github-<label>` to `gitsetu-<label>`.
-- Older unauthenticated / CBC backup vaults are no longer restored.
-
 ## [1.0.0] - 2026-09-10
 
 The inaugural General Availability (GA) production release of GitSetu — a zero-dependency, pure Bash 3.2 CLI compiler for automated Git multi-identity orchestration and OpenSSH key management across Linux, macOS, and Windows.

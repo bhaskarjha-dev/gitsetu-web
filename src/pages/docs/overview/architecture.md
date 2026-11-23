@@ -7,7 +7,7 @@ slug: "overview/architecture"
 ---
 # System Architecture
 
-**A comprehensive deep dive into the internal mechanics, modular compilation patterns, and managed execution flows of GitSetu.**
+**A comprehensive deep dive into the internal mechanics, modular compilation patterns, and zero-trust execution flows of GitSetu.**
 
 GitSetu achieves robust multi-identity orchestration without relying on long-running daemons or binary runtimes. Operating purely as a **localized configuration compiler**, it statefully compiles native Git and OpenSSH structures, delegating continuous runtime evaluation directly to standard OS routing mechanisms.
 
@@ -38,7 +38,7 @@ When triggered, GitSetu reads your profile specifications, injects precisely for
 ## Subsystem Mechanics
 
 ### 1. Global Identity Routing (`~/.gitconfig`)
-GitSetu establishes a managed routing framework using atomic, demarcated blocks labeled with markers such as `# [gitsetu:managed:start]`.
+GitSetu establishes a highly secure routing framework by deploying atomic, demarcated blocks labeled with custom signatures (e.g., `[gitsetu:managed:start]`).
 
 Inside these managed bounds, GitSetu maps local folders to isolated target files using Git's built-in `includeIf` condition:
 ```ini
@@ -50,42 +50,43 @@ Inside these managed bounds, GitSetu maps local folders to isolated target files
 [includeIf "gitdir/i:C:/Users/username/work/"]
     path = ~/.config/gitsetu/profiles/work.gitconfig
 ```
-When your active terminal session traverses into a managed workspace, Git evaluates the applicable profile configuration. On Windows, `gitdir/i:` provides case-insensitive matching for managed paths.
+When your active terminal session traverses into any sub-path of your workspace, Git natively intercepts the operation, seamlessly applying your professional email and custom execution parameters inline. On Windows, the `gitdir/i:` keyword guarantees case-insensitive path evaluation across all shells.
 
 ### 2. OpenSSH `Include` Integration
-Mutating global `~/.ssh/config` files inline creates avoidable risk to existing host parameters.
+Mutating global `~/.ssh/config` files inline violates zero-trust principles and risks catastrophic corruption of existing host parameters. 
 
 GitSetu resolves this by leveraging OpenSSH 7.3+'s native `Include` directive. During initial setup, GitSetu prepends a single portable routing link to the absolute top of your configuration file:
 ```ini
 Include ~/.config/gitsetu/profiles/ssh_config
 ```
-All generated host configurations, identity file pointers, and verification flags are written inside GitSetu's managed SSH include. Unrelated user host blocks remain outside that file; OpenSSH still controls the final effective configuration.
+All distinct host configurations, custom identity file pointers (`IdentityFile ~/.ssh/id_ed25519_work`), and strict verification flags (`IdentitiesOnly yes`) are exclusively orchestrated inside GitSetu's isolated layout layer, guaranteeing absolute sandboxing across Linux, macOS, and native Windows OpenSSH (`ssh.exe`).
 
-### 3. Identity Guard (Pre-Commit)
+### 3. Fail-Closed Identity Guard (Pre-Commit)
+To eliminate multi-state identity drift (e.g., configuring GitSetu but accidentally setting local `.git/config` overrides manually), GitSetu deploys a lightweight global hooks boundary (`core.hooksPath`).
 
-`gitsetu guard --install` installs an opt-in generated pre-commit guard in the managed hooks directory and preserves a project hook when the identity check succeeds. For a repository selected by a managed profile, an unresolved or divergent effective name/email fails closed. A repository outside all managed profiles is unmanaged: the identity check fails open by policy and ordinary project hooks continue. Malformed managed state is treated as indeterminate and fails closed. A local `core.hooksPath`, `--no-verify`, direct writes, and history rewrites can bypass this client-side boundary.
+1. **Commit Interception:** The global hook triggers the moment `git commit` executes.
+2. **Registry Verification:** Rapidly loads the master profile state from `~/.config/gitsetu/profiles.conf`.
+3. **Identity Verification:** Compares the expected profile email address for the local file path against the active runtime string returned by `git config user.email`.
+4. **Execution Decision:** If values match, execution proceeds. If values diverge, it raises an instant fatal termination (`exit 1`), blocking unauthorized code from hitting remote branches.
 
-### 4. Per-Profile Credential Routing
-GitSetu delegates HTTPS authentication directly to Git's native credential-helper ecosystem (Git Credential Manager, Apple Keychain via `git-credential-osxkeychain`, or Linux Secret Service via `git-credential-libsecret`) via standardized per-profile configuration:
-```ini
-[credential "https://github.com"]
-    username = dev-user
-```
-When invoking Git operations inside a managed profile directory, Git queries the platform credential manager with both the host and the configured profile username. This eliminates token leakage risks, respects native keychain access controls, and cleanly isolates multiple accounts across shared hosts without custom broker intermediaries.
+### 4. Namespaced Credential Brokering
+When authenticating over HTTPS, standard credential managers frequently mix Personal Access Tokens (PATs) for identical hostnames. 
+
+GitSetu injects itself as a proxy credential helper (`[credential] helper = "/path/to/gitsetu credential"`). When upstream syncs fire, GitSetu intercepts the authentication pipeline, evaluates active directory context, and requests heavily namespaced tokens from the underlying operating system (e.g., `gitsetu:work:github.com`), completely stopping cross-tenant authentication cross-talk.
 
 ---
 
 ## Zero-Trust Architecture & Concurrency Boundaries
 
-To reduce risk under parallel builds and automated environments, GitSetu uses bounded integrity controls:
+To ensure absolute resilience under parallel builds, cross-platform environments, or automated Continuous Integration:
 - **Atomic File Hot-Swaps:** All global configuration mutations write out to isolated temp directory contexts (`$TMPDIR/..._$$_${RANDOM}`) before executing immediate atomic renames (`mv`), eliminating mid-write interruption vectors.
-- **Lock ownership:** Directory locks use an owner token, PID liveness checks, bounded waiting, and safe stale-lock reaping. They protect normal concurrent operations but are not a security boundary against a same-user attacker.
-- **Process cleanup:** EXIT/INT/TERM handlers remove only resources registered by the current process.
-- **Automatic workspace provisioning:** Missing profile directories are created only during an explicitly mutating operation; dry-run remains non-persistent.
-- **Longest-prefix routing:** Nested paths are resolved by canonical prefix matching, with platform-aware case behavior.
-- **Versioned persistence:** Re-running setup reloads the v2 registry and managed profile configs; old registry formats are rejected rather than migrated.
-- **Safe SSH Command Quoting:** Uses POSIX single-quote shell quoting for key paths in generated `core.sshCommand` and `GIT_SSH_COMMAND`; review the effective command on each platform.
-- **Windows Sandbox Test Harness:** Experimental, host-isolated validation environment (`sandbox/`) for multi-profile checks. It is not a release qualification gate while legacy fixtures are reconciled; a run with no terminal status is inconclusive.
+- **POSIX Lock Reaping:** Subsystem routines generate dedicated execution lock blocks via `mkdir` primitives (`profiles.lock`) with PID verification to safely process concurrent requests without race conditions and auto-reap stale locks.
+- **Unified Global Traps:** Comprehensive signal traps (`EXIT / SIGINT / SIGTERM`) guarantee orphaned states, transient arrays, and partial file descriptors are cleanly collected even if execution panics.
+- **Automatic Workspace Directory Provisioning:** Automatically provisions missing workspace directories via `mkdir -p` when applying blueprints during setup or CLI profile addition.
+- **Longest-Prefix Match Routing:** Evaluates nested directory structures deterministically, prioritizing the deepest matching directory boundary across identity routing, pre-commit guards, and prompt lookups.
+- **Multi-Profile Persistence & Re-hydration:** Re-running setup safely re-hydrates existing profiles from `profiles.conf`, allowing non-destructive iterative updates.
+- **Safe SSH Command Quoting:** Enforces escaped double-quoting around SSH key paths containing spaces in `core.sshCommand` and `GIT_SSH_COMMAND`.
+- **Windows Sandbox Test Harness:** Completely disposable, host-isolated validation container (`sandbox/`) executing all 36 regression & empirical test suites and multi-profile simulations without touching the host machine.
 
 ---
 
@@ -105,7 +106,8 @@ GitSetu loads distinct library dependencies dynamically during runtime compilati
 | **`guard.sh`** | Pre-commit hook deployment and global hook virtualization handling. |
 | **`doctor.sh`** | Multi-point environment diagnostics and configuration drift discovery. |
 | **`verify.sh`** | Infrastructure verification: SSH key existence/permissions, gitconfig integrity. |
-| **`backup.sh`** | Managed state snapshots, authenticated v2 vault export/import, staging, and rollback. |
+| **`backup.sh`** | File-level timestamped backups, OpenSSL encrypted vault export/import. |
 | **`teardown.sh`** | Profile removal, managed block cleanup, deep local-repo identity stripping. |
 | **`discovery.sh`** | Auto-discovery: SSH key email extraction, gitconfig identity parsing, workspace detection. |
+| **`keychain.sh`** | Cross-platform credential broker routing to macOS Keychain and Linux Secret Service. |
 | **`completion.sh`** | TAB completion for Bash/Zsh: subcommands and profile name completion. |

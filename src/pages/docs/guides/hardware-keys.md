@@ -7,9 +7,9 @@ slug: "guides/hardware-keys"
 ---
 # Hardware Keys (FIDO2 / YubiKey)
 
-**Provisioning FIDO2-backed SSH keys with explicit hardware-presence requirements.**
+**Bootstrapping highly secure, tamper-resistant SSH authentication keys backed directly by hardware tokens.**
 
-GitSetu supports resident `ed25519-sk` keys. The hardware token performs the private-key operation and OpenSSH requests user presence, but users must still protect the host, token, and recovery paths; no client-side tool can guarantee protection from a compromised system.
+GitSetu natively supports provisioning FIDO2-backed resident SSH keys (`ed25519-sk`). This operational paradigm ensures that private cryptographic signatures are generated and held strictly inside external physical security keys (e.g., YubiKey 5 Series), completely protecting key material from extraction even if your local host filesystem is compromised.
 
 ---
 
@@ -39,21 +39,21 @@ What type of SSH key do you want to generate?
 1. Select option **`2`**.
 2. Connect your physical token directly into an available host USB interface.
 3. The terminal halts execution mid-flight. **Physically tap the capacitive contact** on your hardware key to confirm user presence.
-4. GitSetu writes a key handle file (`~/.ssh/id_ed25519_sk_<profile>`) containing the FIDO2 credential reference required to communicate with your physical token.
-5. The generated public key payload is available for provider registration, while the managed SSH configuration points OpenSSH to the hardware-backed identity.
+4. GitSetu compiles an isolated host pointer layout (`~/.ssh/id_ed25519_sk_<profile>`) containing reference hooks linking directly to your physical token.
+5. The generated public key payload streams directly out for integration, while configuration blocks automatically pivot to leverage your OpenSSH zero-trust bounds.
 
 ---
 
 ## Runtime Verification Mechanics
 
-When executing code pushes or fetching protected upstream branches over SSH, OpenSSH reads the key handle and requests user presence / authentication from the attached physical device.
+When executing code pushes or fetching protected upstream branches over SSH, OpenSSH reads the localized key hook pointer and streams an evaluation request to the attached physical device.
 
 ```text
 $ git push origin main
 Confirm user presence for key ED25519-SK...
 ```
 
-Your terminal session pauses while OpenSSH waits for the hardware token. A stolen laptop alone is not sufficient to use the resident key, but an attacker with the token, user presence, or a compromised host may still succeed. If hardware enrollment fails, GitSetu never silently substitutes a software key; any fallback requires an explicit user choice.
+Your terminal session pauses automatically. You must **physically touch the hardware key** to complete the handshake negotiation. If an adversarial actor steals your laptop or intercepts remote terminal environments, they remain structurally incapable of pushing commits because the cryptographic operation requires explicit physical proximity verification.
 
 ---
 
