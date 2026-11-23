@@ -1,7 +1,13 @@
-/install https://raw.githubusercontent.com/bhaskarjha-dev/gitsetu/main/install.sh 302
-/install.sh https://raw.githubusercontent.com/bhaskarjha-dev/gitsetu/main/install.sh 302
-/install.ps1 https://raw.githubusercontent.com/bhaskarjha-dev/gitsetu/main/install.ps1 302
-/uninstall https://raw.githubusercontent.com/bhaskarjha-dev/gitsetu/main/uninstall.sh 302
-/uninstall.sh https://raw.githubusercontent.com/bhaskarjha-dev/gitsetu/main/uninstall.sh 302
-/uninstall.ps1 https://raw.githubusercontent.com/bhaskarjha-dev/gitsetu/main/uninstall.ps1 302
+# Verified GitHub Release installer & uninstaller (POSIX / WSL / Git Bash)
+/install https://github.com/bhaskarjha-dev/gitsetu/releases/latest/download/install.sh 302
+/install.sh https://github.com/bhaskarjha-dev/gitsetu/releases/latest/download/install.sh 302
+/uninstall https://github.com/bhaskarjha-dev/gitsetu/releases/latest/download/uninstall.sh 302
+/uninstall.sh https://github.com/bhaskarjha-dev/gitsetu/releases/latest/download/uninstall.sh 302
 
+# Windows PowerShell installation is performed from a verified release tag checkout (no blind irm | iex)
+/install.ps1 /docs/getting-started/installation#3-windows-powershell-and-cmd 302
+/uninstall.ps1 /docs/getting-started/installation#removing-binaries--files 302
+
+# Renamed documentation routes (v1.0.0 -> v1.1.0)
+/docs/core-engines/credential-broker /docs/core-engines/https-credentials 301
+/docs/core-engines/credential-broker/ /docs/core-engines/https-credentials 301

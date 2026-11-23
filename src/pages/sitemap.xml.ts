@@ -1,34 +1,24 @@
 import type { APIRoute } from 'astro';
-
-const SITE = 'https://gitsetu.bhaskarjha.dev';
+import { DOCS_MANIFEST, GITSETU_SITE } from '../data/docs.mjs';
 
 export const GET: APIRoute = async () => {
-  const markdownFiles = import.meta.glob('/src/pages/docs/**/*.md', { eager: true });
-  
+  const today = new Date().toISOString().split('T')[0];
+
   const urls: { loc: string; lastmod: string; changefreq: string; priority: string }[] = [
     {
-      loc: `${SITE}/`,
-      lastmod: new Date().toISOString().split('T')[0],
+      loc: `${GITSETU_SITE}/`,
+      lastmod: today,
       changefreq: 'weekly',
-      priority: '1.0',
-    },
-    {
-      loc: `${SITE}/docs`,
-      lastmod: new Date().toISOString().split('T')[0],
-      changefreq: 'weekly',
-      priority: '0.9',
-    },
+      priority: '1.0'
+    }
   ];
 
-  for (const path in markdownFiles) {
-    const slug = path.replace('/src/pages/', '').replace('.md', '');
-    if (slug === 'docs/overview/introduction' || slug === 'docs/index') continue;
-    
+  for (const doc of DOCS_MANIFEST) {
     urls.push({
-      loc: `${SITE}/${slug}`,
-      lastmod: new Date().toISOString().split('T')[0],
+      loc: `${GITSETU_SITE}${doc.href}`,
+      lastmod: today,
       changefreq: 'weekly',
-      priority: '0.8',
+      priority: doc.href === '/docs' ? '0.9' : '0.8'
     });
   }
 
@@ -48,7 +38,7 @@ ${urls
 
   return new Response(sitemapXml, {
     headers: {
-      'Content-Type': 'application/xml; charset=utf-8',
-    },
+      'Content-Type': 'application/xml; charset=utf-8'
+    }
   });
 };
