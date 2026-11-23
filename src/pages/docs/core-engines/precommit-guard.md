@@ -1,23 +1,23 @@
 ---
 layout: ../../../layouts/DocsLayout.astro
 title: "Pre-Commit Guard"
-description: "Deterministic pre-commit hook preventing cross-identity commit pollution and secret leakage."
+description: "Opt-in client-side pre-commit guard that fails closed on identity mismatches in managed repos while preserving project hooks."
 category: "core-engines"
 slug: "core-engines/precommit-guard"
 ---
 # Pre-Commit Identity Guard Engine
 
-**Fail-closed verification interceptor stopping wrong-author commits from hitting your repository history.**
+**Managed-repository identity verification that blocks unresolved or divergent Git identities while preserving unmanaged repositories.**
 
 While directory-scoped configuration routing acts as an incredibly reliable dynamic baseline, multi-state configuration drift remains a real vulnerability. 
 
-If a developer runs manual one-off override commands inside a local project folder (e.g., `git config user.email "personal@example.com"`), Git's native precedence engine prioritizes local repository flags over global profile rules. To prevent these localized state overrides from leaking unauthorized identities into public commit history, GitSetu deploys an uncompromising final boundary: the **Identity Guard Engine**.
+If a developer runs manual one-off override commands inside a local project folder (e.g., `git config user.email "personal@example.com"`), Git's native precedence engine prioritizes local repository flags over global profile rules. GitSetu offers an opt-in client-side guard for repositories classified as managed; it reduces this risk but is not an uncompromising final boundary.
 
 ---
 
-## Fail-Closed Intercept Flow
+## Guard Flow
 
-During initial installation or execution of the `gitsetu guard --install` subcommand, GitSetu maps a high-speed verification interceptor directly into your global Git configuration bounds (`core.hooksPath`).
+During `gitsetu guard --install`, GitSetu writes a generated pre-commit wrapper into its managed hooks directory and points Git's `core.hooksPath` at it. For a managed repository, an unresolved or mismatched effective name/email aborts the commit. For an unmanaged repository, the identity check fails open by policy and the repository's own hook continues. Malformed managed state fails closed.
 
 ```
 [ Developer executes: git commit -m "feat: core module" ]
@@ -29,18 +29,18 @@ During initial installation or execution of the `gitsetu guard --install` subcom
   [ Rapid lookup of expected profile state for path ]
                            │
                            ▼
-  [ Compares expected profile email vs actual email ]
+  [ Compares expected profile name/email vs effective author/committer ]
                            │
              ┌─────────────┴─────────────┐
              ▼                           ▼
        [ MATCHES ]                 [ DIVERGES ]
              │                           │
              ▼                           ▼
-     [ Commit Succeeds ]       [ INSTANT FATAL ABORT ]
+     [ Commit Succeeds ]       [ COMMIT BLOCKED ]
 ```
 
 ### The Terminal Experience
-When configuration divergence is intercepted, execution aborts instantly with high-visibility diagnostic output:
+When configuration divergence is intercepted, execution aborts the commit with high-visibility diagnostic output:
 
 ```text
 $ git commit -m "wip: core patch"
@@ -57,15 +57,13 @@ Action Required: Run 'gitsetu doctor' or strip local config overrides.
 
 Deploying global `core.hooksPath` directives frequently breaks localized team development tooling. 
 
-GitSetu's intercept engine is architected to act as a **transparent pass-through proxy**. After verifying active identity boundaries successfully, the hook automatically identifies and triggers project-level execution hooks (e.g., `husky`, `lefthook`, or `pre-commit` runners), guaranteeing localized linting and testing pipelines run completely uninhibited.
+A repository-local `core.hooksPath`, `git commit --no-verify`, direct hook/configuration changes, a compromised same-user process, and later history rewrites can bypass this global guard. The wrapper invokes the repository's prior/project hook after a successful managed identity check and forwards its arguments and standard input. Hook behavior, permissions, and failures remain the repository's responsibility.
 
 ---
 
 ## High-Performance Execution & Invariants
 
-Because commit validation occurs inline multiple times a day, execution overhead must remain minimal. 
-
-The Identity Guard is compiled purely in native, un-subshell-dependent **Bash 3.2**. By directly scanning internal configuration parameters without spinning up sub-processes or external interpreters, total evaluation completes in **`< 2 milliseconds`**, rendering the security verification entirely invisible during normal workflows.
+The guard uses Bash and Git plumbing, but its latency depends on the repository, filesystem, and hook chain. Measure the actual workflow rather than relying on a fixed sub-2ms claim.
 
 ### Longest-Prefix Match Routing
 If multiple managed profile directories nest within each other (e.g., `~/work/` and `~/work/client-project/`), the guard uses a longest-prefix match algorithm to identify the deepest matching directory boundary. Commits inside `~/work/client-project/` are strictly enforced against the client profile email rather than the parent work profile.

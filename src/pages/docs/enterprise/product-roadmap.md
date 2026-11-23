@@ -1,74 +1,107 @@
 ---
 layout: ../../../layouts/DocsLayout.astro
 title: "Product Roadmap"
-description: "Strategic milestones, protocol enhancements, and enterprise roadmap for GitSetu."
+description: "Shipped v1.1.0 milestones and upcoming v1.2.0 plans including external SSH agents, gitsetu clone, and community package managers."
 category: "enterprise"
 slug: "enterprise/product-roadmap"
 ---
 # Product Roadmap (2026 Vision)
 
-**Charting the trajectory from 82/100 to an unassailable 100/100 Enterprise Identity Platform.**
+**Charting the trajectory from the current v1.1.0 candidate toward a broader enterprise identity platform.** Scores and market projections in this roadmap are illustrative planning estimates, not measured product guarantees.
 
-Our mission is to make identity leakage structurally impossible. GitSetu currently holds an industry-leading position for zero-dependency identity orchestration, yet significant expansion opportunities exist within the enterprise, CI/CD, and deeper IDE integration layers.
+Our mission is to reduce identity leakage through explicit routing, reviewable configuration, and conservative defaults. GitSetu is an unpublished Bash-core candidate; broader enterprise, CI/CD, and IDE integration remain future work.
 
-This research-driven roadmap synthesizes competitive analysis, developer pain-point research, and macro identity security trends to chart the complete path forward over the next 18 months.
+This research-driven roadmap synthesizes competitive analysis, developer pain-point research, and macro identity security trends to chart the complete path forward over the next 18 months. Items under Phases 1–4 are aspirational plans, not claims about the current v1.1.0 candidate.
 
 ---
 
 ## The Strategic Baseline
 
-Based on exhaustive ecosystem analysis (May 2026), GitSetu maintains a composite feature/safety score of **82/100**, acting as the most comprehensive identity manager for macOS and Linux engineers.
+The planning baseline is qualitative: GitSetu currently provides a Bash configuration compiler with managed identity, SSH, vault, and packaging primitives. External ecosystem statistics require citations and retrieval dates before they are used in a decision.
 
-However, the industry landscape reveals escalating threat vectors:
-- **64% of credentials** leaked in 2022 remained actively valid four years later due to stagnant key rotation practices.
-- **Non-Human Identities (NHI)** in CI/CD environments now outnumber human identities **144:1**, representing the primary target for credential compromise.
-
-Our target is a flawless **100/100**. A developer using GitSetu should never have to manually manage key generation, rotation, identity switching, or pipeline authentication ever again. The bridge must become entirely invisible.
+Potential threat vectors include credential leakage, stale keys, unmanaged automation identities, and unreviewed repository configuration. The figures sometimes quoted for credential lifetime and non-human identity ratios are not maintained as guarantees in this repository; cite the original research before repeating them.
 
 ---
 
-## Foundation: Completed in v1.0.0
+## Foundation: Completed in v1.1.0
 
-The following architectural hardening milestones established our enterprise baseline, backed by 36 automated regression and empirical test suites (250+ assertions) and a 31-phase live Windows Sandbox empirical audit (107/107 checks passed):
+The following architectural hardening milestones describe the v1.1.0 release. They are not timeless claims: verification is tied to a named source commit and test run, and an isolated Windows Sandbox run is environment-dependent; a run without a terminal status is inconclusive rather than a product pass:
 - **Zero-Trust Identity Guard**: Hard pre-commit intercepts preventing dual-state leaks with longest-prefix directory matching, Windows/macOS case-insensitivity, and dynamic email re-reading.
 - **Single Source of Truth (SSOT)**: Dynamic resolution via isolated `.gitconfig` files without registry polling.
-- **Native Windows PowerShell Distribution**: Shipped native `install.ps1` & `uninstall.ps1` installers, automated Command Prompt (`gitsetu.cmd`) and PowerShell (`gitsetu.ps1`) shims in `%LOCALAPPDATA%\gitsetu\bin`, and User `PATH` environment management.
-- **Package Formula Definitions**: Authored official Homebrew formula (`packaging/homebrew/gitsetu.rb`) and Windows Scoop manifest (`packaging/scoop/gitsetu.json`).
+- **Native Windows PowerShell Distribution**: Provides `install.ps1` & `uninstall.ps1` installers (run from a checkout), ExecutionPolicy-safe Command Prompt (`gitsetu.cmd`) shims in `%LOCALAPPDATA%\gitsetu\bin`, native compiled C# launcher (`gitsetu.exe`), and User `PATH` environment management.
+- **Package Formula Definitions**: Keeps an unpublished Homebrew template for a future intentional publication; no package-manager formula or manifest is public.
 - **Headless & Dotfiles Automation**: Scriptable, non-interactive profile provisioning via `gitsetu add` and `gitsetu profile add` backed by POSIX directory concurrency locking (`profiles.lock`).
 - **Automated Workspace Provisioning**: Auto-creates missing workspace directories (`mkdir -p`) upon profile registration, with clean unmounting and pruning on profile deletion.
 - **Multi-Profile Persistence & Re-hydration**: Preserves and re-hydrates existing profiles across multiple `gitsetu setup` runs.
-- **Safe SSH Space Quoting**: Double-quotes key paths with spaces in `core.sshCommand` and `GIT_SSH_COMMAND`.
+- **Safe SSH Space Quoting**: Uses POSIX single-quote shell quoting for key paths in generated SSH commands; review the effective Git/OpenSSH command on each platform.
 - **SSH Commit Signing**: Full native support for SSH-based cryptographic commit signatures (`gpg.format = ssh`, `commit.gpgsign = true`).
 - **Cross-Platform Normalization**: Native Windows drive path conversion (`pwd -W`), case-insensitive path comparisons on Windows and macOS.
 - **Unified Global Lifecycle**: Complete signal trapping (`EXIT/SIGINT/SIGTERM`) ensuring zero lock leaks.
 - **POSIX Concurrency Hardening**: Atomic `mv` operations eliminating Time-of-Check to Time-of-Use race conditions.
 - **Bash 3.2 Array Panic Prevention**: Native C-style POSIX loop structures replacing fragile subshell bounds.
 - **Path Injection Prevention**: Strict newline sanitization preventing INI boundary corruption.
-- **Encrypted State Export**: AES-256 OpenSSL vault packaging (`gitsetu backup` / `gitsetu restore`).
-- **Empirical Sandbox Verification Matrix**: 36 automated regression test suites and isolated Windows Sandbox test harness (36/36 suites passing 100% green, 107/107 sandbox audit checks passed).
+- **Authenticated State Export**: Versioned authenticated v2 vault packaging (`gitsetu backup` / `gitsetu restore`) with staging, tamper checks, and rollback. Older vault formats are rejected.
+- **Remote-URL Routing (FUT-01)**: Dynamic identity routing by `includeIf "hasconfig:remote.*.url:..."` patterns in the tail block for repositories cloned outside designated folders.
+- **SSH Greeting Account Verification (FUT-02)**: Validating authenticated remote usernames against configured provider accounts during `verify` checks without false-mismatch regressions.
+- **Safe Adoption & Diagnostics (FUT-04)**: Non-destructive configuration trace (`gitsetu explain`) and interactive adoption (`gitsetu import`) with existing key reuse and explicit confirmation.
+- **Structured Telemetry API**: Native machine-readable JSON output via `gitsetu status --json` and `gitsetu doctor --json` for editor integration and automated audits.
+- **Inherited Tri-State Commit Signing**: Preserving global GPG and hardware signing configurations by defaulting to `inherit`.
+- **Empirical Sandbox Verification**: Windows Sandbox is an optional environment check. Record the tested revision and terminal status; a run with no terminal status is inconclusive, not a product pass.
 
 ---
 
 ## Phase 1: Zero-Friction Onboarding & Universal Distribution
 
+> **Release-candidate preparation:** v1.1.0 is an unpublished candidate with
+> named-commit verification records. Publication remains gated until a reviewed
+> publish-only workflow verifies and publishes pinned artifacts and manifests.
+> None of the package-manager or extension commands below are available before
+> that gate.
+
 **Goal:** Eliminate all adoption friction by ensuring GitSetu is instantly discoverable, installable, and trusted across all developer environments without requiring git clones or elevated permissions.
 
-- **Single-File Bundled Binary (`gitsetu-standalone` / `make dist`):** 
-  - Release an automated build step that inlines all `lib/*.sh` modules into a single, self-contained executable script.
+- **Single-File Bundled Binary (`gitsetu-standalone` / `bash scripts/bundle.sh`):**
+  - Maintain the deterministic build step that inlines all `lib/*.sh` modules into a single, self-contained executable script.
   - Allows direct download without cloning the git repository:
     ```bash
-    curl -sL https://gitsetu.bhaskarjha.dev/bin/gitsetu -o ~/.local/bin/gitsetu && chmod +x ~/.local/bin/gitsetu
+    # Download a verified, immutable release artifact and verify its checksum/signature first.
     ```
-- **Homebrew Tap & Core Ingestion:** Launch the official `bhaskarjha-dev/homebrew-tap` repository and initiate submission to `homebrew/core` (`brew install gitsetu`).
+- **Homebrew Tap & Core Ingestion:** Launch the official `bhaskarjha-dev/homebrew-tap` repository and initiate submission to `homebrew/core` after an intentional release.
 - **Dedicated Community Package Managers:**
   - **Windows Scoop:** Publish `packaging/scoop/gitsetu.json` to official Scoop buckets (Main / Extras).
-  - **Microsoft Winget:** Submit the official `BhaskarJha.GitSetu` manifest to Microsoft's `winget-pkgs` repository (`winget install BhaskarJha.GitSetu`).
-  - **Arch Linux AUR:** Publish official `PKGBUILD` to `aur.archlinux.org/gitsetu.git` (`yay -S gitsetu`).
-  - **Nix / Nixpkgs Flake:** Introduce a standard `flake.nix` in the repository root for reproducible, zero-dependency NixOS execution (`nix run github:bhaskarjha-dev/gitsetu`).
+  - **Microsoft Winget:** Submit the official `BhaskarJha.GitSetu` manifest to Microsoft's `winget-pkgs` repository after the release metadata is pinned.
+  - **Arch Linux AUR:** Publish an official `PKGBUILD` only after the release source and digest are pinned.
+  - **Nix / Nixpkgs Flake:** Maintain a pinned `flake.nix` in the repository root for reproducible, zero-dependency NixOS execution from a reviewed checkout.
   - **npm / npx Wrapper:** Publish a thin npm binary wrapper (`npx gitsetu setup` / `npm i -g gitsetu`) for JavaScript and fullstack web developers.
-- **GitHub CLI Extension (`gh gitsetu`):** Publish `gh extension install bhaskarjha-dev/gh-gitsetu`, allowing developers working inside GitHub CLI workflows to run `gh setu` / `gh gitsetu setup` natively.
-- **Smart Zero-Prompt Auto-Discovery (`gitsetu init --auto`):** Expand the discovery engine in `lib/discovery.sh` into an instant, non-interactive one-shot setup command that auto-detects existing Git identities, SSH keys, and workspace folders (`~/work`, `~/personal`), applying a recommended zero-trust configuration in under 1 second.
+- **GitHub CLI Extensions (`gh gitsetu` / `gh setu`):** Publish separate `gh-gitsetu` and `gh-setu` extension repositories, allowing developers working inside GitHub CLI workflows to run either command natively.
+- **Smart Auto-Discovery (`gitsetu setup --auto`):** Expand the discovery engine in `lib/discovery.sh` into a one-shot setup command that auto-detects existing Git identities, SSH keys, and workspace folders (`~/work`, `~/personal`), while keeping the current apply-mode and TTY consent boundaries visible.
 - **Sponsorship & Governance:** Establish a formal Technical Steering Committee and define open-source contribution guidelines to guarantee long-term operational sustainability.
+
+---
+
+## Phase 1.5: Codebase Consolidation, Key Systems & Migration (v1.2.0)
+
+**Goal:** Shrink the codebase to an ultra-lean maintainable core, expand agent/hardware key routing, and automate upstream package submissions.
+
+- **Core Codebase Consolidation (FUT-03):**
+  - Following the v1.1.0 release and feature freeze, execute a disciplined, zero-breakage consolidation across the 13,934 LOC production codebase (ADR 0003).
+  - Target a realistic ~2,300 LOC reduction (~16.6% shrinkage toward ~11,600 LOC) by eliminating defensive shadow helpers and UI boilerplate without compromising security boundaries or feature completeness.
+  - Consolidate redundant path-safety helpers, portable tilde formatting, and ASCII control character sanitizers into a single shared primitives hub in `lib/platform.sh`.
+  - Maintain the 14-module packaging boundaries required by `packaging/release.js`, `scripts/bundle.sh`, and `build_release_zip.ps1`.
+  - Preserve the multi-process atomic locking engine (`profiles.lock` directory markers, PID recycling protection, and signature verification) to prevent race conditions during concurrent execution.
+  - Retain `cmd_prompt`'s low-overhead inline independence in `gitsetu` to guarantee sub-millisecond shell prompt performance.
+  - Target ≥80% statement coverage across Linux, macOS, and Windows.
+- **External SSH Agents & Resident Hardware Keys (FUT-05):**
+  - Integrate native routing for 1Password (`op-ssh-sign`), Bitwarden, and Secretive SSH agent sockets.
+  - Add native support for FIDO2 resident keys (`ed25519-sk`) and hardware security tokens without forcing filesystem-bound private key generation.
+- **Smart Identity-Aware Clone (`gitsetu clone <url>`):**
+  - Query remote-URL routing rules (`FUT-01`) before cloning, automatically routing repositories to their appropriate directory root (e.g., corporate repos to `~/work` and personal to `~/personal`).
+- **Legacy v1.0.0 Vault In-Memory Import Bridge (D8):**
+  - Implement an in-memory legacy OpenSSL PBKDF2/Salted__ envelope parser to directly import legacy v1.0.0 vaults without requiring users to check out v1.0.0.
+- **Community Package Repository Ingestion (D3):**
+  - Submit official, pinned formulas and manifests to Homebrew Core, Windows Scoop (`main` bucket), WinGet (`winget-pkgs`), Arch Linux AUR, and Nixpkgs Flake once v1.1.0 release tags and SHA256SUMS are published.
+- **Compiler Marker Evolution Safety:**
+  - Maintain backward compatibility for both `# [gitsetu:managed:head:start]` and `# [gitsetu:managed:start]` markers across all future compiler iterations.
 
 ---
 
@@ -80,7 +113,7 @@ The following architectural hardening milestones established our enterprise base
 - **Fuzzy Profile Switching (`fzf`):** Implement interactive, ultra-fast `fzf`-powered runtime profile selection (`gitsetu switch`).
 - **Native VS Code Extension:** Publish an official VS Code extension to surface the active profile directly within the editor status bar, halting commits visually within the GUI if identities misalign.
 - **PGP / GPG Key Auto-Wiring:** Extend commit signing capabilities beyond native SSH to automatically wire classical PGP / GPG key targets on a per-profile basis.
-- **Machine-Readable API (`--json`):** Expose all diagnostic and structural queries (`gitsetu status --json`, `gitsetu doctor --json`) via structured JSON payloads to empower community tooling and editor plugins.
+- **Rich Terminal UI & Visual Dashboard:** Deploy an interactive terminal UI dashboard (`gitsetu dashboard`) visualizing active identity routes, mapped SSH keys, and commit signatures.
 
 ---
 

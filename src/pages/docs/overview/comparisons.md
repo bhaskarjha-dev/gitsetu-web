@@ -1,90 +1,47 @@
 ---
 layout: ../../../layouts/DocsLayout.astro
-title: "Ecosystem Comparisons"
-description: "Comparative evaluation of GitSetu versus manual SSH configs, direnv, and alternative Git identity managers."
+title: "How GitSetu Compares"
+description: "Objective comparison of generated native Git config versus hand-written configs, on-demand switchers, and shell hooks like direnv."
 category: "overview"
 slug: "overview/comparisons"
 ---
-# Git Identity Tools: Comprehensive Comparison
+# How GitSetu Compares
 
-**An authoritative, deep-dive competitive matrix evaluating multi-identity Git managers across features, architecture, safety, and developer experience.**
-
-Managing multiple directory-scoped Git identities securely is a foundational challenge. To help engineering organizations and security managers evaluate their options, this document provides an objective, side-by-side comparison of the six leading approaches to Git identity switching as of **September 2026 (v1.0.0 GA)**.
+GitSetu is one of several ways to run more than one Git identity on a machine. This page explains its approach and the trade-offs, so you can choose. It makes no claims about other tools' current features; check their own documentation.
 
 ---
 
-## Overall Composite Scores
+## The Approaches
 
-Scores reflect a balanced evaluation of feature breadth, zero-trust reliability, user experience, community presence, and portability constraints.
-
-| Tool | Approach / Runtime | Composite Score | Feature Breadth | Ease of Use | Reliability | Community Stars | Portability |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| 🏆 **GitSetu** | **Zero-Dependency Bash Core** | **86 / 100** | **95%** | **80%** | **90%** | **★ 0** | **75%** |
-| **gitego** | Go Binary Switcher | **76 / 100** | 75% | 85% | 78% | ★ ~20 | 90% |
-| **karn** | Mature YAML Switcher (Go) | **68 / 100** | 40% | 85% | 85% | ★ 306 | 90% |
-| **gitch** | Feature-Rich TUI (Go) | **72 / 100** | 88% | 72% | 55% | ★ 5 | 90% |
-| **gh-switcher** | GitHub-Focused CLI (Go) | **60 / 100** | 60% | 72% | 50% | ★ 3 | 85% |
-| **Manual DIY** | Hand-Rolled `.ssh/config` | **54 / 100** | 100% | 20% | 80% | N/A | 100% |
+| Approach | How it works | Trade-off |
+| :--- | :--- | :--- |
+| **Hand-written configuration** | `includeIf "gitdir:…"` blocks in `~/.gitconfig` and `Host` aliases in `~/.ssh/config` | Full control and nothing to install; every new identity, key and folder is manual, and mistakes are silent |
+| **Switch on demand** | A tool rewrites the global identity or SSH key when you run a command | A simple model, but the active identity follows the last command, not the folder you're in |
+| **Shell hooks and environment loaders** (for example `direnv`) | Variables such as `GIT_AUTHOR_EMAIL` or `GIT_SSH_COMMAND` change when you `cd` | General purpose; works where the hook runs, so IDEs and GUI clients need their own integration |
+| **Generated native configuration** (GitSetu) | Writes `includeIf` routes, per-profile Git files and an included SSH config once, then exits | Git and OpenSSH do the routing everywhere, IDEs included; behavior follows Git's and OpenSSH's own rules |
 
 ---
 
-## Detailed Feature Matrix
+## What GitSetu Does
 
-| Feature Capability | GitSetu | gitego | karn | gitch | gh-switch | Manual DIY |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Identity Switching Mechanics** | | | | | | |
-| Directory auto-switch (`cd` trigger) | ✓ | ✓ | ✓ | ✓ | ✓ | ~ |
-| Native Git `includeIf` integration | ✓ | ✓ | ✓ | ✓ | ~ | ✓ |
-| Deep directory path recursion | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| Manual CLI profile override | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| Global fallback identity safety | ✓ | ✓ | ~ | ✓ | ✓ | ✓ |
-| **SSH & Cryptography Orchestration** | | | | | | |
-| Automated `ed25519` key generation | ✓ | ~ | ~ | ~ | ✗ | ✗ |
-| Top-level OpenSSH `Include` pivot | ✓ | ~ | ~ | ✓ | ✗ | ✓ |
-| Native SSH commit signing (`gpgsign`) | ✓ | ~ | ✓ | ✓ | ✗ | ~ |
-| Hardware key bootstrapping (FIDO2) | ✓ | ✗ | ✗ | ✗ | ✗ | ~ |
-| Standard clone URLs (`git@github.com`) | ✓ | ✓ | ✓ | ✓ | ✓ | ✗ |
-| **HTTPS & Credential Brokering** | | | | | | |
-| Namespaced PAT authentication routing | ✓ | ✓ | ~ | ✓ | ✓ | ✗ |
-| OS keychain integration (`security`) | ✓ | ✓ | ~ | ✓ | ✓ | ~ |
-| **Safety Guard Rails & Integrity** | | | | | | |
-| Pre-commit Identity Guard (fail-closed) | ✓ | ~ | ✓ | ✓ | ✗ | ✗ |
-| Idempotent managed block parsing | ✓ | ✓ | ✓ | ~ | ~ | ✗ |
-| Atomic configuration writes | ✓ | ✓ | ✓ | ~ | ~ | ✓ |
-| **Diagnostics & Team Operations** | | | | | | |
-| Built-in `doctor` configuration scanner | ✓ | ✗ | ✗ | ✗ | ✗ | ✗ |
-| Hyper-optimized prompt integration | ✓ | ✓ | ✓ | ✓ | ✓ | ✗ |
-| Encrypted state export & restoration | ✓ | ~ | ✗ | ✗ | ✗ | ✗ |
-| **Technical Footprint** | | | | | | |
-| Runtime dependency requirements | **None** | Go | Go | Go | Go | None |
-| Active maintenance lifecycle | **High** | High | Stale | High | Low | N/A |
-
-*(✓ = fully supported, ~ = partial / manual intervention required, ✗ = unsupported)*
+- **Directory and remote routing:** per-profile `includeIf "gitdir:…"` routes, plus `includeIf "hasconfig:remote.*.url:…"` routes for `--remote` patterns (Git 2.36 or later).
+- **One SSH key per profile:** a generated Ed25519 or FIDO2 key, or an existing key you choose, pinned with `IdentitiesOnly`. GitSetu doesn't add profile keys to the SSH agent.
+- **Your configuration stays yours:** GitSetu writes only its own files and marked blocks, so your own `includeIf` rules, `Host` aliases, hooks and signing settings keep working.
+- **Opt-in guard:** `gitsetu guard --install` blocks commits with the wrong identity in managed repositories, and still runs the repository's own `.git/hooks` and a global `core.hooksPath` you set earlier. It is a client-side check, not a boundary: a repository-level `core.hooksPath`, `--no-verify` and history rewrites bypass it, and it fails open on its own errors.
+- **Authenticated backup vault:** `gitsetu backup` and `gitsetu restore` move managed state and keys between machines. Credentials held in your OS keychain or Git Credential Manager aren't exported.
+- **Diagnostics for people and agents:** `gitsetu doctor` (with `--repair` for GitSetu's own managed blocks), `verify`, `explain`, `audit` for existing history, and `status --json` for scripts.
+- **Platforms:** Linux, macOS (Bash 3.2), WSL, and Windows through Git Bash, PowerShell and CMD.
 
 ---
 
-## Strategic Deep Dive: Best For Each Use Case
+## When Another Approach Fits Better
 
-### 🏆 Best Overall: GitSetu
-GitSetu covers the widest operational scope end-to-end. It is the only platform evaluated that seamlessly combines **automated SSH key generation**, directory-scoped multi-key routing, native OS credential brokering, fail-closed pre-commit guard enforcement, encrypted state backups, and interactive diagnostics into a single, cohesive engine. 
-
-**The Trade-off:** As a new entrant (★ 0 stars), GitSetu has a smaller community footprint than mature Go-based tools. However, it ships with the widest distribution coverage at launch: npm, Homebrew, Scoop, WinGet, AUR, Nix, GitHub CLI extension, and native shell installers for both POSIX and PowerShell.
-
-### 🪟 Windows Environments
-While tools like `gitego` compile native `.exe` binaries, GitSetu provides first-class, production-grade Windows support under Git Bash with native integration across PowerShell, CMD, Windows Terminal, and VS Code. GitSetu automatically compiles canonical Windows paths (`C:/path`), configures case-insensitive `gitdir/i:` directives, binds natively to **Windows Credential Manager (GCM)** via DPAPI, and provides a host-isolated **Windows Sandbox Test Harness** (`sandbox/`) for zero-risk verification.
-
-### 🏛️ Best for Battle-Tested Simplicity: `karn`
-With over 300+ GitHub stars and years of historical deployment stability, `karn` provides exceptionally reliable directory-to-identity switching via clean YAML definitions. 
-**The Trade-off:** Extremely narrow functional footprint. It acts purely as a switcher, omitting cryptographic key bootstrapping, agent virtualization handling, and secure token isolation entirely.
-
-### 🛡️ Most Control & Auditability: Manual DIY
-Writing conditional `includeIf` directives and manually crafting namespaced `~/.ssh/config` host alias blocks provides absolute zero-black-box execution. 
-**The Trade-off:** Imposes brutal operational friction. Requires developers to remember specialized remote formatting strings (`git clone git@github-work:org/repo.git`), scales poorly across enterprise developer fleets, and provides zero dynamic feedback inside the editor or terminal shell.
+- You have one identity, or two that never share a machine folder: hand-written `includeIf` blocks are enough.
+- You need enforcement on the server side, such as rejecting pushes with the wrong email: use your Git host's rules. GitSetu's guard runs on your machine.
+- You keep keys only in an SSH agent such as 1Password or Secretive: GitSetu v1.1.0 pins a key file per profile. Agent-held keys are planned for v1.2.0.
 
 ---
 
-## Conclusion
+## Other Tools
 
-If you require seamless, automated identity security across POSIX-compliant platforms (macOS, Linux, WSL) and native Windows environments with absolute zero runtime dependencies, **GitSetu stands alone as the category winner.** 
-
-If native compiled distribution targets or integrated IDE extensions represent hard operational blockers for your team, reviewing alternative Go tools or consulting our upcoming feature milestones provides clear planning direction.
+These projects solve related problems in other ways. Check each project's current documentation before you compare: [git-ego](https://github.com/bgreenwell/git-ego), [gitch](https://github.com/orzazade/gitch), [karn](https://github.com/prydonius/karn), [gguser](https://github.com/withshubh/gguser) and [direnv](https://direnv.net/).

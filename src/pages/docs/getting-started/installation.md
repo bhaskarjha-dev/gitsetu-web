@@ -1,147 +1,88 @@
 ---
 layout: ../../../layouts/DocsLayout.astro
 title: "Installation"
-description: "Installation guides across 9 distribution channels including Homebrew, WinGet, Scoop, AUR, Nix, and native scripts."
+description: "Verified v1.1.0 installation via GitHub Releases (SHA-256 + attestation), npm/npx, Windows PowerShell/CMD checkout, and source builds."
 category: "getting-started"
 slug: "getting-started/installation"
 ---
 # Installation
 
-GitSetu is designed to be as lightweight and accessible as possible. It runs natively across macOS, Linux, and Windows with zero external runtimes (no Node.js, Python, or Go required for shell installations). On Windows, the only prerequisite is **Git for Windows**.
-
----
-
-## 1. Quick Onboarding (Zero-Dependency Shell Installers)
-
-### macOS & Linux (POSIX Bash)
-Run in your standard terminal (Terminal, iTerm2, Alacritty, Kitty):
-```bash
-curl -sL https://raw.githubusercontent.com/bhaskarjha-dev/gitsetu/main/install.sh | bash
-# Or via custom domain:
-# curl -sL https://gitsetu.bhaskarjha.dev/install | bash
-```
-
-### Windows (Native PowerShell)
-Open **PowerShell**, **Windows Terminal**, or **Command Prompt** and run:
-```powershell
-irm https://raw.githubusercontent.com/bhaskarjha-dev/gitsetu/main/install.ps1 | iex
-# Or via custom domain:
-# irm https://gitsetu.bhaskarjha.dev/install.ps1 | iex
-```
+GitSetu is a Bash 3.2-compatible CLI with native Git and OpenSSH integration. The installed program needs no Node.js, Python or Go; Node.js is needed only for the npm package and for building from a checkout. Optional credential stores and OpenSSL are detected explicitly; a feature that needs one fails clearly when it is unavailable.
 
 > [!IMPORTANT]
-> **Windows Prerequisite:** GitSetu requires **Git for Windows** (which provides standard `git.exe` and `bash.exe`).
-> If you do not have Git installed yet, run:
-> ```powershell
-> winget install Git.Git
-> ```
-> or download from [git-scm.com/download/win](https://git-scm.com/download/win).
-
-> [!TIP]
-> **Zero Friction on Windows:** The PowerShell installer automatically configures native `gitsetu.cmd` and `gitsetu.ps1` command shims and adds `%LOCALAPPDATA%\gitsetu\bin` directly to your Windows User `PATH`. You can run `gitsetu` or `git setu` immediately in PowerShell, Command Prompt, or VS Code without opening Git Bash!
-
-### Windows (via Git Bash)
-If you prefer working exclusively inside Git Bash:
-```bash
-curl -sL https://raw.githubusercontent.com/bhaskarjha-dev/gitsetu/main/install.sh | bash
-```
+> GitSetu v1.1.0 is distributed through GitHub Releases and npm.
 
 ---
 
-## 2. Package Managers & Ecosystem Wrappers
+## 1. Release Installer (Linux, macOS, WSL, Git Bash)
 
-### Node.js — npm & npx
-Run instantly without global installation, or install globally across any OS:
 ```bash
-# Instant one-shot setup (no installation needed)
-npx gitsetu setup --auto
+curl -fsSL https://github.com/bhaskarjha-dev/gitsetu/releases/latest/download/install.sh | bash
+export PATH="$HOME/.local/bin:$PATH"
+```
 
-# Or global install
+The installer downloads the release's single-file `gitsetu`, checks its SHA-256 and size against the values pinned in the installer, and installs it under `~/.local/share/gitsetu`, with the `gitsetu` and `git-setu` commands in `~/.local/bin`. It needs Bash, `curl` or `wget`, and `sha256sum` or `shasum`. When the GitHub CLI is installed and logged in, it also verifies the release's build attestation. To read the installer first, download `install.sh` from the release, review it, and run `bash install.sh`.
+
+> [!IMPORTANT]
+> **Windows prerequisite:** GitSetu requires [Git for Windows](https://git-scm.com/download/win), which provides `git.exe` and `bash.exe`.
+
+---
+
+## 2. npm (All Platforms)
+
+Requires Node.js 18 or later:
+
+```bash
 npm install -g gitsetu
 ```
 
-### Windows — Microsoft WinGet
-Install via the official Windows Package Manager:
-```powershell
-# Official Microsoft Package Identifier (Publisher.PackageName)
-winget install BhaskarJha.GitSetu
+Or run a command without installing:
 
-# Or once indexed in local manifests:
-winget install GitSetu
-```
-
-> [!NOTE]
-> `BhaskarJha.GitSetu` is the canonical, collision-proof Package Identifier in Microsoft's official `winget-pkgs` repository.
-
-### Windows — Scoop
-Install via Scoop bucket:
-```powershell
-scoop bucket add gitsetu https://github.com/bhaskarjha-dev/scoop-gitsetu
-scoop install gitsetu
-```
-
-### macOS & Linux — Homebrew
-Install via Homebrew tap:
 ```bash
-brew tap bhaskarjha-dev/tap
-brew install gitsetu
-```
-
-### Arch Linux — AUR
-Install via your preferred AUR helper:
-```bash
-yay -S gitsetu
-# or
-paru -S gitsetu
-```
-
-### Nix & NixOS — Nix Flake
-Execute or install hermetically via Nix Flakes:
-```bash
-# Run directly without polluting system state
-nix run github:bhaskarjha-dev/gitsetu -- setup --auto
-
-# Or install to your user environment
-nix profile install github:bhaskarjha-dev/gitsetu
-```
-
-### GitHub CLI Extension
-Integrate directly into `gh` CLI:
-```bash
-gh extension install bhaskarjha-dev/gh-gitsetu
-gh gitsetu setup
+npx gitsetu status
 ```
 
 ---
 
-## 3. Standalone Monolith (Direct Curl)
+## 3. Windows: PowerShell and CMD
 
-If you need a single, zero-dependency executable without cloning the repository or downloading extra folders:
+To use `gitsetu` from PowerShell and CMD, install from a checkout of the release tag:
 
-```bash
-mkdir -p ~/.local/bin
-curl -sL https://raw.githubusercontent.com/bhaskarjha-dev/gitsetu/main/dist/gitsetu -o ~/.local/bin/gitsetu
-chmod +x ~/.local/bin/gitsetu
+```powershell
+git clone https://github.com/bhaskarjha-dev/gitsetu
+cd gitsetu
+git checkout v1.1.0
+powershell -ExecutionPolicy Bypass -File .\install.ps1
 ```
+
+> [!TIP]
+> The PowerShell installer builds the native launcher, creates `gitsetu.cmd` shims and can add `%LOCALAPPDATA%\gitsetu\bin` to the user `PATH`. It does not execute an unreviewed remote script through `irm | iex`.
 
 ---
 
-## 4. Manual Installation (From Source)
+## 4. From Source
 
-If your machine is behind an air-gapped firewall:
+From a clean checkout on Linux, macOS or Git Bash:
 
 ```bash
-# 1. Clone the repository
-git clone https://github.com/bhaskarjha-dev/gitsetu.git ~/.local/share/gitsetu
-
-# 2. Symlink or copy the binary
-mkdir -p ~/.local/bin
-ln -sf ~/.local/share/gitsetu/gitsetu ~/.local/bin/gitsetu
-ln -sf ~/.local/share/gitsetu/gitsetu ~/.local/bin/git-setu
-
-# 3. Ensure ~/.local/bin is in your PATH
+bash install.sh
 export PATH="$HOME/.local/bin:$PATH"
 ```
+
+This builds the single-file bundle with `scripts/bundle.sh` and installs it, so it needs Node.js 18 or later. The installer refuses a checkout with uncommitted changes.
+
+---
+
+## 5. Standalone Bundle
+
+GitSetu can be compiled into a standalone, single-file executable containing all core modules:
+
+```bash
+make dist
+./dist/gitsetu --version
+```
+
+Each [GitHub Release](https://github.com/bhaskarjha-dev/gitsetu/releases) also publishes this bundle as `gitsetu`, with `SHA256SUMS`.
 
 ---
 
@@ -150,14 +91,16 @@ export PATH="$HOME/.local/bin:$PATH"
 Once installed, verify that GitSetu is available:
 ```bash
 gitsetu --version
-# Outputs: gitsetu v1.0.0
+# Outputs: gitsetu v1.1.0
 ```
 
-### Instant 1-Second Setup
-Bootstrap all detected identities without prompts:
+### Automated Setup
+Apply the detected identity blueprint without interactive input in non-TTY use:
 ```bash
 gitsetu setup --auto
 ```
+
+This is an apply mode, not a review-only proposal. In a TTY it can still ask about guard installation or an explicit FIDO2 fallback; use interactive `gitsetu setup` when review is required.
 
 ### Interactive Dashboard Setup
 Review and tweak your identities visually:
@@ -169,29 +112,16 @@ git setu setup
 
 ---
 
-## Testing in Windows Sandbox
-
-If you are on Windows and want to test GitSetu safely in an isolated, disposable virtual machine without touching your personal configuration, clone the repository and launch the sandbox harness:
-```cmd
-.\sandbox\launch_sandbox.bat
-```
-
----
-
 ## Upgrading
 
-GitSetu includes an atomic self-updater:
-```bash
-gitsetu update
-```
+To upgrade GitSetu, download the latest release installer or update via npm:
 
-Or upgrade through your package manager:
 ```bash
-npm update -g gitsetu         # npm
-winget upgrade BhaskarJha.GitSetu # WinGet
-scoop update gitsetu          # Scoop
-brew upgrade gitsetu          # Homebrew
-yay -Syu gitsetu              # Arch AUR
+# Via GitHub Release installer:
+curl -fsSL https://github.com/bhaskarjha-dev/gitsetu/releases/latest/download/install.sh | bash
+
+# Or via npm:
+npm install -g gitsetu@latest
 ```
 
 ---
@@ -206,31 +136,16 @@ gitsetu teardown --deep
 
 ### Removing Binaries & Files
 
-- **macOS / Linux:**
+Use the uninstaller from the same release or checkout you installed from:
+
+- **Release installer (macOS, Linux, WSL, Git Bash):** download `uninstall.sh` from the release, then run it:
   ```bash
-  curl -sL https://raw.githubusercontent.com/bhaskarjha-dev/gitsetu/main/uninstall.sh | bash
+  curl -fsSLO https://github.com/bhaskarjha-dev/gitsetu/releases/latest/download/uninstall.sh
+  bash uninstall.sh
   ```
-- **Windows (PowerShell):**
+- **Checkout install:** run `bash uninstall.sh` from the checkout.
+- **Windows (PowerShell), from the checkout you installed from:**
   ```powershell
-  irm https://raw.githubusercontent.com/bhaskarjha-dev/gitsetu/main/uninstall.ps1 | iex
+  powershell -ExecutionPolicy Bypass -File .\uninstall.ps1
   ```
-- **npm:**
-  ```bash
-  npm uninstall -g gitsetu
-  ```
-- **WinGet:**
-  ```powershell
-  winget uninstall BhaskarJha.GitSetu
-  ```
-- **Homebrew:**
-  ```bash
-  brew uninstall gitsetu
-  ```
-- **Scoop:**
-  ```powershell
-  scoop uninstall gitsetu
-  ```
-- **GitHub CLI:**
-  ```bash
-  gh extension remove gh-gitsetu
-  ```
+- **npm:** `npm uninstall -g gitsetu`.

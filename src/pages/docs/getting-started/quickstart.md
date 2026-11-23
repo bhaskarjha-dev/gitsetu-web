@@ -1,7 +1,7 @@
 ---
 layout: ../../../layouts/DocsLayout.astro
 title: "Quickstart"
-description: "Fast-track tutorial to configure your personal and work Git profiles in under three minutes."
+description: "Configure your personal and work Git identities, isolated SSH keys, and optional pre-commit guard in minutes."
 category: "getting-started"
 slug: "getting-started/quickstart"
 ---
@@ -23,8 +23,8 @@ gitsetu setup
 *Example: Create profile "personal" with `me@gmail.com` and `~/personal`.*
 
 The wizard will automatically:
-1. Generate an ED25519 SSH keypair specific to this profile.
-2. Inject a Zero-Trust `Include` directive into your `~/.ssh/config`.
+1. Generate an Ed25519 SSH keypair specific to this profile.
+2. Inject a managed `Include` directive into your `~/.ssh/config`.
 3. Create a managed block in your `~/.gitconfig` using the `includeIf` conditional.
 4. Automatically create the workspace directory (`mkdir -p`) if it does not already exist.
 
@@ -45,14 +45,16 @@ You **must** upload your newly generated public key to your provider, otherwise 
 2. Copy the entire output string and paste it into your [GitHub SSH Settings](https://github.com/settings/ssh/new).
 
 ### If you clone using HTTPS (`https://github.com/...`)
-If you rely on Personal Access Tokens (PATs) instead of SSH keys, you must securely bind your token to your profile so you aren't prompted for a password on every push.
+If you clone repositories using HTTPS instead of SSH, Git routes your authentication requests to your system's native credential helper (Git Credential Manager, Apple Keychain, or Linux Secret Service):
 
-1. Provision or update credentials:
-   You can provide PATs during the interactive `gitsetu setup` wizard, register profiles with credentials via `gitsetu profile add <label> --email=<email> ...`, or pipe credentials into the broker:
-   ```bash
-   printf "protocol=https\nhost=github.com\nusername=YOUR_USERNAME\npassword=YOUR_PAT\n" | gitsetu credential store
+1. **Profile Username Binding:**
+   During `gitsetu setup` or profile creation, specify your HTTPS provider username. GitSetu writes `credential.<provider>.username` into the profile configuration:
+   ```ini
+   [credential "https://github.com"]
+       username = YOUR_USERNAME
    ```
-2. On Windows, GitSetu integrates directly with Windows Credential Manager (`credential.helper = manager` via DPAPI/GCM). On macOS and Linux, it securely delegates to the OS keychain or isolated fallback storage (`~/.config/gitsetu/.tokens` with `chmod 600`).
+2. **First Push / Authentication:**
+   On your first `git push` or `git fetch` within the profile workspace, Git automatically invokes your operating system's native credential helper, pre-populating `YOUR_USERNAME`. Supply your Personal Access Token (PAT) when prompted; the native keychain securely stores it for future commands.
 
 ---
 
@@ -71,7 +73,7 @@ $ gitsetu status
 
 ## 4. The Magic: Just `cd` and work
 
-GitSetu does the rest. It natively intercepts directory changes and switches your Git email, SSH key, and Credentials completely transparently. **You do not need to run any commands when switching projects.**
+GitSetu generates Git's conditional configuration, so Git evaluates the active identity when you run commands in a managed directory. There is no background daemon; review `gitsetu status` when you need to inspect the selected profile.
 
 ```text
 $ cd ~/work/my-api && git commit -m "fix: auth bug"
@@ -79,4 +81,4 @@ Author: Aditya Kumar <dev@company.com> ← correct, automatically
 ```
 
 > [!TIP]
-> **Global Fallback:** By default, GitSetu enforces `useConfigOnly = true` — commits outside a mapped directory are blocked to prevent identity leakage. If you register a profile with an unmapped directory (`""`), GitSetu provisions it as your `[Global Fallback]` identity before conditional `[includeIf]` rules, ensuring standard commits succeed across unmapped paths while preserving strict directory isolation.
+> **Global fallback:** A configured global profile can provide an identity for otherwise unmapped paths. The pre-commit guard itself treats repositories outside all managed profiles as unmanaged and fails open for its identity check, while malformed managed state fails closed. Keep Git's own `useConfigOnly` behavior in mind when diagnosing a blocked commit.

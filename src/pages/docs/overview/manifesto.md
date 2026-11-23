@@ -1,7 +1,7 @@
 ---
 layout: ../../../layouts/DocsLayout.astro
 title: "Design Manifesto"
-description: "Core engineering principles prioritizing zero dependencies, POSIX compliance, and atomic safety."
+description: "Core engineering principles: Bash 3.2 portability, managed-file boundaries, atomic writes, and honest security limits."
 category: "overview"
 slug: "overview/manifesto"
 ---
@@ -13,29 +13,29 @@ GitSetu was engineered to solve a pervasive operational friction: managing multi
 
 Standard workflows require developers to constantly toggle configuration contexts between enterprise source trees, customer delivery repositories, and personal sandboxes. The operational tooling required to maintain these environments—hand-crafting SSH host blocks, writing manual conditional logic, and diagnosing platform virtualization issues—imposes immense operational overhead and massive risk surfaces.
 
-GitSetu exists to automate these operations out of existence permanently.
+GitSetu exists to reduce these operations to a reviewable, repeatable configuration workflow.
 
 ---
 
 ## Uncompromising Principles
 
-### 1. The Magical Clone (Absolute Frictionless UX)
-Traditional dual-identity approaches force developers to use non-standard clone URLs containing specialized host aliases (`git clone git@github-work:org/repo.git`). We fundamentally reject this design pattern.
+### 1. Native URLs and Managed Routing
+GitSetu does not require specialized clone URLs for ordinary repositories inside mapped workspaces. It also generates optional aliases such as `gitsetu-work` for explicit external package-manager and cache workflows; those aliases are an escape hatch, not a requirement.
 
-GitSetu leverages directory-scoped `includeIf` conditional mapping to inject custom `core.sshCommand` parameters mid-flight during repository cloning. Developers clone, fetch, and push standard URLs exactly as they normally would (`git clone git@github.com:org/repo.git`). GitSetu intercepts the local path evaluation and dynamically routes execution through the designated cryptographic keypair. The bridging layer is entirely invisible.
+GitSetu uses directory-scoped `includeIf` mapping to provide profile-specific `core.sshCommand` parameters when Git evaluates a managed path. Developers can use standard Git URLs; the operating system, Git, and OpenSSH still determine the final effective connection. The configuration compiler adds no daemon.
 
-### 2. Absolute Zero Runtime Dependencies
-A core environment bootstrapping script that requires downloading complex package managers or language runtimes to install is fundamentally contradictory.
+### 2. Minimal Runtime Dependencies
+A core environment bootstrapping script that requires downloading complex package managers or language runtimes is unnecessarily fragile.
 
-GitSetu is compiled strictly in hardened, POSIX-compliant **Bash 3.2**. It relies on zero external language dependencies—no Go runtimes, no Python scripts, no Node packages, and no Homebrew installations. It executes using `bash`, `git`, and `ssh-keygen` exclusively. This guarantees extreme multi-platform portability across legacy OS bounds, minimal container builds, and headless CI/CD execution environments.
+GitSetu's primary implementation is plain Bash 3.2-compatible source and uses standard Git/OpenSSH tools. Optional native credential stores and OpenSSL are detected explicitly; a feature that needs an unavailable optional tool fails clearly rather than silently downgrading. This keeps the core portable while making trade-offs visible.
 
-### 3. Strict Idempotency & Safe Self-Healing
-Blind configuration string appends frequently corrupt configuration states. 
+### 3. Bounded Idempotency & Safe Self-Healing
+Blind configuration string appends frequently corrupt configuration states.
 
-GitSetu enforces a strict **Managed Block Protocol**. Utilizing stateful line parsing, it surgically injects or refreshes only the layout blocks it explicitly owns, leaving all user-defined global options completely untouched. It is safe to run repeatedly. Furthermore, it automatically self-heals against virtualization environments, aggressively removing CRLF line endings from VirtualBox shared mounts and injecting localized `safe.directory` rules to bypass restrictive platform ownership blocks.
+GitSetu uses a managed-block protocol, private staging, strict validation, and atomic replacement where possible. It does not claim that every command is side-effect-free: setup and removal intentionally mutate managed state, while `--dry-run` previews without persistence. CRLF recovery and other repairs are bounded, ownership-checked operations.
 
 ### 4. Bootstrapping vs. Switching
-GitSetu acts as an initial environment bootstrapper, not a manual context switcher. It does not exist to supervise custom configurations you have already manually assembled. It exists to eliminate manual assembly entirely. From a bare-metal OS setup, GitSetu securely seeds your complete identity layout architecture in under 60 seconds.
+GitSetu is primarily a configuration compiler, not a daemon. It can discover existing identities and propose a setup, but users remain responsible for reviewing changes and maintaining third-party configuration outside its managed roots.
 
 ---
 
@@ -43,14 +43,14 @@ GitSetu acts as an initial environment bootstrapper, not a manual context switch
 
 When developers attempt to build multi-identity solutions, they frequently rely on modern languages like Go or Rust. While these languages offer excellent execution speed, introducing a binary runtime dependency breaks the core utility of a lightweight shell setup script. 
 
-GitSetu is highly unique because it achieved compiled-binary-level developer experience, robust concurrency isolation, and multi-point diagnostics purely using zero-dependency POSIX shell mechanics.
+GitSetu aims to provide a lightweight developer experience, bounded concurrency controls, and multi-point diagnostics using zero-dependency POSIX shell mechanics.
 
 ---
 
 ## Strict Non-Goals
 
-To maintain absolute system reliability and maximum focus, GitSetu explicitly rejects the following product additions:
-- **OAuth / Single Sign-On Orchestration:** GitSetu proxies Personal Access Tokens via native OS keychains, but intentionally avoids supervising web-based OAuth authentication loops.
-- **Git Binary Wrapping:** It acts exclusively via native hooks and credential helpers, avoiding command-line alias intercepts.
+To maintain a focused reliability model, GitSetu explicitly rejects the following product additions:
+- **OAuth / Single Sign-On Orchestration:** GitSetu configures per-profile credential delegation for native OS helpers, but intentionally avoids supervising web-based OAuth authentication loops.
+- **Git Binary Wrapping:** It primarily acts through native Git/OpenSSH configuration, with optional `gitsetu run`, installer, npm, and GitHub CLI wrappers for explicit workflows rather than intercepting every shell command.
 - **General Workspace Dotfiles:** It strictly limits its operational domain to Git and OpenSSH identity structures.
 - **Persistent Daemonization:** It operates entirely as an ephemeral configuration compiler, leaving zero lingering background listener tasks.

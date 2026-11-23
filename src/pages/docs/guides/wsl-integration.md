@@ -1,24 +1,24 @@
 ---
 layout: ../../../layouts/DocsLayout.astro
 title: "WSL Integration"
-description: "Seamless Windows Subsystem for Linux (WSL) interoperability with Windows credential managers."
+description: "Running GitSetu inside Windows Subsystem for Linux (WSL) with cross-boundary paths and Windows Git Credential Manager."
 category: "guides"
 slug: "guides/wsl-integration"
 ---
 # WSL Integration
 
-**Seamless identity and file-path harmonization across Windows Subsystem for Linux environments.**
+**Identity and file-path routing across Windows Subsystem for Linux environments.**
 
-Because GitSetu is compiled strictly utilizing pure, POSIX-compliant Bash 3.2, it achieves absolute native execution compatibility across all Windows Subsystem for Linux (WSL) environments (Ubuntu, Debian, Alpine, etc.). The tool requires zero Windows-specific `.exe` dependencies, operating entirely decoupled from standard host virtualization layers.
+Because GitSetu's core is written for POSIX Bash 3.2, it is designed to work across supported WSL distributions (Ubuntu, Debian, Alpine, and others). Platform-specific credential tools, path mounts, and OpenSSH behavior still require normal host review.
 
 ---
 
 ## Installation Pathways
 
-Inside your WSL terminal execution layer, initialize the standard Linux bootstrapping script exactly as you would on bare-metal hardware:
+Inside WSL, use a reviewed checkout or a verified release artifact. Do not pipe a mutable remote URL into the shell:
 
 ```bash
-curl -sL https://raw.githubusercontent.com/bhaskarjha-dev/gitsetu/main/install.sh | bash
+bash install.sh
 ```
 
 ---
@@ -30,21 +30,21 @@ When generating isolated identity profiles inside WSL environments, developers f
 ### Path Evaluation Mechanics
 Always supply absolute Linux path strings targeting your target repositories (e.g., `~/projects/work` or `/mnt/c/Users/Name/work`).
 
-Because GitSetu compiles paths directly into Git's native `includeIf` conditional boundaries, Git interprets the Linux-structured paths seamlessly during runtime evaluation. Execution matches reliably whether target repositories exist on isolated WSL root drives or explicitly mounted back across to primary Windows `C:\` bounds.
+When profiles are configured with absolute Linux paths, Git evaluates the corresponding `includeIf` rules. Repositories on WSL root drives and mounted Windows paths should be tested separately because Git and OpenSSH resolve the two environments differently.
 
 ---
 
-## HTTPS Credential Brokering in WSL
+## HTTPS Credential Routing in WSL
 
-The primary operational complexity introduced by headless WSL containers centers around mapping HTTPS Personal Access Tokens (PATs) securely, as standard Linux secret layers (e.g., `secret-tool`) typically remain unavailable in CLI-only runtimes.
-
-### Native Vault Fallbacks
-When you store an active profile token inside a headless WSL instance lacking D-Bus secret integrations (via `gitsetu credential store` or `gitsetu setup`), GitSetu dynamically switches execution modes.
-
-It automatically provisions an isolated, restricted permissions payload vault file located directly at `~/.config/gitsetu/.tokens`. The directory and file enforce strict POSIX permissions (`700` directory, `600` file) to guarantee containment.
+When operating inside WSL, HTTPS authentication is delegated to Git's native credential routing using per-profile `credential.https://<host>.username` directives.
 
 ### Microsoft Git Credential Manager (GCM) Interoperability
-If your local environment utilizes Microsoft's cross-platform [Git Credential Manager](https://github.com/git-ecosystem/git-credential-manager) to securely proxy WSL Git operations back into your native Windows Credential Store, GitSetu respects the configuration gracefully.
+In WSL environments, the recommended pattern is configuring Git to route credentials to the Windows host's Git Credential Manager executable:
 
-> [!WARNING]
-> **GCM Identity Collisions:** Standard GCM pipelines struggle fundamentally to partition tokens bound to identical overlapping base hostnames (e.g., mapping distinct personal and corporate tokens concurrently to `github.com`). If you absolutely require Port 443 HTTPS multi-tenant cloning capabilities, we explicitly recommend utilizing GitSetu's native built-in fallback vault architecture.
+```bash
+git config --global credential.helper "/mnt/c/Program\ Files/Git/mingw64/bin/git-credential-manager.exe"
+```
+
+GitSetu injects `credential.https://<host>.username` into each profile's configuration (`~/.config/gitsetu/profiles/<label>.gitconfig`). When Git queries GCM via the helper bridge, GCM partitions credentials by both hostname and the specific profile username, ensuring seamless multi-account isolation across WSL and Windows.
+
+Alternatively, headless Linux WSL environments without Windows GCM access can configure standard Linux credential helpers (such as `libsecret` or `cache`).

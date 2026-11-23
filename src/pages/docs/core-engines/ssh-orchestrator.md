@@ -1,17 +1,17 @@
 ---
 layout: ../../../layouts/DocsLayout.astro
 title: "SSH Orchestrator"
-description: "Automated OpenSSH key generation, ~/.ssh/config profile management, and multi-host multiplexing."
+description: "Per-profile Ed25519/FIDO2 key generation, OpenSSH Include isolation, gitsetu-<label> host aliases, and IdentitiesOnly enforcement."
 category: "core-engines"
 slug: "core-engines/ssh-orchestrator"
 ---
 # SSH Orchestrator Engine
 
-**Automated multi-key generation, native agent pre-loading, and zero-trust configuration isolation.**
+**Automated multi-key generation, bounded agent registration, and isolated managed SSH configuration.**
 
 Managing multiple SSH keys manually is highly error-prone. Standard workflows require generating distinct keys using specific CLI arguments, tracking permissions, and manually modifying host blocks in your global `~/.ssh/config` file.
 
-GitSetu completely automates this lifecycle, bridging robust cryptographic security with absolute layout isolation.
+GitSetu automates the managed portions of this lifecycle while leaving unrelated user configuration and explicit hardware/network choices to the operator.
 
 ---
 
@@ -20,15 +20,18 @@ GitSetu completely automates this lifecycle, bridging robust cryptographic secur
 During profile creation (`gitsetu setup`), GitSetu queries if you require distinct SSH credentials for the workspace. It natively supports two primary cryptographic paths:
 
 ### ED25519 Software Signatures
-Generates highly secure, modern software keys using optimal cryptographic curves:
+Generates modern software keys using optimal cryptographic curves. The
+comment is the profile email, and the default path is
+`~/.ssh/id_ed25519_<label>`:
 ```bash
-ssh-keygen -t ed25519 -C "profile-identifier" -f ~/.ssh/id_ed25519_<label> -N ""
+ssh-keygen -t ed25519 -C "email@example.com" -f ~/.ssh/id_ed25519_<label> -N ""
 ```
 
 ### Hardware Keys (FIDO2 / YubiKey)
-Bootstraps highly tamper-resistant resident keys backed by hardware tokens:
+Bootstraps resident keys backed by hardware tokens. This example assumes an
+empty passphrase; setup prompts for one when passphrase protection is chosen:
 ```bash
-ssh-keygen -t ed25519-sk -O resident -C "profile-identifier" -f ~/.ssh/id_ed25519_sk_<label>
+ssh-keygen -t ed25519-sk -O resident -C "email@example.com" -f ~/.ssh/id_ed25519_sk_<label> -N ""
 ```
 *(For a complete breakdown of hardware key workflows, consult the [Hardware Keys Guide](/docs/guides/hardware-keys)).*
 
@@ -38,30 +41,53 @@ ssh-keygen -t ed25519-sk -O resident -C "profile-identifier" -f ~/.ssh/id_ed2551
 
 Historically, utilities modified `~/.ssh/config` files inline using search-and-replace scripts. This design pattern introduces catastrophic risk, frequently corrupting user configurations during unexpected exit events.
 
-GitSetu resolves this by leveraging OpenSSH 7.3+'s native **`Include` directive** to enforce a zero-trust network boundary.
+GitSetu resolves this by leveraging OpenSSH 7.3+'s native **`Include` directive** to keep GitSetu-managed routing separate from unrelated user host blocks.
 
 ### Stage 1: The Initial Hook Injection
-GitSetu inspects your global config once. It prepends a single line to the top of your file:
+GitSetu inspects your global config once. It prepends a single, managed
+`Include` line to the top of your file. With the default POSIX XDG location it
+looks like this (an explicit `XDG_CONFIG_HOME` changes the path):
 ```ini
 Include ~/.config/gitsetu/profiles/ssh_config
 ```
 
 ### Stage 2: Sandboxed Orchestration
-All customized host targets, host mapping blocks, and explicit key links are fully sandboxed inside GitSetu's localized state directory:
+All customized host targets, host mapping blocks, and explicit key links are
+stored inside GitSetu's managed state directory. The alias is formed using
+GitSetu's dedicated prefix `gitsetu-<label>`:
 
 ```ini
-# ~/.config/gitsetu/profiles/ssh_config (Fully Automated)
-Host github.com-work
+# ~/.config/gitsetu/profiles/ssh_config (generated)
+Host gitsetu-work
     HostName github.com
     User git
     IdentityFile ~/.ssh/id_ed25519_work
     IdentitiesOnly yes
 ```
 
-This ensures your primary SSH configuration remains completely untouched, allowing clean profile teardowns and safe multi-environment usage.
+The generated file is managed separately; unrelated host blocks remain outside
+GitSetu's include. Review OpenSSH's effective configuration because first-use
+host-key trust and Port 443 routing require explicit consent.
 
 ### Safe SSH Key Path Quoting
-When SSH key paths contain spaces (e.g. `C:/Users/First Last/.ssh/...` or `~/My Keys/id_ed25519`), OpenSSH CLI commands can suffer from argument splitting. GitSetu automatically wraps key paths in escaped double-quotes within `core.sshCommand = ssh -i "..."` and when exporting `GIT_SSH_COMMAND="ssh -i \"...\""` in `gitsetu run`, preventing command parsing errors across all platforms.
+When a key path contains spaces, backslashes, quotes, or `%` (for example
+`C:/Users/First Last/.ssh/id_ed25519` or `~/My Keys/id_ed25519`), the two
+consumers use the appropriate quoting form:
+
+```ini
+# Git's generated profile value (the single quotes keep the path one shell word)
+sshCommand = "ssh -o IdentitiesOnly=yes -i '~/My Keys/id_ed25519_work'"
+```
+
+```bash
+# The environment exported by gitsetu run uses the same POSIX single-quote form
+GIT_SSH_COMMAND="ssh -i '/home/alice/.ssh/My Keys/id_ed25519_work'"
+```
+
+The generated OpenSSH `IdentityFile` value is independently OpenSSH-quoted
+(for example, `IdentityFile "~/My Keys/id_ed25519_work"`). This keeps spaces
+and special characters from becoming extra shell words; it is not a claim that
+an arbitrary unmanaged path is safe to execute.
 
 ---
 
@@ -70,7 +96,7 @@ When SSH key paths contain spaces (e.g. `C:/Users/First Last/.ssh/...` or `~/My 
 Loading multiple keys concurrently often saturates remote authentication boundaries, returning `Too many authentication failures` errors during handshake negotiations.
 
 GitSetu's compiler natively intercepts and resolves these session blocks:
-- **`IdentitiesOnly = yes`:** Hardcoded into every generated target file to prevent OpenSSH from blindly presenting unmapped keys cached in the global agent socket.
-- **Keychain Injection:** Automates passphrase pre-loading on macOS (`UseKeychain yes`) and Linux agents to optimize daily workflows seamlessly.
-- **Windows NTFS Permission Tolerance:** Under POSIX systems, OpenSSH mandates strict `0600` permissions on private keys. Under Git Bash on Windows NTFS filesystems, POSIX permissions default to `644`. GitSetu's diagnostic and verification engines natively recognize this environment, tolerating `644` without producing false-positive permission warnings.
-- **Dual Routing Architecture (ADR-0001):** Combines directory-scoped `core.sshCommand` with `~/.ssh/config` host aliases (`github.com-<label>`), ensuring seamless compatibility both inside mapped workspaces and for external dependency package manager clones (`go get`, `npm`, `cargo`) outside mapped folders.
+- **`IdentitiesOnly yes`:** Hardcoded into every generated target file to prevent OpenSSH from blindly presenting unmapped keys cached in the global agent socket.
+- **Portable Host Config:** Emits standard OpenSSH directives without host-specific extensions (`UseKeychain`), ensuring cross-platform portability.
+- **Windows NTFS Permission Tolerance:** Under POSIX systems, OpenSSH mandates strict `0600` permissions on private keys. In supported Git Bash/MSYS NTFS contexts, POSIX modes may appear as `644`; GitSetu's diagnostic and verification engines recognize that environment without relaxing the POSIX requirement.
+- **Dual Routing Architecture (ADR-0001):** Combines directory-scoped `core.sshCommand` with `~/.ssh/config` host aliases in the form `gitsetu-<profile-label>` (for example, `gitsetu-work`), supporting mapped workspaces and explicitly configured external dependency clones (`go get`, `npm`, `cargo`).
