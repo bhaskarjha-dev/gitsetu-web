@@ -1,7 +1,7 @@
 {
   "name": "gitsetu-web",
   "type": "module",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "scripts": {
     "sync-docs": "node scripts/sync_docs.js && node scripts/generate_llms.js",
@@ -9,8 +9,7 @@
     "build": "npm run sync-docs && astro build",
     "preview": "astro preview",
     "test": "playwright test",
-    "test:e2e": "playwright test",
-    "test:runner": "node tests/e2e/runner.mjs"
+    "test:e2e": "playwright test"
   },
   "devDependencies": {
     "@playwright/test": "^1.50.0",
