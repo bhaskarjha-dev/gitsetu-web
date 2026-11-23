@@ -26,9 +26,13 @@ Thumbs.db
 
 # Generated Artifacts
 public/llms.txt
+public/llms-full.txt
 
 # Test artifacts
 playwright.config.ts
 test-results/
 test-results.json
 tests/
+
+# Temporary files
+temp/
