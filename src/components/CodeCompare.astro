@@ -5,7 +5,7 @@
   <div class="compare-container container">
     <div class="compare-header reveal delay-100">
       <h2 class="section-title">The <span class="accent-text">end of</span> alias scripts.</h2>
-      <p class="section-subtitle">Stop managing horrific SSH aliases and manual `git config` overrides. GitSetu handles it natively at the OS level.</p>
+      <p class="section-subtitle">Stop managing brittle SSH host aliases and manual <code>git config</code> overrides. GitSetu compiles native Git and OpenSSH rules for you.</p>
     </div>
 
     <div class="compare-split reveal delay-200">
@@ -37,19 +37,26 @@ git clone git@github-work.com:acme/core.git</code></pre>
       <div class="code-panel new-way">
         <div class="panel-header">
           <span class="panel-label success-label">The GitSetu Way</span>
-          <span class="file-name">~/.gitconfig & ~/.ssh/config</span>
+          <span class="file-name">~/.gitconfig &amp; ~/.ssh/config</span>
         </div>
         <div class="panel-body">
-          <pre><code><span class="comment"># Native longest-match directory include</span>
+          <pre><code><span class="comment"># ~/.gitconfig (marked managed block)</span>
 <span class="keyword">[includeIf</span> <span class="string">"gitdir:~/work/"</span><span class="keyword">]</span>
-  <span class="keyword">path</span> = ~/.config/gitsetu/profiles/work.gitconfig
+  <span class="keyword">path</span> = "~/.config/gitsetu/profiles/work.gitconfig"
+
+<span class="comment"># Optional remote-URL route (Git 2.36+)</span>
+<span class="keyword">[includeIf</span> <span class="string">"hasconfig:remote.*.url:*acme/*"</span><span class="keyword">]</span>
+  <span class="keyword">path</span> = "~/.config/gitsetu/profiles/work.gitconfig"
+
+<span class="comment"># ~/.ssh/config (single isolated Include)</span>
+<span class="keyword">Include</span> ~/.config/gitsetu/profiles/ssh_config
 
 <span class="comment"># Standard clone URLs everywhere:</span>
 git clone git@github.com:acme/core.git</code></pre>
         </div>
         <div class="panel-footer success-footer">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
-          Standard clone URLs, 100% non-destructive.
+          Standard clone URLs everywhere. Managed-file boundaries.
         </div>
       </div>
 
@@ -66,11 +73,22 @@ git clone git@github.com:acme/core.git</code></pre>
     margin-bottom: var(--space-4xl);
   }
 
+  .compare-header code {
+    background: var(--bg-code);
+    color: var(--accent-primary);
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-family: var(--font-mono);
+    font-size: 0.88em;
+    border: 1px solid var(--border-subtle);
+    white-space: nowrap;
+  }
+
   .compare-split {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: var(--space-2xl);
-    max-width: 1000px;
+    max-width: 1100px;
     margin: 0 auto;
   }
 
@@ -143,13 +161,14 @@ git clone git@github.com:acme/core.git</code></pre>
   pre {
     margin: 0;
     font-family: var(--font-mono);
-    font-size: clamp(12px, 1.5cqw, 14px); /* Fluid type based on container */
+    font-size: clamp(11.5px, 1.1vw, 13px);
     line-height: 1.6;
     color: var(--text-primary);
   }
 
   .comment { color: var(--text-muted); font-style: italic; }
   .keyword { color: var(--accent-secondary); font-weight: 600; }
+  .string { color: #34d399; }
 
   .panel-footer {
     display: flex;

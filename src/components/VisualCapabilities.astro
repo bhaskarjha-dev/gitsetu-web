@@ -6,8 +6,8 @@
   <div id="capabilities" style="position: absolute; top: -80px;"></div>
   <div class="capabilities-container container">
     <div class="capabilities-header reveal delay-100">
-      <h2 class="section-title">Visualizing <span class="accent-text">Zero-Trust</span></h2>
-      <p class="section-subtitle">How GitSetu cryptographically separates your identities without relying on fragile global state.</p>
+      <h2 class="section-title">Visualizing <span class="accent-text">Identity Isolation</span></h2>
+      <p class="section-subtitle">How GitSetu compiles scoped Git configs, pinned SSH keys, and OS credential namespaces without background daemons.</p>
     </div>
 
     <div class="visualizer-stage reveal delay-200">
@@ -33,7 +33,10 @@
       <div class="core-node" aria-label="GitSetu Zero-Daemon Core Engine">
         <div class="pulse-ring"></div>
         <div class="node-inner">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          <picture>
+            <source srcset="/logo.webp" type="image/webp" />
+            <img src="/logo.png" alt="" width="28" height="28" aria-hidden="true" loading="lazy" decoding="async" />
+          </picture>
           <div class="core-text">
             <span class="core-title">GitSetu Core</span>
             <span class="core-tag">Zero-Daemon Engine</span>
@@ -70,11 +73,15 @@
           </div>
           <div class="card-row">
             <span class="row-label">SSH Key</span>
-            <span class="row-val">Hardware FIDO2 (YubiKey)</span>
+            <span class="row-val">id_ed25519_sk_work (FIDO2)</span>
           </div>
           <div class="card-row">
-            <span class="row-label">Isolation</span>
-            <span class="row-val text-emerald">Strict /dev/null Shield</span>
+            <span class="row-label">SSH Scope</span>
+            <span class="row-val text-emerald">IdentitiesOnly yes</span>
+          </div>
+          <div class="card-row">
+            <span class="row-label">HTTPS Creds</span>
+            <span class="row-val">OS Helper (acme-dev)</span>
           </div>
         </div>
       </div>
@@ -96,11 +103,15 @@
           </div>
           <div class="card-row">
             <span class="row-label">SSH Key</span>
-            <span class="row-val">id_ed25519 (Personal)</span>
+            <span class="row-val">id_ed25519_personal</span>
           </div>
           <div class="card-row">
-            <span class="row-label">Isolation</span>
-            <span class="row-val text-muted">Zero Crossover</span>
+            <span class="row-label">SSH Scope</span>
+            <span class="row-val text-muted">IdentitiesOnly yes</span>
+          </div>
+          <div class="card-row">
+            <span class="row-label">HTTPS Creds</span>
+            <span class="row-val">OS Helper (bhaskar)</span>
           </div>
         </div>
       </div>
@@ -110,26 +121,26 @@
         <div class="live-explanation" id="live-explanation">
           <span class="exp-icon" aria-hidden="true">💡</span>
           <span class="exp-text" id="exp-text">
-            <strong>In this folder:</strong> Every <code>git commit</code> automatically signs as <strong>eng@acme.corp</strong> using your corporate hardware key. Your personal keys are locked out.
+            <strong>In this folder:</strong> Git resolves <code>work.gitconfig</code> via <code>includeIf</code> (<code>gitdir</code> &amp; optional <code>--remote</code>) — pinning <strong>eng@acme.corp</strong>, your FIDO2 key (<code>IdentitiesOnly yes</code>), and corporate OS credentials. Run <code>gitsetu explain</code> anytime to inspect origins.
           </span>
         </div>
 
         <div class="stage-badges">
-          <div class="guarantee-badge" title="No background process or daemon">
+          <div class="guarantee-badge" title="No background process or resident daemon">
             <span class="badge-icon">🍃</span>
             <span>0 KB Resident RAM</span>
           </div>
-          <div class="guarantee-badge" title="Sub-millisecond native Git resolution">
+          <div class="guarantee-badge" title="Evaluated directly by Git and OpenSSH, including inside IDEs">
             <span class="badge-icon">⚡</span>
-            <span>&lt; 1.8ms Switch Time</span>
+            <span>Native Git &amp; OpenSSH</span>
           </div>
-          <div class="guarantee-badge" title="Fail-closed pre-commit guard">
+          <div class="guarantee-badge" title="Opt-in fail-closed pre-commit guard for managed repositories">
             <span class="badge-icon">🛡️</span>
-            <span>Zero Credential Leaks</span>
+            <span>Opt-In Pre-Commit Guard</span>
           </div>
-          <div class="guarantee-badge" title="Preserves pre-existing manual configs and SSH keys">
+          <div class="guarantee-badge" title="Writes only marked blocks and isolated profile files">
             <span class="badge-icon">🔒</span>
-            <span>100% Non-Destructive</span>
+            <span>Managed-File Safety</span>
           </div>
         </div>
       </div>
@@ -148,7 +159,7 @@
   .visualizer-stage {
     position: relative;
     width: 100%;
-    min-height: 560px;
+    min-height: 610px;
     background: var(--bg-secondary);
     border: 1px solid var(--border-card);
     border-radius: var(--radius-xl);
@@ -441,13 +452,13 @@
   }
 
   .work-card {
-    top: 22%;
-    left: 8%;
+    top: 19%;
+    left: 7%;
   }
 
   .personal-card {
-    bottom: 22%;
-    right: 8%;
+    bottom: 26%;
+    right: 7%;
   }
 
   /* Active vs Shielded States */
@@ -713,8 +724,8 @@
   }
 
   const FOLDER_EXPLANATIONS: Record<string, string> = {
-    work: '<strong>In this folder:</strong> Every <code>git commit</code> automatically signs as <strong>eng@acme.corp</strong> using your corporate hardware key. Your personal keys are locked out.',
-    personal: '<strong>In this folder:</strong> Every <code>git commit</code> seamlessly uses <strong>me@bhaskarjha.dev</strong>. Corporate credentials and tokens cannot be accessed.'
+    work: '<strong>In this folder:</strong> Git resolves <code>work.gitconfig</code> via <code>includeIf</code> (<code>gitdir</code> &amp; optional <code>--remote</code>) — pinning <strong>eng@acme.corp</strong>, your FIDO2 key (<code>IdentitiesOnly yes</code>), and corporate OS credentials. Run <code>gitsetu explain</code> anytime to inspect origins.',
+    personal: '<strong>In this folder:</strong> Git activates <code>personal.gitconfig</code> for <strong>me@bhaskarjha.dev</strong> with <code>id_ed25519_personal</code> and your personal OS helper username — keeping work keys uninvolved.'
   };
 
   class VisualCapabilities extends HTMLElement {

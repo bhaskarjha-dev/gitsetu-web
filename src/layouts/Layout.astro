@@ -2,6 +2,7 @@
 import { ClientRouter } from 'astro:transitions';
 import '../styles/global.css';
 import CommandPalette from '../components/CommandPalette.astro';
+import { GITSETU_VERSION, GITSETU_REPO, GITSETU_SITE } from '../data/docs.mjs';
 
 interface Props {
   title?: string;
@@ -10,10 +11,40 @@ interface Props {
 }
 
 const {
-  title = 'GitSetu — Zero-Dependency Git Identity Manager',
-  description = 'Zero-dependency Git multi-identity orchestration engine. Automatic context-switching, FIDO2/SSH key routing, commit signing, and 100% non-destructive coexistence for Windows, macOS, and Linux.',
-  canonical = 'https://gitsetu.bhaskarjha.dev'
+  title = 'GitSetu — Multi-Identity Git & SSH Orchestration Engine',
+  description = 'Pure Bash 3.2 Git multi-identity orchestration engine. Directory and remote-URL includeIf routing, isolated SSH keys, native OS HTTPS credential delegation, opt-in pre-commit guard, and authenticated v2 vaults.',
+  canonical = GITSETU_SITE
 } = Astro.props;
+
+const websiteSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  '@id': `${GITSETU_SITE}/#website`,
+  url: GITSETU_SITE,
+  name: 'GitSetu',
+  description: 'Bash 3.2 Git multi-identity orchestration engine',
+  inLanguage: 'en'
+};
+
+const softwareSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'SoftwareApplication',
+  '@id': `${GITSETU_SITE}/#software`,
+  name: 'GitSetu',
+  operatingSystem: 'Linux, macOS, WSL, Windows (Git Bash, PowerShell, CMD)',
+  applicationCategory: 'DeveloperApplication',
+  softwareVersion: GITSETU_VERSION,
+  softwareRequirements: 'Bash 3.2+, Git (2.36+ for remote URL routing), OpenSSH 7.3+; Git for Windows on Windows',
+  offers: {
+    '@type': 'Offer',
+    price: '0.00',
+    priceCurrency: 'USD'
+  },
+  description: 'Bash 3.2 configuration compiler that generates directory-scoped and remote-URL Git includeIf rules, isolated OpenSSH Include configs, native OS HTTPS credential routing, an opt-in pre-commit guard, and authenticated v2 vaults.',
+  url: GITSETU_SITE,
+  downloadUrl: `${GITSETU_REPO}/releases/latest`,
+  releaseNotes: `${GITSETU_SITE}/docs/reference/changelog`
+};
 ---
 
 <!doctype html>
@@ -23,25 +54,34 @@ const {
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="color-scheme" content="dark" />
     <meta name="theme-color" content="#000000" />
+    <meta name="author" content="Bhaskar Jha" />
     <title>{title}</title>
     <meta name="description" content={description} />
 
     <!-- OpenGraph & Twitter -->
+    <meta property="og:site_name" content="GitSetu" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:image" content="https://gitsetu.bhaskarjha.dev/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="GitSetu v1.1.0 — Multi-Identity Git & SSH Orchestration Engine" />
     <meta property="og:url" content={canonical} />
     <meta property="og:type" content="website" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content="https://gitsetu.bhaskarjha.dev/og-image.png" />
+    <meta name="twitter:image:alt" content="GitSetu v1.1.0 — Multi-Identity Git & SSH Orchestration Engine" />
 
-    <!-- Canonical -->
+    <!-- Canonical & Agentic Discovery -->
     <link rel="canonical" href={canonical} />
+    <link rel="describedby" href="/llms.txt" />
 
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" href="/logo.png" />
 
     <!-- Critical CSS for FOWT Elimination & Progressive Reveal Fallback -->
     <style is:inline>
@@ -76,37 +116,8 @@ const {
     <ClientRouter />
     
     <!-- JSON-LD Semantic Web -->
-    <script type="application/ld+json">
-      {
-        "@context": "https://schema.org",
-        "@type": "WebSite",
-        "@id": "https://gitsetu.bhaskarjha.dev/#website",
-        "url": "https://gitsetu.bhaskarjha.dev",
-        "name": "GitSetu",
-        "description": "Zero-dependency Git multi-identity orchestration engine",
-        "inLanguage": "en"
-      }
-    </script>
-    <script type="application/ld+json">
-      {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "@id": "https://gitsetu.bhaskarjha.dev/#software",
-        "name": "GitSetu",
-        "operatingSystem": "POSIX (Linux, macOS, WSL), Windows (PowerShell, CMD, WinGet, Scoop)",
-        "applicationCategory": "DeveloperApplication",
-        "softwareVersion": "1.0.0",
-        "softwareRequirements": "Bash 3.2+ (Git Bash, WSL, POSIX) or PowerShell 5.1+ (Windows)",
-        "offers": {
-          "@type": "Offer",
-          "price": "0.00",
-          "priceCurrency": "USD"
-        },
-        "description": "Zero-dependency orchestration engine that automatically routes SSH keys and credentials based on your directory. Enforces Zero-Trust identity for developers.",
-        "url": "https://gitsetu.bhaskarjha.dev",
-        "downloadUrl": "https://gitsetu.bhaskarjha.dev/install"
-      }
-    </script>
+    <script type="application/ld+json" set:html={JSON.stringify(websiteSchema)} />
+    <script type="application/ld+json" set:html={JSON.stringify(softwareSchema)} />
 
     <script defer data-domain="gitsetu.bhaskarjha.dev" src="https://plausible.io/js/script.js"></script>
   </head>

@@ -2,11 +2,12 @@
 import Layout from '../layouts/Layout.astro';
 import Navbar from '../components/Navbar.astro';
 import Footer from '../components/Footer.astro';
+import { DOCS_MANIFEST } from '../data/docs.mjs';
 ---
 
 <Layout 
   title="404: Identity Boundary Not Found | GitSetu" 
-  description="The requested path is outside of registered workspace boundaries. Return to safety with GitSetu."
+  description="The requested path has no matching route in GitSetu documentation. Return home or browse the v1.1.0 docs."
 >
   <Navbar />
   
@@ -15,7 +16,7 @@ import Footer from '../components/Footer.astro';
       <!-- Cyber Glowing 404 Badge -->
       <div class="error-badge">
         <span class="badge-dot error-dot"></span>
-        <span class="badge-text">Boundary Violation • Error 404</span>
+        <span class="badge-text">Unmatched Route • Error 404</span>
       </div>
 
       <h1 class="error-title">
@@ -23,7 +24,7 @@ import Footer from '../components/Footer.astro';
       </h1>
       
       <p class="error-subtitle">
-        The requested URL has no matching <code class="code-inline">includeIf</code> directive in the identity fabric. Fail-closed security has halted navigation to prevent profile crossover.
+        The requested URL does not match any <code class="code-inline">includeIf</code> route or documentation page. Return to the home page or search the v1.1.0 docs with <code class="code-inline">⌘K</code>.
       </p>
 
       <!-- Interactive Simulated Terminal Box -->
@@ -34,21 +35,21 @@ import Footer from '../components/Footer.astro';
             <span class="terminal-dot yellow"></span>
             <span class="terminal-dot green"></span>
           </div>
-          <span class="terminal-title">gitsetu guard — path-audit</span>
+          <span class="terminal-title">gitsetu explain — route-trace</span>
         </div>
         <div class="terminal-body">
           <div class="terminal-line">
             <span class="term-prompt">❯</span>
-            <span class="term-cmd">gitsetu route --resolve current_path</span>
+            <span class="term-cmd">gitsetu explain ./requested-page</span>
           </div>
           <div class="terminal-line term-error">
-            <span>✘ [404] No registered profile matches this URI namespace.</span>
+            <span>✘ [404] Matched profile: none (unmanaged path).</span>
           </div>
           <div class="terminal-line term-warn">
-            <span>⚡ Fail-Closed Guard: Isolation active. Zero credentials exposed.</span>
+            <span>ℹ Effective scope: no managed includeIf or remote route found.</span>
           </div>
           <div class="terminal-line term-success">
-            <span>✔ Recommended action: Return to trusted root directory.</span>
+            <span>✔ Recommended action: Return to a registered page or press ⌘K to search.</span>
           </div>
         </div>
       </div>
@@ -83,7 +84,7 @@ import Footer from '../components/Footer.astro';
           </div>
           <div class="action-details">
             <span class="action-title">Installation</span>
-            <span class="action-desc">WinGet, Homebrew, Scoop, AUR, Nix</span>
+            <span class="action-desc">GitHub Releases, npm &amp; Windows</span>
           </div>
           <svg class="arrow-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
         </a>
@@ -94,7 +95,7 @@ import Footer from '../components/Footer.astro';
           </div>
           <div class="action-details">
             <span class="action-title">All Documentation</span>
-            <span class="action-desc">Explore 24 architecture &amp; CLI guides</span>
+            <span class="action-desc">Explore {DOCS_MANIFEST.length} architecture &amp; CLI guides</span>
           </div>
           <svg class="arrow-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
         </a>

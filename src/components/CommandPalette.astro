@@ -23,7 +23,7 @@
             <li>
               <a href="/docs/getting-started/installation" class="cmd-item">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                <span>Installation & Package Managers (9 Methods)</span>
+                <span>Installation Guide (Releases, npm, Windows)</span>
                 <kbd class="cmd-shortcut">⏎</kbd>
               </a>
             </li>
@@ -34,42 +34,48 @@
               </a>
             </li>
             <li>
-              <a href="/docs/core-engines/identity-routing" class="cmd-item">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>
-                <span>Identity Routing Architecture</span>
+              <a href="/docs/reference/cli-commands" class="cmd-item">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
+                <span>CLI Commands (explain, audit, import, doctor)</span>
               </a>
             </li>
             <li>
-              <a href="/docs/guides/hardware-keys" class="cmd-item">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"></path></svg>
-                <span>Configure FIDO2 Hardware Keys</span>
+              <a href="/docs/guides/vault-backups" class="cmd-item">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                <span>Authenticated Vault Backups (v2)</span>
+              </a>
+            </li>
+            <li>
+              <a href="/docs/reference/changelog" class="cmd-item">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+                <span>Release Notes &amp; Changelog (v1.1.0)</span>
               </a>
             </li>
           </ul>
         </div>
         
         <div class="cmd-section default-section">
-          <div class="cmd-section-title">Quick Install Commands</div>
+          <div class="cmd-section-title">Quick Install &amp; CLI Commands</div>
           <ul class="cmd-results" role="listbox">
             <li>
-              <button class="cmd-item cmd-copy-action" data-copy="curl -sL https://gitsetu.bhaskarjha.dev/install | bash" type="button">
+              <button class="cmd-item cmd-copy-action" data-copy="curl -fsSL https://github.com/bhaskarjha-dev/gitsetu/releases/latest/download/install.sh | bash" type="button">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                <span>Copy POSIX Installer (curl)</span>
+                <span>Copy Verified Release Installer (macOS / Linux / WSL)</span>
                 <kbd class="cmd-shortcut">curl</kbd>
               </button>
             </li>
             <li>
-              <button class="cmd-item cmd-copy-action" data-copy="irm https://gitsetu.bhaskarjha.dev/install.ps1 | iex" type="button">
+              <button class="cmd-item cmd-copy-action" data-copy="npm install -g gitsetu" type="button">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                <span>Copy Windows Installer (PowerShell)</span>
-                <kbd class="cmd-shortcut">ps1</kbd>
+                <span>Copy Global npm Install (All Platforms)</span>
+                <kbd class="cmd-shortcut">npm</kbd>
               </button>
             </li>
             <li>
-              <button class="cmd-item cmd-copy-action" data-copy="npx gitsetu setup --auto" type="button">
+              <button class="cmd-item cmd-copy-action" data-copy="gitsetu explain" type="button">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                <span>Copy Zero-Install Command (npx)</span>
-                <kbd class="cmd-shortcut">npx</kbd>
+                <span>Copy Identity Origin Trace (gitsetu explain)</span>
+                <kbd class="cmd-shortcut">cli</kbd>
               </button>
             </li>
           </ul>
@@ -660,7 +666,7 @@
           if (html === '') {
             html = `
               <li role="option" style="padding: 12px 16px; color: var(--text-muted); font-size: 12px;">
-                No results found for "${query}".
+                No results found for "${this.escapeHtml(query)}".
               </li>
             `;
           }

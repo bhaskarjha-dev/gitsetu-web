@@ -13,23 +13,23 @@ const isActive = (path: string) => {
       <div class="status-group">
         <div class="status-pill brand">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 3a3 3 0 0 0-3 3v12a3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3H6a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3V6a3 3 0 0 0-3-3 3 3 0 0 0-3 3s0-3 3-3h12a3 3 0 0 0 3 3"></path></svg>
-          <span>GitSetu v1.0.0 GA</span>
+          <span>GitSetu v1.1.0</span>
         </div>
         <div class="status-pill branch">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="6" y1="3" x2="6" y2="15"></line><circle cx="18" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><path d="M18 9a9 9 0 0 1-9 9"></path></svg>
-          <span>main*</span>
+          <span>main</span>
         </div>
         <div class="status-pill secure">
           <span class="pulse-dot" aria-hidden="true"></span>
-          <span>Zero-Trust: Active</span>
+          <span>Zero Daemons</span>
         </div>
       </div>
       <div class="status-meta">
-        <span>Pure Bash 3.2+</span>
+        <span>Bash 3.2+ Core</span>
         <span class="meta-dot">•</span>
-        <span>Zero Dependencies</span>
+        <span>Native Git &amp; OpenSSH</span>
         <span class="meta-dot">•</span>
-        <span>POSIX &amp; Windows Native</span>
+        <span>Linux, macOS, WSL &amp; Windows</span>
       </div>
     </div>
 
@@ -49,10 +49,11 @@ const isActive = (path: string) => {
         <h3 class="col-title">Resources</h3>
         <ul class="col-links">
           <li><a href="/docs">Documentation</a></li>
-          <li><a href="https://github.com/bhaskarjha-dev/gitsetu" target="_blank" rel="noopener">GitHub Repository</a></li>
-          <li><a href="/docs/reference/contributing" class={isActive('/docs/reference/contributing')}>Contributing</a></li>
+          <li><a href="/docs/reference/changelog" class={isActive('/docs/reference/changelog')}>Changelog (v1.1.0)</a></li>
+          <li><a href="https://github.com/bhaskarjha-dev/gitsetu/releases" target="_blank" rel="noopener">GitHub Releases</a></li>
+          <li><a href="/docs/guides/ai-agents" class={isActive('/docs/guides/ai-agents')}>AI Agent Skill</a></li>
           <li><a href="/docs/enterprise/product-roadmap" class={isActive('/docs/enterprise/product-roadmap')}>Roadmap</a></li>
-          <li><a href="/llms.txt" target="_blank" rel="noopener">LLM API (llms.txt)</a></li>
+          <li><a href="/llms.txt" target="_blank" rel="noopener">LLM Index (llms.txt)</a></li>
         </ul>
       </div>
 
@@ -60,6 +61,8 @@ const isActive = (path: string) => {
         <h3 class="col-title">Project</h3>
         <ul class="col-links">
           <li><a href="/docs/enterprise/security-privacy" class={isActive('/docs/enterprise/security-privacy')}>Security &amp; Privacy</a></li>
+          <li><a href="/docs/enterprise/security-policy" class={isActive('/docs/enterprise/security-policy')}>Security Policy</a></li>
+          <li><a href="/docs/reference/contributing" class={isActive('/docs/reference/contributing')}>Contributing</a></li>
           <li><a href="https://github.com/bhaskarjha-dev/gitsetu/blob/main/LICENSE" target="_blank" rel="noopener">MIT License</a></li>
           <li><a href="/docs/reference/faq" class={isActive('/docs/reference/faq')}>FAQ</a></li>
         </ul>
@@ -69,18 +72,11 @@ const isActive = (path: string) => {
     <!-- Bottom Attribution & Copyright -->
     <div class="footer-bottom">
       <div class="bottom-brand">
-        <svg width="20" height="20" viewBox="0 0 100 100" class="footer-logo" aria-hidden="true">
-          <defs>
-            <linearGradient id="footer-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="#00c4cc" />
-              <stop offset="100%" stop-color="#0ea5e9" />
-            </linearGradient>
-          </defs>
-          <rect width="100" height="100" rx="20" fill="#0a0e17" />
-          <path d="M 30 50 Q 50 20 70 50 T 70 50" fill="none" stroke="url(#footer-grad)" stroke-width="8" stroke-linecap="round" />
-          <path d="M 30 70 L 30 50 M 70 70 L 70 50" stroke="url(#footer-grad)" stroke-width="8" stroke-linecap="round" />
-        </svg>
-        <span>Zero-dependency Git multi-identity orchestration engine.</span>
+        <picture>
+          <source srcset="/logo.webp" type="image/webp" />
+          <img src="/logo.png" alt="GitSetu" width="20" height="20" class="footer-logo" loading="lazy" decoding="async" />
+        </picture>
+        <span>Bash 3.2 Git multi-identity orchestration engine.</span>
       </div>
       <div class="bottom-copyright">
         <span>© 2026 Bhaskar Jha. Distributed under the MIT License.</span>
