@@ -17,5 +17,8 @@
 *.jpg binary
 *.jpeg binary
 *.gif binary
+*.webp binary
 *.ico binary
+*.woff binary
+*.woff2 binary
 *.svg text eol=lf
